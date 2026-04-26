@@ -14,7 +14,7 @@ export default function Home() {
             <span className="text-lg font-semibold text-white">LinkedInForge</span>
             <span className="text-xs bg-orange-600/80 px-3 py-1 rounded-full font-medium">Beta</span>
           </div>
-          <Link href="/onboarding" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold text-sm">
+          <Link href="/login" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold text-sm">
             Commencer
           </Link>
         </div>
@@ -39,7 +39,7 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-            <Link href="/onboarding" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold flex items-center justify-center gap-2 text-base">
+            <Link href="/login" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold flex items-center justify-center gap-2 text-base">
               Créer mon premier post <ArrowRight className="w-5 h-5" />
             </Link>
             <button className="px-8 py-4 border-2 border-slate-700 text-slate-200 hover:border-slate-600 hover:text-white rounded-lg transition font-semibold text-base">
