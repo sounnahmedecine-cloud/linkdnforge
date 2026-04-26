@@ -133,9 +133,9 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-12">
+        <div className="flex items-center gap-3 mb-12" suppressHydrationWarning>
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <span className="text-2xl">in</span>
+            <span className="text-2xl" suppressHydrationWarning>in</span>
             <h1 className="text-2xl font-bold">LinkedInForge</h1>
             <span className="text-xs bg-blue-600 px-3 py-1 rounded-full">Beta</span>
           </Link>
