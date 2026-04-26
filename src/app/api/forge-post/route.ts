@@ -81,25 +81,33 @@ CONTEXT:
 
 TA MISSION: Génère UN post LinkedIn qui va "Killer" - court, percutant, mémorable.
 
-STRUCTURE OBLIGATOIRE:
-1. ACCROCHE (1-2 lignes max): Une phrase qui STOPPE le scroll. Provoque la curiosité ou l'émotion.
-2. DÉVELOPPEMENT (3-5 lignes): Le cœur du message. Raconte une histoire, partage une insight, révèle une truth que tu as découverte.
-3. VALEUR/TRANSFORMATION: Montre concrètement ce que tu offres ou enseignes. Sois spécifique.
-4. APPEL À L'ACTION: Termine par une question engageante, une invitation ou un défi. Quelque chose qui demande une réaction.
+**RÈGLES CRITIQUES (NON NÉGOCIABLES):**
+- ❌ PAS de "Bonjour 👋 Je viens de réaliser que..." - JAMAIS cette structure
+- ❌ PAS de "Après plusieurs années d'expérience..." - trop générique
+- ❌ PAS de bullet points avec ✓ - sauf si vraiment pertinent
+- ❌ L'idée/sujet ne doit JAMAIS être un titre, mais intégré naturellement au fil du texte
+- ✅ Sois SPÉCIFIQUE et PERSONNEL: une anecdote réelle, un chiffre concret, une observation unique
+
+STRUCTURE FORTE:
+1. ACCROCHE (1-2 lignes): Une observation choquante, une contradiction, une question qui tue, ou un fait surprenant. PAS un "bonjour".
+2. CONTEXTE (2-3 lignes): Établis le problème ou le dilemme de manière naturelle. Intègre le sujet ici de façon organique.
+3. RÉVÉLATION (2-3 lignes): Le moment "oh shit" - ce que tu as découvert, compris, ou ce qui a changé ta perspective.
+4. CTA (1 ligne): Question ou invitation. Court et direct.
 
 RÈGLES DE RYTHME:
-- Alterne phrases courtes et longues
-- Utilise des sauts de ligne pour la respiration
-- 1 emoji maximum par paragraphe (pertinent, pas gratuit)
-- Longueur totale: 200-400 caractères (c'est LinkedIn, pas un roman)
+- Alterne phrases courtes et longues pour créer du suspense
+- Sauts de ligne = respiration naturelle
+- 0-2 emojis MAXIMUM pour tout le post (seulement si vraiment pertinents)
+- Longueur: 150-350 caractères (concision = respect du lecteur)
 
-TON STYLE:
-- Authentique et human (pas de robot)
-- Conversationnel mais professionnel
-- Basé sur ton: ${getToneDescription(formData.tone)}
-- Raconte TES expériences, pas des généralités
+TONE & STYLE (adapté à: ${getToneDescription(formData.tone)}):
+- Voix unique et reconnaissable
+- PAS de formules toutes faites
+- Direct, sans fioritures
+- Si tu utilises un chiffre ou un exemple, sois PRÉCIS
+- Termine par quelque chose qui demande une vraie réaction (pas juste "vos pensées?")
 
-GÉNÈRE LE POST DIRECTEMENT, SANS EXPLICATIONS.`;
+GÉNÈRE LE POST DIRECTEMENT, SANS EXPLICATIONS NI PREAMBULLE.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
