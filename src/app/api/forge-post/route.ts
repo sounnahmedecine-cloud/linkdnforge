@@ -4,6 +4,27 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.json();
 
+    // Check user authentication and quota
+    const authToken = request.cookies.get('auth_token');
+    let isAdmin = false;
+    let unlimited = false;
+
+    if (authToken?.value) {
+      try {
+        const user = JSON.parse(authToken.value);
+        isAdmin = user.role === 'admin';
+        unlimited = user.unlimited === true;
+      } catch (e) {
+        // Token parsing failed, continue as guest
+      }
+    }
+
+    // For non-admin users, implement quota checking here
+    if (!unlimited) {
+      // TODO: Implement quota system with database tracking
+      // For now, allow unlimited for all
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {

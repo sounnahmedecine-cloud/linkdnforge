@@ -1,0 +1,10 @@
+{
+  "admins": [
+    {
+      "email": "sounnahmedecine@gmail.com",
+      "role": "admin",
+      "unlimited": true,
+      "createdAt": "2026-04-26"
+    }
+  ]
+}

@@ -1,15 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 type Step = 1 | 2 | 3;
+
+interface User {
+  email: string;
+  role: 'admin' | 'user';
+  unlimited: boolean;
+}
 
 export default function OnboardingPage() {
   const [step, setStep] = useState<Step>(1);
   const [generatedPost, setGeneratedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     linkedinUrl: '',
     linkedinProfile: '',
@@ -22,6 +29,20 @@ export default function OnboardingPage() {
     postSubject: '',
     visualType: '',
   });
+
+  useEffect(() => {
+    // Get user info from cookie
+    const cookies = document.cookie.split(';');
+    const authCookie = cookies.find(c => c.trim().startsWith('auth_token='));
+    if (authCookie) {
+      try {
+        const userData = JSON.parse(decodeURIComponent(authCookie.split('=')[1]));
+        setUser(userData);
+      } catch (e) {
+        // Cookie parsing failed
+      }
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -139,17 +160,29 @@ export default function OnboardingPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-12" suppressHydrationWarning>
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <span className="text-2xl" suppressHydrationWarning>in</span>
-            <h1 className="text-2xl font-bold">LinkedInForge</h1>
-            <span className="text-xs bg-blue-600 px-3 py-1 rounded-full">Beta</span>
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 border border-slate-600 text-slate-300 hover:text-white rounded-lg hover:border-slate-500 transition text-sm"
-          >
-            Déconnexion
-          </button>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
+              <span className="text-2xl" suppressHydrationWarning>in</span>
+              <h1 className="text-2xl font-bold">LinkedInForge</h1>
+              <span className="text-xs bg-blue-600 px-3 py-1 rounded-full">Beta</span>
+            </Link>
+            {user?.role === 'admin' && (
+              <span className="text-xs bg-orange-600/80 px-3 py-1 rounded-full font-semibold uppercase tracking-wide">
+                👑 Admin
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            {user?.email && (
+              <span className="text-sm text-slate-400">{user.email}</span>
+            )}
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 border border-slate-600 text-slate-300 hover:text-white rounded-lg hover:border-slate-500 transition text-sm"
+            >
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">

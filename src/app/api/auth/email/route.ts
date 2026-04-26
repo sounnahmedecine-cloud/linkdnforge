@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import adminsConfig from '@/config/admins.json';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,11 +19,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user is admin
+    const adminData = adminsConfig.admins.find(
+      (admin: any) => admin.email.toLowerCase() === email.toLowerCase()
+    );
+
     // For now, mock authentication - in production, use Firebase
     // TODO: Integrate with Firebase Authentication
     const mockUser = {
       uid: `user_${Date.now()}`,
       email,
+      role: adminData ? 'admin' : 'user',
+      unlimited: adminData?.unlimited || false,
       createdAt: new Date().toISOString()
     };
 

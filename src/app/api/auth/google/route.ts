@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import adminsConfig from '@/config/admins.json';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,10 +34,17 @@ export async function GET(request: NextRequest) {
 
     // TODO: Exchange code for token with Firebase
     // For now, mock authentication
+    const email = 'user@google.com'; // In production, extract from Google token
+    const adminData = adminsConfig.admins.find(
+      (admin: any) => admin.email.toLowerCase() === email.toLowerCase()
+    );
+
     const mockUser = {
       uid: `google_${Date.now()}`,
-      email: 'user@google.com',
+      email,
       provider: 'google',
+      role: adminData ? 'admin' : 'user',
+      unlimited: adminData?.unlimited || false,
       createdAt: new Date().toISOString()
     };
 
