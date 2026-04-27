@@ -49,23 +49,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-24 bg-slate-900/50 border-y border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-3 gap-12 text-center">
-            <div className="space-y-2">
-              <p className="text-5xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">+50%</p>
-              <p className="text-slate-400 text-base font-light">Engagement moyen</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-5xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">2x</p>
-              <p className="text-slate-400 text-base font-light">Temps gagné par post</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-5xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">100+</p>
-              <p className="text-slate-400 text-base font-light">Posts créés</p>
-            </div>
-          </div>
+      {/* Intro Band */}
+      <section className="py-20 bg-slate-900/50 border-y border-slate-800">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
+          <p className="text-xl sm:text-2xl font-semibold text-white leading-snug">
+            Créez des publications LinkedIn percutantes en quelques secondes.
+          </p>
+          <p className="text-base sm:text-lg text-slate-400 font-light leading-relaxed">
+            LinkedInForge vous aide à alimenter votre calendrier de contenu, à mettre en avant vos projets et à bâtir votre autorité sur LinkedIn — sans passer des heures devant une page blanche. Renseignez votre profil, choisissez votre style, et obtenez instantanément des posts prêts à publier.
+          </p>
         </div>
       </section>
 
