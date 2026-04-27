@@ -60,7 +60,8 @@ function getPostTypeDescription(type: string): string {
   const types: Record<string, string> = {
     story: 'Story personnelle - Raconte une anecdote ou un moment clé de ta vie',
     advice: 'Conseils - Donne 3-5 tips concrets et actionnables',
-    carousel: 'Carrousel - Prépare le texte pour un carrousel (format multi-images)'
+    carousel: 'Carrousel - Prépare le texte pour un carrousel (format multi-images)',
+    ghostwriter: 'Ghostwriter - Hook + 3 insights contre-intuitifs + CTA (150 mots, style personnel)'
   };
   return types[type] || types.advice;
 }
@@ -90,45 +91,11 @@ Qu'en pensez-vous? Avez-vous rencontré des défis similaires?
 }
 
 async function generateWithClaude(formData: any, apiKey: string): Promise<string> {
-  const prompt = `Tu es un copyreader expert en LinkedIn avec 10 ans d'expérience. Tu as guidé des centaines de freelances et entrepreneurs à générer des leads via LinkedIn.
+  const isGhostwriter = formData.postType === 'ghostwriter';
 
-CONTEXT:
-- Thèmes d'expertise: ${formData.themes?.join(', ') || 'non spécifiés'}
-- Ton vocal: ${getToneDescription(formData.tone)}
-- Type de post: ${getPostTypeDescription(formData.postType)}
-- Objectif: ${formData.postObjective === 'leads' ? 'Générer des leads qualifiés et conversions' : 'Maximiser la visibilité et l\'engagement'}
-- Profil: ${formData.linkedinProfile ? 'Profil fourni' : 'Pas de profil'}
-- Sujet du post: ${formData.postSubject || 'à définir selon ton expertise'}
-
-TA MISSION: Génère UN post LinkedIn qui va "Killer" - court, percutant, mémorable.
-
-**RÈGLES CRITIQUES (NON NÉGOCIABLES):**
-- ❌ PAS de "Bonjour 👋 Je viens de réaliser que..." - JAMAIS cette structure
-- ❌ PAS de "Après plusieurs années d'expérience..." - trop générique
-- ❌ PAS de bullet points avec ✓ - sauf si vraiment pertinent
-- ❌ L'idée/sujet ne doit JAMAIS être un titre, mais intégré naturellement au fil du texte
-- ✅ Sois SPÉCIFIQUE et PERSONNEL: une anecdote réelle, un chiffre concret, une observation unique
-
-STRUCTURE FORTE:
-1. ACCROCHE (1-2 lignes): Une observation choquante, une contradiction, une question qui tue, ou un fait surprenant. PAS un "bonjour".
-2. CONTEXTE (2-3 lignes): Établis le problème ou le dilemme de manière naturelle. Intègre le sujet ici de façon organique.
-3. RÉVÉLATION (2-3 lignes): Le moment "oh shit" - ce que tu as découvert, compris, ou ce qui a changé ta perspective.
-4. CTA (1 ligne): Question ou invitation. Court et direct.
-
-RÈGLES DE RYTHME:
-- Alterne phrases courtes et longues pour créer du suspense
-- Sauts de ligne = respiration naturelle
-- 0-2 emojis MAXIMUM pour tout le post (seulement si vraiment pertinents)
-- Longueur: 150-350 caractères (concision = respect du lecteur)
-
-TONE & STYLE (adapté à: ${getToneDescription(formData.tone)}):
-- Voix unique et reconnaissable
-- PAS de formules toutes faites
-- Direct, sans fioritures
-- Si tu utilises un chiffre ou un exemple, sois PRÉCIS
-- Termine par quelque chose qui demande une vraie réaction (pas juste "vos pensées?")
-
-GÉNÈRE LE POST DIRECTEMENT, SANS EXPLICATIONS NI PREAMBULLE.`;
+  const prompt = isGhostwriter
+    ? buildGhostwriterPrompt(formData)
+    : buildStandardPrompt(formData);
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -138,7 +105,7 @@ GÉNÈRE LE POST DIRECTEMENT, SANS EXPLICATIONS NI PREAMBULLE.`;
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-opus-4-1',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -150,4 +117,60 @@ GÉNÈRE LE POST DIRECTEMENT, SANS EXPLICATIONS NI PREAMBULLE.`;
 
   const data = await response.json();
   return data.content[0].text.trim();
+}
+
+function buildGhostwriterPrompt(formData: any): string {
+  return `Tu es un ghostwriter LinkedIn pour entrepreneurs tech francophones.
+${formData.personalExamples ? `
+STYLE DE L'UTILISATEUR — imite sa voix, son rythme, ses tournures:
+${formData.personalExamples}
+` : ''}
+${formData.linkedinProfile ? `PROFIL LINKEDIN:\n${formData.linkedinProfile}\n` : ''}
+THÈMES: ${formData.themes?.join(', ') || 'Tech/Entrepreneuriat'}
+OBJECTIF: ${formData.postObjective === 'leads' ? 'Générer des leads' : 'Visibilité & engagement'}
+SUJET: ${formData.postSubject || 'à définir selon le profil'}
+
+STRUCTURE OBLIGATOIRE:
+1. Hook (1-2 lignes) : question percutante OU anecdote personnelle concrète
+2. 3 insights contre-intuitifs (courts, directs, surprenants)
+3. CTA : "Et vous ? [question précise]" ou invitation à commenter
+
+RÈGLES NON NÉGOCIABLES:
+- 150 mots maximum
+- ZÉRO tournures IA : pas de "déclic", "game-changer", "révolutionnaire", "j'ai réalisé que"
+- Ton humain, pro, direct — jamais générique
+- 0-2 emojis maximum
+- Si exemples fournis, colle exactement au style de l'utilisateur
+
+GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION.`;
+}
+
+function buildStandardPrompt(formData: any): string {
+  return `Tu es un copyreader expert en LinkedIn avec 10 ans d'expérience. Tu as guidé des centaines de freelances et entrepreneurs à générer des leads via LinkedIn.
+
+CONTEXT:
+- Thèmes d'expertise: ${formData.themes?.join(', ') || 'non spécifiés'}
+- Ton vocal: ${getToneDescription(formData.tone)}
+- Type de post: ${getPostTypeDescription(formData.postType)}
+- Objectif: ${formData.postObjective === 'leads' ? 'Générer des leads qualifiés et conversions' : 'Maximiser la visibilité et l\'engagement'}
+${formData.linkedinProfile ? `- Profil LinkedIn: ${formData.linkedinProfile}` : ''}
+${formData.personalExamples ? `- Posts précédents (imite ce style): ${formData.personalExamples}` : ''}
+- Sujet du post: ${formData.postSubject || 'à définir selon ton expertise'}
+
+TA MISSION: Génère UN post LinkedIn qui va "Killer" - court, percutant, mémorable.
+
+RÈGLES CRITIQUES:
+- ❌ PAS de "Bonjour 👋 Je viens de réaliser que..."
+- ❌ PAS de "Après plusieurs années d'expérience..."
+- ✅ SPÉCIFIQUE et PERSONNEL: anecdote réelle, chiffre concret, observation unique
+
+STRUCTURE:
+1. ACCROCHE (1-2 lignes): observation choquante, contradiction, question qui tue
+2. CONTEXTE (2-3 lignes): problème ou dilemme, intègre le sujet naturellement
+3. RÉVÉLATION (2-3 lignes): ce que tu as découvert ou compris
+4. CTA (1 ligne): question directe
+
+RYTHME: phrases courtes + longues, sauts de ligne, 0-2 emojis max, 150-350 mots
+
+GÉNÈRE LE POST DIRECTEMENT, SANS EXPLICATIONS NI PREAMBULLE.`;
 }

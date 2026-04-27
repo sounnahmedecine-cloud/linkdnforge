@@ -21,6 +21,8 @@ export default function OnboardingPage() {
     linkedinUrl: '',
     linkedinProfile: '',
     facebookProfile: '',
+    facebookUrl: '',
+    personalExamples: '',
     themes: [] as string[],
     tone: '',
     frequency: '',
@@ -29,6 +31,8 @@ export default function OnboardingPage() {
     postSubject: '',
     visualType: '',
   });
+  const [scraping, setScraping] = useState<{ linkedin: boolean; facebook: boolean }>({ linkedin: false, facebook: false });
+  const [scrapeStatus, setScrapeStatus] = useState<{ linkedin: string; facebook: string }>({ linkedin: '', facebook: '' });
 
   useEffect(() => {
     // Get user info from cookie
@@ -47,6 +51,31 @@ export default function OnboardingPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const scrapeProfile = async (url: string, field: 'linkedin' | 'facebook') => {
+    if (!url.startsWith('http')) return;
+    setScraping(prev => ({ ...prev, [field]: true }));
+    setScrapeStatus(prev => ({ ...prev, [field]: '' }));
+    try {
+      const res = await fetch('/api/scrape-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (data.data) {
+        const profileField = field === 'linkedin' ? 'linkedinProfile' : 'facebookProfile';
+        setFormData(prev => ({ ...prev, [profileField]: data.data }));
+        setScrapeStatus(prev => ({ ...prev, [field]: '✓ Profil extrait automatiquement' }));
+      } else {
+        setScrapeStatus(prev => ({ ...prev, [field]: '⚠ Profil privé — collez le contenu manuellement' }));
+      }
+    } catch {
+      setScrapeStatus(prev => ({ ...prev, [field]: '⚠ Erreur — collez le contenu manuellement' }));
+    } finally {
+      setScraping(prev => ({ ...prev, [field]: false }));
+    }
   };
 
   const handleMultiSelect = (field: string, value: string) => {
@@ -96,6 +125,7 @@ export default function OnboardingPage() {
   ];
 
   const postTypes = [
+    { value: 'ghostwriter', label: '✍️ Ghostwriter' },
     { value: 'story', label: 'Story personnelle' },
     { value: 'advice', label: 'Conseils' },
     { value: 'carousel', label: 'Carrousel' },
@@ -225,43 +255,104 @@ export default function OnboardingPage() {
                   </div>
 
                   <div className="space-y-6">
+                    {/* LinkedIn URL + auto-scrape */}
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        URL de votre profil LinkedIn public
+                        URL de votre profil LinkedIn
                       </label>
-                      <input
-                        type="text"
-                        name="linkedinUrl"
-                        value={formData.linkedinUrl}
-                        onChange={handleInputChange}
-                        placeholder="https://www.linkedin.com/in/..."
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          name="linkedinUrl"
+                          value={formData.linkedinUrl}
+                          onChange={handleInputChange}
+                          placeholder="https://www.linkedin.com/in/..."
+                          className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => scrapeProfile(formData.linkedinUrl, 'linkedin')}
+                          disabled={scraping.linkedin || !formData.linkedinUrl}
+                          className="px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg font-semibold text-sm transition whitespace-nowrap"
+                        >
+                          {scraping.linkedin ? '⏳' : '🔍 Extraire'}
+                        </button>
+                      </div>
+                      {scrapeStatus.linkedin && (
+                        <p className={`text-xs mt-1 ${scrapeStatus.linkedin.startsWith('✓') ? 'text-green-400' : 'text-orange-400'}`}>
+                          {scrapeStatus.linkedin}
+                        </p>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        Profil LinkedIn
+                        Contenu du profil LinkedIn
                       </label>
                       <textarea
                         name="linkedinProfile"
                         value={formData.linkedinProfile}
                         onChange={handleInputChange}
-                        placeholder="Copiez-collez le contenu de votre profil LinkedIn..."
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 h-32 resize-none"
+                        placeholder="Auto-rempli après extraction, ou collez manuellement : titre, bio, expériences..."
+                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 h-28 resize-none"
                       />
+                    </div>
+
+                    {/* Facebook URL + auto-scrape */}
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">
+                        URL page Facebook (Optionnel)
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          name="facebookUrl"
+                          value={formData.facebookUrl}
+                          onChange={handleInputChange}
+                          placeholder="https://www.facebook.com/..."
+                          className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => scrapeProfile(formData.facebookUrl, 'facebook')}
+                          disabled={scraping.facebook || !formData.facebookUrl}
+                          className="px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg font-semibold text-sm transition whitespace-nowrap"
+                        >
+                          {scraping.facebook ? '⏳' : '🔍 Extraire'}
+                        </button>
+                      </div>
+                      {scrapeStatus.facebook && (
+                        <p className={`text-xs mt-1 ${scrapeStatus.facebook.startsWith('✓') ? 'text-green-400' : 'text-orange-400'}`}>
+                          {scrapeStatus.facebook}
+                        </p>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        Profil Facebook (Optionnel)
+                        Contenu page Facebook
                       </label>
                       <textarea
                         name="facebookProfile"
                         value={formData.facebookProfile}
                         onChange={handleInputChange}
-                        placeholder="Infos de votre page Facebook..."
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 h-24 resize-none"
+                        placeholder="Auto-rempli ou collez manuellement..."
+                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 h-20 resize-none"
+                      />
+                    </div>
+
+                    {/* Personal examples */}
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">
+                        Vos posts précédents <span className="text-orange-400">(recommandé pour le mode Ghostwriter)</span>
+                      </label>
+                      <p className="text-xs text-slate-400 mb-2">Collez 2-3 de vos meilleurs posts LinkedIn — l'IA va copier votre style exact</p>
+                      <textarea
+                        name="personalExamples"
+                        value={formData.personalExamples}
+                        onChange={handleInputChange}
+                        placeholder="Post 1 : J'ai lancé mon SaaS sans lever de fonds...&#10;&#10;Post 2 : La vérité sur le cold outreach LinkedIn..."
+                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 h-36 resize-none"
                       />
                     </div>
                   </div>
