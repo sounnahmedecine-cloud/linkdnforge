@@ -589,7 +589,7 @@ export default function OnboardingPage() {
           {generatedPost && (
             <div className="lg:sticky lg:top-4 lg:h-fit">
               <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 space-y-6">
-                <h2 className="text-2xl font-bold">📝 Votre post LinkedIn</h2>
+                <h2 className="text-2xl font-bold">Votre post LinkedIn</h2>
 
                 <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600 max-h-96 overflow-y-auto">
                   <p className="text-lg leading-relaxed whitespace-pre-wrap">{generatedPost}</p>
@@ -683,6 +683,11 @@ export default function OnboardingPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Legal disclaimer */}
+                <p className="text-xs text-slate-600 leading-relaxed border-t border-slate-700/50 pt-4">
+                  Cet outil peut afficher des contenus inexacts. Vous êtes seul responsable de l'utilisation du contenu généré, y compris sa conformité aux lois applicables et aux droits des tiers.
+                </p>
               </div>
             </div>
           )}
