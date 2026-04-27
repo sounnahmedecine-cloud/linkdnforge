@@ -69,111 +69,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-20 leading-tight">
-            Pourquoi choisir<br /><span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">LinkedInForge</span> ?
-          </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Sparkles className="w-8 h-8" />,
-                title: "IA Intelligente",
-                desc: "Claude 3 génère 3 variantes optimisées de votre post"
-              },
-              {
-                icon: <Zap className="w-8 h-8" />,
-                title: "Score d'Engagement",
-                desc: "Chaque variante reçoit un score prédictif 0-100"
-              },
-              {
-                icon: <span className="text-2xl">🌐</span>,
-                title: "Multicanal",
-                desc: "Créez pour LinkedIn et Facebook en même temps"
-              },
-              {
-                icon: <Zap className="w-8 h-8" />,
-                title: "Plan Éditorial",
-                desc: "Planifiez vos posts pour les 4 prochaines semaines"
-              },
-              {
-                icon: <Sparkles className="w-8 h-8" />,
-                title: "Analytics",
-                desc: "Suivez impressions, engagements et taux de conversion"
-              },
-              {
-                icon: <Zap className="w-8 h-8" />,
-                title: "Équipe",
-                desc: "Collaborez avec votre équipe (à venir)"
-              }
-            ].map((feature, idx) => (
-              <div key={idx} className="bg-slate-900/50 p-8 rounded-xl border border-slate-800 hover:border-blue-600 transition space-y-4 group">
-                <div className="text-orange-500 text-2xl">{feature.icon}</div>
-                <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition">{feature.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed font-light">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section className="py-32 bg-slate-900/50 border-y border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-20">
-            Tarifs <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">simples et transparents</span>
-          </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Gratuit",
-                price: "0€",
-                desc: "Pour tester",
-                features: ["5 posts/mois", "Génération simple", "Pas de scoring"]
-              },
-              {
-                name: "Founder",
-                price: "49€",
-                desc: "/mois ou 490€/an",
-                features: ["Illimité", "3 variantes par post", "Scoring d'engagement", "Plan éditorial", "Analytics"],
-                popular: true
-              },
-              {
-                name: "Enterprise",
-                price: "Custom",
-                desc: "Pour les équipes",
-                features: ["Tout Founder +", "Multi-user", "API", "Support prioritaire"]
-              }
-            ].map((plan, idx) => (
-              <div key={idx} className={`rounded-xl p-8 transition border ${plan.popular ? 'bg-orange-500/10 border-orange-500 scale-105' : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'}`}>
-                {plan.popular && (
-                  <span className="inline-block bg-orange-600/80 text-white px-3 py-1 rounded-full text-xs font-semibold mb-4 uppercase tracking-wide">
-                    Plus populaire
-                  </span>
-                )}
-                <h3 className="text-2xl font-bold mb-3">{plan.name}</h3>
-                <p className={`text-4xl font-bold mb-2 ${plan.popular ? 'text-orange-400' : 'text-orange-500'}`}>
-                  {plan.price}
-                </p>
-                <p className="text-sm text-slate-400 mb-8 font-light">{plan.desc}</p>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex gap-3 text-sm text-slate-300">
-                      <span className="text-orange-500 font-bold">✓</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/onboarding" className={`block text-center py-3 rounded-lg font-semibold transition text-sm ${plan.popular ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-slate-800 text-white hover:bg-slate-700'}`}>
-                  Commencer
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Guide Section */}
       <section className="py-32 bg-slate-900/30">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
@@ -286,6 +181,62 @@ export default function Home() {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-32 bg-slate-900/50 border-y border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-20">
+            Tarifs <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">simples et transparents</span>
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Gratuit",
+                price: "0€",
+                desc: "Pour tester",
+                features: ["5 posts/mois", "Génération simple", "Pas de scoring"]
+              },
+              {
+                name: "Founder",
+                price: "49€",
+                desc: "/mois ou 490€/an",
+                features: ["Illimité", "3 variantes par post", "Scoring d'engagement", "Plan éditorial", "Analytics"],
+                popular: true
+              },
+              {
+                name: "Enterprise",
+                price: "Custom",
+                desc: "Pour les équipes",
+                features: ["Tout Founder +", "Multi-user", "API", "Support prioritaire"]
+              }
+            ].map((plan, idx) => (
+              <div key={idx} className={`rounded-xl p-8 transition border ${plan.popular ? 'bg-orange-500/10 border-orange-500 scale-105' : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'}`}>
+                {plan.popular && (
+                  <span className="inline-block bg-orange-600/80 text-white px-3 py-1 rounded-full text-xs font-semibold mb-4 uppercase tracking-wide">
+                    Plus populaire
+                  </span>
+                )}
+                <h3 className="text-2xl font-bold mb-3">{plan.name}</h3>
+                <p className={`text-4xl font-bold mb-2 ${plan.popular ? 'text-orange-400' : 'text-orange-500'}`}>
+                  {plan.price}
+                </p>
+                <p className="text-sm text-slate-400 mb-8 font-light">{plan.desc}</p>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex gap-3 text-sm text-slate-300">
+                      <span className="text-orange-500 font-bold">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/onboarding" className={`block text-center py-3 rounded-lg font-semibold transition text-sm ${plan.popular ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-slate-800 text-white hover:bg-slate-700'}`}>
+                  Commencer
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
