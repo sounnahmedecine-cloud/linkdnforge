@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       // For now, allow unlimited for all
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const post = await generateWithClaude(formData, apiKey);
+    const post = await generateWithGemini(formData, apiKey);
     return NextResponse.json({ post });
   } catch (error) {
     console.error('Erreur:', error);
@@ -90,33 +90,28 @@ Qu'en pensez-vous? Avez-vous rencontré des défis similaires?
 #${themes.split(',')[0]?.trim().replace(/\s+/g, '')} #LinkedIn #Expertise`;
 }
 
-async function generateWithClaude(formData: any, apiKey: string): Promise<string> {
+async function generateWithGemini(formData: any, apiKey: string): Promise<string> {
   const isGhostwriter = formData.postType === 'ghostwriter';
+  const prompt = isGhostwriter ? buildGhostwriterPrompt(formData) : buildStandardPrompt(formData);
 
-  const prompt = isGhostwriter
-    ? buildGhostwriterPrompt(formData)
-    : buildStandardPrompt(formData);
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 1000, temperature: 0.9 }
+      })
+    }
+  );
 
   if (!response.ok) {
-    throw new Error(`Erreur Claude API: ${response.status}`);
+    throw new Error(`Erreur Gemini API: ${response.status}`);
   }
 
   const data = await response.json();
-  return data.content[0].text.trim();
+  return data.candidates[0].content.parts[0].text.trim();
 }
 
 function buildGhostwriterPrompt(formData: any): string {
