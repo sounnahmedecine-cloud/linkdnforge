@@ -1,6 +1,6 @@
 'use client';
 
-import { Zap, Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -14,9 +14,14 @@ export default function Home() {
             <span className="text-lg font-semibold text-white">LinkedInForge</span>
             <span className="text-xs bg-orange-600/80 px-3 py-1 rounded-full font-medium">Beta</span>
           </div>
-          <Link href="/login" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold text-sm">
-            Commencer
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/pricing" className="text-sm text-slate-400 hover:text-white transition font-medium">
+              Tarifs
+            </Link>
+            <Link href="/login" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold text-sm">
+              Commencer
+            </Link>
+          </div>
         </div>
       </nav>
 
