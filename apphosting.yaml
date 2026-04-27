@@ -1,0 +1,42 @@
+runConfig:
+  concurrency: 100
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 2
+
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyBO5VB2ImMiUPlgL1uw1QJrWhZzUaidzeQ"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "studio-8127417460-db3b2.firebaseapp.com"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "studio-8127417460-db3b2"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "studio-8127417460-db3b2.firebasestorage.app"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "124686847779"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:124686847779:web:6ce9e932981f089c0d8696"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: FIREBASE_ADMIN_SDK_KEY
+    secret: firebase-admin-sdk-key
+    availability:
+      - RUNTIME
