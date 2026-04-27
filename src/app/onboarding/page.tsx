@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Copy, Check, RefreshCw, ImageIcon, Download } from 'lucide-react';
 
 type Step = 1 | 2 | 3;
 
@@ -16,6 +17,9 @@ export default function OnboardingPage() {
   const [generatedPost, setGeneratedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState('');
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [imageError, setImageError] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     linkedinUrl: '',
@@ -173,6 +177,40 @@ export default function OnboardingPage() {
     navigator.clipboard.writeText(generatedPost);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleGenerateVisual = async () => {
+    setIsGeneratingImage(true);
+    setImageError('');
+    setGeneratedImage('');
+    try {
+      const response = await fetch('/api/generate-visual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: generatedPost,
+          visualType: formData.visualType,
+          themes: formData.themes,
+        })
+      });
+      const data = await response.json();
+      if (data.image) {
+        setGeneratedImage(data.image);
+      } else {
+        setImageError(data.error || 'Erreur lors de la génération');
+      }
+    } catch {
+      setImageError('Erreur réseau');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const handleDownloadImage = () => {
+    const a = document.createElement('a');
+    a.href = generatedImage;
+    a.download = `linkedin-visuel-${Date.now()}.png`;
+    a.click();
   };
 
   const handleShareLinkedIn = () => {
@@ -557,36 +595,94 @@ export default function OnboardingPage() {
                   <p className="text-lg leading-relaxed whitespace-pre-wrap">{generatedPost}</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleShareLinkedIn}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-[#0A66C2] hover:bg-[#004182] text-white"
                   >
-                    💼 Publier sur LinkedIn
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    Publier
                   </button>
                   <button
                     onClick={handleShareFacebook}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-[#1877F2] hover:bg-[#0c5fc7] text-white"
                   >
-                    👥 Publier sur Facebook
-                  </button>
-                  <button
-                    onClick={handleCopy}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition"
-                  >
-                    {copied ? '✓ Copié!' : '📋 Copier'}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    Partager
                   </button>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setGeneratedPost('');
-                    setStep(3);
-                  }}
-                  className="w-full border border-slate-600 text-white font-bold py-3 rounded-lg hover:bg-slate-700 transition"
-                >
-                  ✨ Régénérer
-                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleCopy}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition border ${
+                      copied
+                        ? 'border-green-500 text-green-400 bg-green-500/10'
+                        : 'border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copied ? 'Copié' : 'Copier'}
+                  </button>
+                  <button
+                    onClick={() => { setGeneratedPost(''); setGeneratedImage(''); setStep(3); }}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white transition"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Régénérer
+                  </button>
+                </div>
+
+                {/* Visual generation */}
+                <div className="border-t border-slate-700 pt-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-300">Visuel LinkedIn</p>
+                    <span className="text-xs text-slate-500">
+                      {formData.visualType === 'quote' ? 'Carte Citation' : formData.visualType === 'image' ? 'Image Illustrative' : 'Sélectionnez un type en étape 3'}
+                    </span>
+                  </div>
+
+                  {!generatedImage ? (
+                    <>
+                      <button
+                        onClick={handleGenerateVisual}
+                        disabled={isGeneratingImage || !formData.visualType}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:text-slate-500 text-white"
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                        {isGeneratingImage ? 'Génération en cours...' : 'Générer le visuel'}
+                      </button>
+                      {imageError && (
+                        <p className="text-xs text-red-400">{imageError}</p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="space-y-3">
+                      <img
+                        src={generatedImage}
+                        alt="Visuel LinkedIn généré"
+                        className="w-full rounded-lg border border-slate-600"
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={handleDownloadImage}
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm bg-orange-500 hover:bg-orange-600 text-white transition"
+                        >
+                          <Download className="w-4 h-4" />
+                          Télécharger
+                        </button>
+                        <button
+                          onClick={handleGenerateVisual}
+                          disabled={isGeneratingImage}
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white transition"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          Nouveau
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
