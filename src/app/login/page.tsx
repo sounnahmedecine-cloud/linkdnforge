@@ -37,18 +37,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleAuth = async () => {
-    try {
-      const response = await fetch('/api/auth/google', { method: 'POST' });
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      setError('Erreur Google');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -110,24 +98,6 @@ export default function LoginPage() {
               {isLoading ? '⏳ Traitement...' : isSignUp ? 'Créer mon compte' : 'Se connecter'}
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-900/50 text-slate-400">Ou</span>
-            </div>
-          </div>
-
-          {/* Google Button */}
-          <button
-            onClick={handleGoogleAuth}
-            className="w-full border-2 border-slate-700 hover:border-slate-600 text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2"
-          >
-            🔵 Google
-          </button>
 
           {/* Toggle */}
           <div className="text-center text-sm text-slate-400">

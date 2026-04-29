@@ -587,11 +587,11 @@ export default function OnboardingPage() {
 
           {/* Right: Generated Post */}
           {generatedPost && (
-            <div className="lg:sticky lg:top-4 lg:h-fit">
+            <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:rounded-2xl">
               <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 space-y-6">
                 <h2 className="text-2xl font-bold">Votre post LinkedIn</h2>
 
-                <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600 max-h-96 overflow-y-auto">
+                <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600">
                   <p className="text-lg leading-relaxed whitespace-pre-wrap">{generatedPost}</p>
                 </div>
 

@@ -95,13 +95,13 @@ async function generateWithGemini(formData: any, apiKey: string): Promise<string
   const prompt = isGhostwriter ? buildGhostwriterPrompt(formData) : buildStandardPrompt(formData);
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 1000, temperature: 0.9 }
+        generationConfig: { maxOutputTokens: 4000, temperature: 0.9 }
       })
     }
   );
@@ -115,57 +115,64 @@ async function generateWithGemini(formData: any, apiKey: string): Promise<string
 }
 
 function buildGhostwriterPrompt(formData: any): string {
-  return `Tu es un ghostwriter LinkedIn pour entrepreneurs tech francophones.
-${formData.personalExamples ? `
-STYLE DE L'UTILISATEUR — imite sa voix, son rythme, ses tournures:
-${formData.personalExamples}
-` : ''}
-${formData.linkedinProfile ? `PROFIL LINKEDIN:\n${formData.linkedinProfile}\n` : ''}
-THÈMES: ${formData.themes?.join(', ') || 'Tech/Entrepreneuriat'}
-OBJECTIF: ${formData.postObjective === 'leads' ? 'Générer des leads' : 'Visibilité & engagement'}
-SUJET: ${formData.postSubject || 'à définir selon le profil'}
+  return `Tu es un expert LinkedIn francophone qui écrit à la PREMIÈRE PERSONNE DU SINGULIER (je, j'ai, mon, ma, mes).
+Tu vas rédiger un vrai post LinkedIn développé, humain, expert — pas un résumé, pas une liste vide.
+${formData.personalExamples ? `\nSTYLE À IMITER (voix, rythme, tournures de l'utilisateur) :\n${formData.personalExamples}\n` : ''}
+${formData.linkedinProfile ? `PROFIL LINKEDIN :\n${formData.linkedinProfile}\n` : ''}
+THÈMES : ${formData.themes?.join(', ') || 'Entrepreneuriat / Tech / Business'}
+OBJECTIF : ${formData.postObjective === 'leads' ? 'Générer des leads — montrer mon expertise, donner envie de me contacter' : 'Visibilité & engagement — toucher un max de personnes'}
+SUJET DU POST : ${formData.postSubject || 'Mon expertise et ce que j\'ai appris'}
 
-STRUCTURE OBLIGATOIRE:
-1. Hook (1-2 lignes) : question percutante OU anecdote personnelle concrète
-2. 3 insights contre-intuitifs (courts, directs, surprenants)
-3. CTA : "Et vous ? [question précise]" ou invitation à commenter
+STRUCTURE OBLIGATOIRE (développe CHAQUE partie en profondeur, NE RÉSUME PAS) :
+1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote personnelle qui intrigue
+2. CONTEXTE & PROBLÈME (4-6 lignes) : décris le problème que tu as vécu ou observé, avec des détails concrets — noms, situations, chiffres réels
+3. TON HISTOIRE / TA SOLUTION (6-10 lignes) : raconte ce que TU as fait, construit ou découvert — étapes, obstacles, ce qui a marché, ce qui a échoué
+4. 3 INSIGHTS CLÉS (3 x 3-4 lignes chacun) : trois leçons concrètes tirées de ton expérience, expliquées en détail, pas juste listées
+5. CONCLUSION & ENSEIGNEMENT (3-4 lignes) : ce que ça t'a appris au fond, pourquoi c'est important, ton point de vue personnel
+6. CTA (1-2 lignes) : question directe et engageante au lecteur
 
-RÈGLES NON NÉGOCIABLES:
-- 150 mots maximum
-- ZÉRO tournures IA : pas de "déclic", "game-changer", "révolutionnaire", "j'ai réalisé que"
-- Ton humain, pro, direct — jamais générique
-- 0-2 emojis maximum
-- Si exemples fournis, colle exactement au style de l'utilisateur
+RÈGLES ABSOLUES :
+- TOUJOURS à la 1ère personne du singulier : "J'ai créé", "Je vois", "Mon expérience", "Chez moi", "J'ai décidé"
+- JAMAIS à la 2ème personne pour parler de l'auteur
+- 800 mots MINIMUM — c'est un post long, complet, qui apporte de la vraie valeur
+- Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
+- ZÉRO jargon IA : pas de "déclic", "game-changer", "révolutionnaire", "j'ai réalisé que", "en tant qu'entrepreneur"
+- Ton humain, direct, expert — concret, spécifique, jamais générique
+- 0-2 emojis max, placés naturellement
+- Sauts de ligne fréquents entre les idées pour la lisibilité LinkedIn
 
-GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION.`;
+GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. NE T'ARRÊTE PAS AVANT 800 MOTS.
 }
 
 function buildStandardPrompt(formData: any): string {
-  return `Tu es un copyreader expert en LinkedIn avec 10 ans d'expérience. Tu as guidé des centaines de freelances et entrepreneurs à générer des leads via LinkedIn.
+  return `Tu es un expert LinkedIn francophone qui écrit à la PREMIÈRE PERSONNE DU SINGULIER (je, j'ai, mon, ma, mes).
+Tu rédiges un post LinkedIn complet, humain et expert — pas un résumé, un vrai post développé.
 
-CONTEXT:
-- Thèmes d'expertise: ${formData.themes?.join(', ') || 'non spécifiés'}
-- Ton vocal: ${getToneDescription(formData.tone)}
-- Type de post: ${getPostTypeDescription(formData.postType)}
-- Objectif: ${formData.postObjective === 'leads' ? 'Générer des leads qualifiés et conversions' : 'Maximiser la visibilité et l\'engagement'}
-${formData.linkedinProfile ? `- Profil LinkedIn: ${formData.linkedinProfile}` : ''}
-${formData.personalExamples ? `- Posts précédents (imite ce style): ${formData.personalExamples}` : ''}
-- Sujet du post: ${formData.postSubject || 'à définir selon ton expertise'}
+CONTEXTE :
+- Thèmes : ${formData.themes?.join(', ') || 'Entrepreneuriat / Business / Tech'}
+- Ton : ${getToneDescription(formData.tone)}
+- Type : ${getPostTypeDescription(formData.postType)}
+- Objectif : ${formData.postObjective === 'leads' ? 'Générer des leads — montrer mon expertise, donner envie de me contacter' : 'Visibilité & engagement — toucher un max de personnes'}
+${formData.linkedinProfile ? `- Profil LinkedIn : ${formData.linkedinProfile}` : ''}
+${formData.personalExamples ? `- Style à imiter (voix de l'utilisateur) : ${formData.personalExamples}` : ''}
+- Sujet : ${formData.postSubject || 'Mon expertise et ce que j\'ai appris'}
 
-TA MISSION: Génère UN post LinkedIn qui va "Killer" - court, percutant, mémorable.
+STRUCTURE (développe CHAQUE partie en profondeur, NE RÉSUME PAS) :
+1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote personnelle qui intrigue
+2. CONTEXTE & PROBLÈME (4-6 lignes) : décris le problème vécu ou observé, avec des détails concrets — situations réelles, chiffres, noms
+3. TON HISTOIRE / TA SOLUTION (6-10 lignes) : raconte ce que TU as fait, construit ou découvert — étapes, obstacles, ce qui a marché, ce qui a échoué
+4. 3 INSIGHTS CLÉS (3 x 3-4 lignes chacun) : trois leçons concrètes tirées de l'expérience, expliquées en détail, pas juste listées
+5. CONCLUSION & ENSEIGNEMENT (3-4 lignes) : ce que ça t'a appris au fond, pourquoi c'est important, ton point de vue personnel
+6. CTA (1-2 lignes) : question directe et engageante au lecteur
 
-RÈGLES CRITIQUES:
-- ❌ PAS de "Bonjour 👋 Je viens de réaliser que..."
-- ❌ PAS de "Après plusieurs années d'expérience..."
-- ✅ SPÉCIFIQUE et PERSONNEL: anecdote réelle, chiffre concret, observation unique
+RÈGLES ABSOLUES :
+- TOUJOURS à la 1ère personne du singulier : "J'ai", "Je", "Mon", "Ma", "Chez moi", "J'ai décidé"
+- JAMAIS : "Bonjour 👋", "Après plusieurs années d'expérience...", "En tant qu'entrepreneur..."
+- 800 mots MINIMUM — post long, complet, qui apporte de la vraie valeur
+- Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
+- Ton humain, direct, expert — concret et spécifique, jamais générique
+- 0-2 emojis max
+- Sauts de ligne fréquents entre les idées pour la lisibilité LinkedIn
 
-STRUCTURE:
-1. ACCROCHE (1-2 lignes): observation choquante, contradiction, question qui tue
-2. CONTEXTE (2-3 lignes): problème ou dilemme, intègre le sujet naturellement
-3. RÉVÉLATION (2-3 lignes): ce que tu as découvert ou compris
-4. CTA (1 ligne): question directe
-
-RYTHME: phrases courtes + longues, sauts de ligne, 0-2 emojis max, 150-350 mots
-
-GÉNÈRE LE POST DIRECTEMENT, SANS EXPLICATIONS NI PREAMBULLE.`;
+GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. NE T'ARRÊTE PAS AVANT 800 MOTS.`;
 }

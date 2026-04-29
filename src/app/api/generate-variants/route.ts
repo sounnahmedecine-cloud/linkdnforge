@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       return NextResponse.json(
         {
-          error: 'Clé API manquante. Ajoutez ANTHROPIC_API_KEY à vos variables d\'environnement',
+          error: 'Clé API manquante. Ajoutez GEMINI_API_KEY à vos variables d\'environnement',
           variants: mockVariants(content)
         },
         { status: 200 }
@@ -65,7 +65,7 @@ Post original:
 ${content}`;
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
