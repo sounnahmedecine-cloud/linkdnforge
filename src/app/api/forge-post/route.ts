@@ -141,7 +141,7 @@ RÈGLES ABSOLUES :
 - 0-2 emojis max, placés naturellement
 - Sauts de ligne fréquents entre les idées pour la lisibilité LinkedIn
 
-GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. NE T'ARRÊTE PAS AVANT 800 MOTS.
+GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. NE T'ARRÊTE PAS AVANT 800 MOTS.`;
 }
 
 function buildStandardPrompt(formData: any): string {
