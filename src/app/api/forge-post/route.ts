@@ -123,25 +123,23 @@ THÈMES : ${formData.themes?.join(', ') || 'Entrepreneuriat / Tech / Business'}
 OBJECTIF : ${formData.postObjective === 'leads' ? 'Générer des leads — montrer mon expertise, donner envie de me contacter' : 'Visibilité & engagement — toucher un max de personnes'}
 SUJET DU POST : ${formData.postSubject || 'Mon expertise et ce que j\'ai appris'}
 
-STRUCTURE OBLIGATOIRE (développe CHAQUE partie en profondeur, NE RÉSUME PAS) :
-1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote personnelle qui intrigue
-2. CONTEXTE & PROBLÈME (4-6 lignes) : décris le problème que tu as vécu ou observé, avec des détails concrets — noms, situations, chiffres réels
-3. TON HISTOIRE / TA SOLUTION (6-10 lignes) : raconte ce que TU as fait, construit ou découvert — étapes, obstacles, ce qui a marché, ce qui a échoué
-4. 3 INSIGHTS CLÉS (3 x 3-4 lignes chacun) : trois leçons concrètes tirées de ton expérience, expliquées en détail, pas juste listées
-5. CONCLUSION & ENSEIGNEMENT (3-4 lignes) : ce que ça t'a appris au fond, pourquoi c'est important, ton point de vue personnel
-6. CTA (1-2 lignes) : question directe et engageante au lecteur
+STRUCTURE OBLIGATOIRE :
+1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote qui intrigue
+2. DÉVELOPPEMENT (8-10 lignes) : explique le problème vécu, ce que tu as fait, 2 insights concrets tirés de ton expérience
+3. ENSEIGNEMENT (2-3 lignes) : la leçon clé, ton point de vue personnel
+4. CTA (1 ligne) : question directe au lecteur
 
 RÈGLES ABSOLUES :
 - TOUJOURS à la 1ère personne du singulier : "J'ai créé", "Je vois", "Mon expérience", "Chez moi", "J'ai décidé"
 - JAMAIS à la 2ème personne pour parler de l'auteur
-- 800 mots MINIMUM — c'est un post long, complet, qui apporte de la vraie valeur
+- 350 à 400 mots MAXIMUM — c'est un post long, complet, qui apporte de la vraie valeur
 - Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
 - ZÉRO jargon IA : pas de "déclic", "game-changer", "révolutionnaire", "j'ai réalisé que", "en tant qu'entrepreneur"
 - Ton humain, direct, expert — concret, spécifique, jamais générique
 - 0-2 emojis max, placés naturellement
 - Sauts de ligne fréquents entre les idées pour la lisibilité LinkedIn
 
-GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. NE T'ARRÊTE PAS AVANT 800 MOTS.`;
+GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. RESPECTE STRICTEMENT LA LIMITE DE 400 MOTS.`;
 }
 
 function buildStandardPrompt(formData: any): string {
@@ -157,22 +155,20 @@ ${formData.linkedinProfile ? `- Profil LinkedIn : ${formData.linkedinProfile}` :
 ${formData.personalExamples ? `- Style à imiter (voix de l'utilisateur) : ${formData.personalExamples}` : ''}
 - Sujet : ${formData.postSubject || 'Mon expertise et ce que j\'ai appris'}
 
-STRUCTURE (développe CHAQUE partie en profondeur, NE RÉSUME PAS) :
-1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote personnelle qui intrigue
-2. CONTEXTE & PROBLÈME (4-6 lignes) : décris le problème vécu ou observé, avec des détails concrets — situations réelles, chiffres, noms
-3. TON HISTOIRE / TA SOLUTION (6-10 lignes) : raconte ce que TU as fait, construit ou découvert — étapes, obstacles, ce qui a marché, ce qui a échoué
-4. 3 INSIGHTS CLÉS (3 x 3-4 lignes chacun) : trois leçons concrètes tirées de l'expérience, expliquées en détail, pas juste listées
-5. CONCLUSION & ENSEIGNEMENT (3-4 lignes) : ce que ça t'a appris au fond, pourquoi c'est important, ton point de vue personnel
-6. CTA (1-2 lignes) : question directe et engageante au lecteur
+STRUCTURE OBLIGATOIRE :
+1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote qui intrigue
+2. DÉVELOPPEMENT (8-10 lignes) : explique le problème vécu, ce que tu as fait, 2 insights concrets tirés de ton expérience
+3. ENSEIGNEMENT (2-3 lignes) : la leçon clé, ton point de vue personnel
+4. CTA (1 ligne) : question directe au lecteur
 
 RÈGLES ABSOLUES :
 - TOUJOURS à la 1ère personne du singulier : "J'ai", "Je", "Mon", "Ma", "Chez moi", "J'ai décidé"
 - JAMAIS : "Bonjour 👋", "Après plusieurs années d'expérience...", "En tant qu'entrepreneur..."
-- 800 mots MINIMUM — post long, complet, qui apporte de la vraie valeur
+- 350 à 400 mots MAXIMUM — post long, complet, qui apporte de la vraie valeur
 - Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
 - Ton humain, direct, expert — concret et spécifique, jamais générique
 - 0-2 emojis max
 - Sauts de ligne fréquents entre les idées pour la lisibilité LinkedIn
 
-GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. NE T'ARRÊTE PAS AVANT 800 MOTS.`;
+GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. RESPECTE STRICTEMENT LA LIMITE DE 400 MOTS.`;
 }
