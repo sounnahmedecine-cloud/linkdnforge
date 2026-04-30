@@ -132,7 +132,7 @@ STRUCTURE OBLIGATOIRE :
 RÈGLES ABSOLUES :
 - TOUJOURS à la 1ère personne du singulier : "J'ai créé", "Je vois", "Mon expérience", "Chez moi", "J'ai décidé"
 - JAMAIS à la 2ème personne pour parler de l'auteur
-- 350 à 400 mots MAXIMUM — c'est un post long, complet, qui apporte de la vraie valeur
+- 300 à 350 mots MAXIMUM — c'est un post long, complet, qui apporte de la vraie valeur
 - Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
 - ZÉRO jargon IA : pas de "déclic", "game-changer", "révolutionnaire", "j'ai réalisé que", "en tant qu'entrepreneur"
 - Ton humain, direct, expert — concret, spécifique, jamais générique
@@ -164,7 +164,7 @@ STRUCTURE OBLIGATOIRE :
 RÈGLES ABSOLUES :
 - TOUJOURS à la 1ère personne du singulier : "J'ai", "Je", "Mon", "Ma", "Chez moi", "J'ai décidé"
 - JAMAIS : "Bonjour 👋", "Après plusieurs années d'expérience...", "En tant qu'entrepreneur..."
-- 350 à 400 mots MAXIMUM — post long, complet, qui apporte de la vraie valeur
+- 300 à 350 mots MAXIMUM — post long, complet, qui apporte de la vraie valeur
 - Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
 - Ton humain, direct, expert — concret et spécifique, jamais générique
 - 0-2 emojis max
