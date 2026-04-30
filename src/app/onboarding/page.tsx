@@ -586,15 +586,37 @@ export default function OnboardingPage() {
           </div>
 
           {/* Right: Generated Post */}
-          {generatedPost && (
+          {(generatedPost || isGenerating) && (
             <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:rounded-2xl">
               <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 space-y-6">
                 <h2 className="text-2xl font-bold">Votre post LinkedIn</h2>
 
+                {isGenerating ? (
+                  <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600 space-y-3">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                      <span className="text-sm text-slate-400">Génération en cours...</span>
+                    </div>
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-full" />
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-5/6" />
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-4/6" />
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-full mt-4" />
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-3/4" />
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-5/6" />
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-full mt-4" />
+                    <div className="h-3 bg-slate-600 rounded animate-pulse w-2/3" />
+                  </div>
+                ) : (
                 <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600">
                   <p className="text-lg leading-relaxed whitespace-pre-wrap">{generatedPost}</p>
                 </div>
+                )}
 
+                {!isGenerating && (<>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleShareLinkedIn}
@@ -684,6 +706,7 @@ export default function OnboardingPage() {
                   )}
                 </div>
 
+                </>)}
                 {/* Legal disclaimer */}
                 <p className="text-xs text-slate-600 leading-relaxed border-t border-slate-700/50 pt-4">
                   Cet outil peut afficher des contenus inexacts. Vous êtes seul responsable de l'utilisation du contenu généré, y compris sa conformité aux lois applicables et aux droits des tiers.
