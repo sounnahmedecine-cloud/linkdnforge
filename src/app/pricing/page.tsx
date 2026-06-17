@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Check, Minus, Zap } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
+import { Button } from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import SectionLabel from '@/components/ui/SectionLabel';
 
 const plans = [
   {
@@ -119,65 +122,57 @@ const featureGroups = [
 ];
 
 function FeatureValue({ value }: { value: string | boolean }) {
-  if (value === true) return <Check className="w-5 h-5 text-orange-400 mx-auto" />;
-  if (value === false) return <Minus className="w-4 h-4 text-slate-600 mx-auto" />;
+  if (value === true) return <Check className="w-5 h-5 text-ember-400 mx-auto" />;
+  if (value === false) return <Minus className="w-4 h-4 text-iron-600 mx-auto" />;
   if (typeof value === 'string' && value.includes('Bientôt')) {
     return (
-      <span className="text-xs text-slate-500 font-medium bg-slate-800 px-2 py-0.5 rounded-full">
+      <span className="font-mono text-[11px] text-smoke-500 bg-iron-800 px-2 py-0.5 rounded-full">
         {value}
       </span>
     );
   }
-  return <span className="text-sm text-slate-300 font-light">{value}</span>;
+  return <span className="text-sm text-smoke-300">{value}</span>;
 }
 
 export default function PricingPage() {
   const [yearly, setYearly] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="min-h-screen bg-iron-950 text-smoke-100">
       {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
+      <nav className="sticky top-0 z-50 bg-iron-950/90 backdrop-blur-md border-b border-iron-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">in</span>
-            <span className="text-lg font-semibold text-white">LinkedInForge</span>
-            <span className="text-xs bg-orange-600/80 px-3 py-1 rounded-full font-medium">Beta</span>
-          </Link>
-          <Link href="/onboarding" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold text-sm">
-            Commencer
-          </Link>
+          <Logo />
+          <Button href="/onboarding">Commencer</Button>
         </div>
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-20">
-
         {/* Header */}
         <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl font-bold leading-tight">
-            Des tarifs{' '}
-            <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
-              pensés pour vous
-            </span>
+          <SectionLabel className="justify-center">Tarification</SectionLabel>
+          <h1 className="font-display font-bold text-5xl sm:text-6xl leading-tight">
+            Des tarifs pensés pour vous
           </h1>
-          <p className="text-lg text-slate-400 font-light leading-relaxed">
-            Pas d'abonnement à 100€/mois. LinkedInForge est conçu pour les entrepreneurs indépendants — des prix honnêtes, des fonctionnalités qui comptent.
+          <p className="text-lg text-smoke-500 leading-relaxed">
+            Pas d&apos;abonnement à 100€/mois. LinkedInForge est conçu pour les entrepreneurs
+            indépendants — des prix honnêtes, des fonctionnalités qui comptent.
           </p>
 
           {/* Toggle */}
-          <div className="inline-flex items-center gap-4 bg-slate-800/60 border border-slate-700 rounded-xl p-1.5">
+          <div className="inline-flex items-center gap-1 bg-iron-900/60 border border-iron-800 rounded-xl p-1.5">
             <button
               onClick={() => setYearly(false)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition ${!yearly ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-5 py-2 rounded-lg text-sm font-semibold transition ${!yearly ? 'bg-iron-800 text-smoke-100' : 'text-smoke-500 hover:text-smoke-100'}`}
             >
               Mensuel
             </button>
             <button
               onClick={() => setYearly(true)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 ${yearly ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 ${yearly ? 'bg-iron-800 text-smoke-100' : 'text-smoke-500 hover:text-smoke-100'}`}
             >
               Annuel
-              <span className="text-xs bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded-full">-20%</span>
+              <span className="font-mono text-[11px] bg-quench-500/15 text-quench-400 border border-quench-500/30 px-2 py-0.5 rounded-full">-20%</span>
             </button>
           </div>
         </div>
@@ -189,62 +184,57 @@ export default function PricingPage() {
               key={plan.name}
               className={`relative rounded-2xl p-7 flex flex-col gap-6 border transition ${
                 plan.popular
-                  ? 'bg-orange-500/8 border-orange-500 shadow-lg shadow-orange-500/10'
-                  : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
+                  ? 'bg-ember-500/[0.06] border-ember-500/50 shadow-[0_0_40px_-16px_rgba(255,90,31,0.4)]'
+                  : 'bg-iron-900/50 border-iron-800 hover:border-iron-700'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="flex items-center gap-1.5 bg-orange-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap">
+                  <Badge tone="ember">
                     <Zap className="w-3 h-3" /> Le plus populaire
-                  </span>
+                  </Badge>
                 </div>
               )}
 
               <div className="space-y-2">
-                <h2 className="text-xl font-bold">{plan.name}</h2>
-                <p className="text-sm text-slate-400 font-light">{plan.desc}</p>
+                <h2 className="text-xl font-display font-bold">{plan.name}</h2>
+                <p className="text-sm text-smoke-500">{plan.desc}</p>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-end gap-1">
-                  <span className={`text-5xl font-bold ${plan.popular ? 'text-orange-400' : 'text-white'}`}>
+                  <span className={`font-mono text-5xl font-semibold ${plan.popular ? 'text-ember-400' : 'text-smoke-100'}`}>
                     {plan.monthly === 0 ? '0' : `${yearly ? plan.yearly : plan.monthly}`}€
                   </span>
                   {plan.monthly > 0 && (
-                    <span className="text-slate-500 text-sm pb-2 font-light">/ mois</span>
+                    <span className="text-smoke-500 text-sm pb-2">/ mois</span>
                   )}
                 </div>
                 {yearly && plan.monthly > 0 && (
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-smoke-500">
                     Facturé {(plan.yearly! * 12)}€ / an
                   </p>
                 )}
               </div>
 
-              <Link
+              <Button
                 href={plan.ctaHref}
-                className={`block text-center py-3 rounded-xl font-semibold text-sm transition ${
-                  plan.popular
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                    : plan.monthly === 0
-                    ? 'bg-slate-800 hover:bg-slate-700 text-white'
-                    : 'border border-slate-600 hover:border-slate-500 text-white hover:bg-slate-800'
-                }`}
+                variant={plan.popular ? 'primary' : plan.monthly === 0 ? 'outline' : 'outline'}
+                className="w-full"
               >
                 {plan.cta}
-              </Link>
+              </Button>
 
               <ul className="space-y-3 flex-1">
                 {Object.entries(plan.features).map(([key, value]) => (
                   value !== false && (
                     <li key={key} className="flex items-start gap-3">
                       {value === true ? (
-                        <Check className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
+                        <Check className="w-4 h-4 text-ember-400 mt-0.5 shrink-0" />
                       ) : (
-                        <span className="w-4 h-4 mt-0.5 shrink-0 text-orange-400 text-xs font-bold flex items-center">→</span>
+                        <span className="w-4 h-4 mt-0.5 shrink-0 text-ember-400 text-xs font-bold flex items-center">→</span>
                       )}
-                      <span className="text-sm text-slate-300 font-light leading-snug">
+                      <span className="text-sm text-smoke-300 leading-snug">
                         {value === true ? key : `${key} : ${value}`}
                       </span>
                     </li>
@@ -257,20 +247,15 @@ export default function PricingPage() {
 
         {/* Comparison table */}
         <div className="space-y-8">
-          <h2 className="text-3xl font-bold text-center">
-            Comparaison{' '}
-            <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
-              détaillée
-            </span>
-          </h2>
+          <h2 className="font-display font-bold text-3xl text-center">Comparaison détaillée</h2>
 
-          <div className="overflow-x-auto rounded-2xl border border-slate-800">
+          <div className="overflow-x-auto rounded-2xl border border-iron-800">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80">
-                  <th className="text-left px-6 py-5 text-slate-400 font-medium w-1/3">Fonctionnalité</th>
+                <tr className="border-b border-iron-800 bg-iron-900/80">
+                  <th className="text-left px-6 py-5 text-smoke-500 font-medium w-1/3">Fonctionnalité</th>
                   {plans.map((p) => (
-                    <th key={p.name} className={`px-6 py-5 text-center font-bold ${p.popular ? 'text-orange-400' : 'text-white'}`}>
+                    <th key={p.name} className={`px-6 py-5 text-center font-display font-bold ${p.popular ? 'text-ember-400' : 'text-smoke-100'}`}>
                       {p.name}
                     </th>
                   ))}
@@ -279,16 +264,16 @@ export default function PricingPage() {
               <tbody>
                 {featureGroups.map((group) => (
                   <>
-                    <tr key={group.label} className="bg-slate-900/40 border-b border-slate-800/60">
-                      <td colSpan={5} className="px-6 py-3 text-xs font-semibold text-orange-400 uppercase tracking-widest">
+                    <tr key={group.label} className="bg-iron-900/40 border-b border-iron-800/60">
+                      <td colSpan={5} className="px-6 py-3 font-mono text-xs font-semibold text-ember-400 uppercase tracking-widest">
                         {group.label}
                       </td>
                     </tr>
                     {group.keys.map((key) => (
-                      <tr key={key} className="border-b border-slate-800/40 hover:bg-slate-800/20 transition">
-                        <td className="px-6 py-4 text-slate-300 font-light">{key}</td>
+                      <tr key={key} className="border-b border-iron-800/40 hover:bg-iron-800/20 transition">
+                        <td className="px-6 py-4 text-smoke-300">{key}</td>
                         {plans.map((p) => (
-                          <td key={p.name} className={`px-6 py-4 text-center ${p.popular ? 'bg-orange-500/5' : ''}`}>
+                          <td key={p.name} className={`px-6 py-4 text-center ${p.popular ? 'bg-ember-500/5' : ''}`}>
                             <FeatureValue value={p.features[key as keyof typeof p.features]} />
                           </td>
                         ))}
@@ -303,12 +288,7 @@ export default function PricingPage() {
 
         {/* FAQ */}
         <div className="max-w-3xl mx-auto space-y-8">
-          <h2 className="text-3xl font-bold text-center">
-            Questions{' '}
-            <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
-              fréquentes
-            </span>
-          </h2>
+          <h2 className="font-display font-bold text-3xl text-center">Questions fréquentes</h2>
           <div className="space-y-4">
             {[
               {
@@ -328,31 +308,27 @@ export default function PricingPage() {
                 a: "Oui. Toutes les fonctionnalités listées comme 'Bientôt' seront incluses dans votre plan sans surcoût dès leur sortie."
               },
             ].map(({ q, a }) => (
-              <div key={q} className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 space-y-3">
-                <h3 className="font-semibold text-white">{q}</h3>
-                <p className="text-slate-400 font-light leading-relaxed text-sm">{a}</p>
+              <div key={q} className="bg-iron-900/50 border border-iron-800 rounded-xl p-6 space-y-3">
+                <h3 className="font-semibold text-smoke-100">{q}</h3>
+                <p className="text-smoke-500 leading-relaxed text-sm">{a}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center space-y-6 bg-slate-900/50 border border-slate-800 rounded-2xl py-16 px-8">
-          <h2 className="text-4xl font-bold">Commencez gratuitement</h2>
-          <p className="text-slate-400 font-light">Aucune carte bancaire • Accès immédiat • 5 posts offerts</p>
-          <Link
-            href="/onboarding"
-            className="inline-block px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition text-base"
-          >
+        <div className="text-center space-y-6 bg-iron-900/50 border border-iron-800 rounded-2xl py-16 px-8">
+          <h2 className="font-display font-bold text-4xl">Commencez gratuitement</h2>
+          <p className="text-smoke-500">Aucune carte bancaire · Accès immédiat · 5 posts offerts</p>
+          <Button href="/onboarding" size="lg">
             Créer mon compte gratuit
-          </Link>
+          </Button>
         </div>
-
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-8 mt-8">
-        <p className="text-center text-slate-600 text-sm font-light">© 2026 LinkedInForge. Tous droits réservés.</p>
+      <footer className="border-t border-iron-800 py-8 mt-8">
+        <p className="text-center text-smoke-500/70 text-sm">© 2026 LinkedInForge. Tous droits réservés.</p>
       </footer>
     </div>
   );

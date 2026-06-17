@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Copy, Check, RefreshCw, ImageIcon, Download } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
+import { Button } from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import StampNumber from '@/components/ui/StampNumber';
+import ForgeLoader from '@/components/ui/ForgeLoader';
 
 type Step = 1 | 2 | 3;
 
@@ -224,55 +229,47 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4">
+    <div className="min-h-screen bg-iron-950 text-smoke-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-12" suppressHydrationWarning>
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-              <span className="text-2xl" suppressHydrationWarning>in</span>
-              <h1 className="text-2xl font-bold">LinkedInForge</h1>
-              <span className="text-xs bg-blue-600 px-3 py-1 rounded-full">Beta</span>
-            </Link>
+            <Logo />
             {user?.role === 'admin' && (
-              <span className="text-xs bg-orange-600/80 px-3 py-1 rounded-full font-semibold uppercase tracking-wide">
-                👑 Admin
-              </span>
+              <Badge tone="spark">👑 Admin</Badge>
             )}
           </div>
           <div className="flex items-center gap-4">
             {user?.email && (
-              <span className="text-sm text-slate-400">{user.email}</span>
+              <span className="text-sm text-smoke-500">{user.email}</span>
             )}
             <button
               onClick={handleLogout}
-              className="px-4 py-2 border border-slate-600 text-slate-300 hover:text-white rounded-lg hover:border-slate-500 transition text-sm"
+              className="px-4 py-2 border border-iron-700 text-smoke-300 hover:text-smoke-100 rounded-lg hover:border-iron-600 transition text-sm"
             >
               Déconnexion
             </button>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div
+          className={
+            generatedPost || isGenerating
+              ? 'grid grid-cols-1 lg:grid-cols-2 gap-8'
+              : 'max-w-2xl mx-auto'
+          }
+        >
           {/* Left: Form */}
           <div>
             {/* Step Indicator */}
             <div className="flex items-center justify-between mb-8">
               {[1, 2, 3].map((num) => (
                 <div key={num} className="flex items-center flex-1">
-                  <div
-                    className={`w-10 h-10 rounded-full font-bold flex items-center justify-center transition text-sm ${
-                      step >= num
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-slate-700 text-slate-400'
-                    }`}
-                  >
-                    {num}
-                  </div>
+                  <StampNumber n={num} active={step >= num} />
                   {num < 3 && (
                     <div
-                      className={`h-1 flex-1 mx-2 transition ${
-                        step > num ? 'bg-orange-500' : 'bg-slate-700'
+                      className={`h-px flex-1 mx-2 transition ${
+                        step > num ? 'bg-ember-500' : 'bg-iron-800'
                       }`}
                     />
                   )}
@@ -281,21 +278,21 @@ export default function OnboardingPage() {
             </div>
 
             {/* Content */}
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 mb-8">
+            <div className="bg-iron-900/50 border border-iron-800 rounded-2xl p-8 mb-8">
               {/* STEP 1 */}
               {step === 1 && (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl font-bold mb-2">
+                    <h2 className="font-display font-bold text-3xl mb-2">
                       1. Vos informations
                     </h2>
-                    <p className="text-slate-400">Remplissez vos infos LinkedIn</p>
+                    <p className="text-smoke-500">Remplissez vos infos LinkedIn</p>
                   </div>
 
                   <div className="space-y-6">
                     {/* LinkedIn URL + auto-scrape */}
                     <div>
-                      <label className="block text-sm font-semibold mb-2">
+                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
                         URL de votre profil LinkedIn
                       </label>
                       <div className="flex gap-2">
@@ -305,26 +302,26 @@ export default function OnboardingPage() {
                           value={formData.linkedinUrl}
                           onChange={handleInputChange}
                           placeholder="https://www.linkedin.com/in/..."
-                          className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="flex-1 min-w-0 bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500"
                         />
                         <button
                           type="button"
                           onClick={() => scrapeProfile(formData.linkedinUrl, 'linkedin')}
                           disabled={scraping.linkedin || !formData.linkedinUrl}
-                          className="px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg font-semibold text-sm transition whitespace-nowrap"
+                          className="px-4 py-3 bg-quench-500 hover:bg-quench-400 disabled:bg-iron-700 disabled:text-smoke-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
                         >
                           {scraping.linkedin ? '⏳' : '🔍 Extraire'}
                         </button>
                       </div>
                       {scrapeStatus.linkedin && (
-                        <p className={`text-xs mt-1 ${scrapeStatus.linkedin.startsWith('✓') ? 'text-green-400' : 'text-orange-400'}`}>
+                        <p className={`text-xs mt-1 ${scrapeStatus.linkedin.startsWith('✓') ? 'text-emerald-400' : 'text-spark'}`}>
                           {scrapeStatus.linkedin}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold mb-2">
+                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
                         Contenu du profil LinkedIn
                       </label>
                       <textarea
@@ -332,13 +329,13 @@ export default function OnboardingPage() {
                         value={formData.linkedinProfile}
                         onChange={handleInputChange}
                         placeholder="Auto-rempli après extraction, ou collez manuellement : titre, bio, expériences..."
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 h-28 resize-none"
+                        className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-28 resize-none"
                       />
                     </div>
 
                     {/* Facebook URL + auto-scrape */}
                     <div>
-                      <label className="block text-sm font-semibold mb-2">
+                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
                         URL page Facebook (Optionnel)
                       </label>
                       <div className="flex gap-2">
@@ -348,26 +345,26 @@ export default function OnboardingPage() {
                           value={formData.facebookUrl}
                           onChange={handleInputChange}
                           placeholder="https://www.facebook.com/..."
-                          className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="flex-1 min-w-0 bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500"
                         />
                         <button
                           type="button"
                           onClick={() => scrapeProfile(formData.facebookUrl, 'facebook')}
                           disabled={scraping.facebook || !formData.facebookUrl}
-                          className="px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg font-semibold text-sm transition whitespace-nowrap"
+                          className="px-4 py-3 bg-quench-500 hover:bg-quench-400 disabled:bg-iron-700 disabled:text-smoke-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
                         >
                           {scraping.facebook ? '⏳' : '🔍 Extraire'}
                         </button>
                       </div>
                       {scrapeStatus.facebook && (
-                        <p className={`text-xs mt-1 ${scrapeStatus.facebook.startsWith('✓') ? 'text-green-400' : 'text-orange-400'}`}>
+                        <p className={`text-xs mt-1 ${scrapeStatus.facebook.startsWith('✓') ? 'text-emerald-400' : 'text-spark'}`}>
                           {scrapeStatus.facebook}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold mb-2">
+                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
                         Contenu page Facebook
                       </label>
                       <textarea
@@ -375,22 +372,22 @@ export default function OnboardingPage() {
                         value={formData.facebookProfile}
                         onChange={handleInputChange}
                         placeholder="Auto-rempli ou collez manuellement..."
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 h-20 resize-none"
+                        className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-20 resize-none"
                       />
                     </div>
 
                     {/* Personal examples */}
                     <div>
-                      <label className="block text-sm font-semibold mb-1">
-                        Vos posts précédents <span className="text-orange-400">(recommandé pour le mode Ghostwriter)</span>
+                      <label className="block text-sm font-semibold mb-1 text-smoke-300">
+                        Vos posts précédents <span className="text-ember-400">(recommandé pour le mode Ghostwriter)</span>
                       </label>
-                      <p className="text-xs text-slate-400 mb-2">Collez 2-3 de vos meilleurs posts LinkedIn — l'IA va copier votre style exact</p>
+                      <p className="text-xs text-smoke-500 mb-2">Collez 2-3 de vos meilleurs posts LinkedIn — l&apos;IA va copier votre style exact</p>
                       <textarea
                         name="personalExamples"
                         value={formData.personalExamples}
                         onChange={handleInputChange}
-                        placeholder="Post 1 : J'ai lancé mon SaaS sans lever de fonds...&#10;&#10;Post 2 : La vérité sur le cold outreach LinkedIn..."
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 h-36 resize-none"
+                        placeholder={"Post 1 : J'ai lancé mon SaaS sans lever de fonds...\n\nPost 2 : La vérité sur le cold outreach LinkedIn..."}
+                        className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-36 resize-none"
                       />
                     </div>
                   </div>
@@ -401,7 +398,7 @@ export default function OnboardingPage() {
               {step === 2 && (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl font-bold mb-2">
+                    <h2 className="font-display font-bold text-3xl mb-2">
                       2. Votre strategie de contenu
                     </h2>
                   </div>
@@ -415,8 +412,8 @@ export default function OnboardingPage() {
                           onClick={() => handleMultiSelect('themes', theme)}
                           className={`px-4 py-2 rounded-lg border transition font-medium text-sm ${
                             formData.themes.includes(theme)
-                              ? 'bg-orange-500 border-orange-500 text-white'
-                              : 'border-slate-600 text-slate-300 hover:border-slate-500'
+                              ? 'bg-ember-500 border-ember-500 text-iron-950'
+                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
                           }`}
                         >
                           {theme}
@@ -434,8 +431,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('tone', tone.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.tone === tone.value
-                              ? 'bg-orange-500 border-orange-500 text-white'
-                              : 'border-slate-600 text-slate-300 hover:border-slate-500'
+                              ? 'bg-ember-500 border-ember-500 text-iron-950'
+                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
                           }`}
                         >
                           {tone.label}
@@ -453,8 +450,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('frequency', freq.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.frequency === freq.value
-                              ? 'bg-orange-500 border-orange-500 text-white'
-                              : 'border-slate-600 text-slate-300 hover:border-slate-500'
+                              ? 'bg-ember-500 border-ember-500 text-iron-950'
+                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
                           }`}
                         >
                           {freq.label}
@@ -469,10 +466,10 @@ export default function OnboardingPage() {
               {step === 3 && (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl font-bold mb-2">
+                    <h2 className="font-display font-bold text-3xl mb-2">
                       3. Choisissez vos options
                     </h2>
-                    <p className="text-slate-400">Finalisez votre post</p>
+                    <p className="text-smoke-500">Finalisez votre post</p>
                   </div>
 
                   <div>
@@ -484,8 +481,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('postObjective', obj.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.postObjective === obj.value
-                              ? 'bg-orange-500 border-orange-500 text-white'
-                              : 'border-slate-600 text-slate-300 hover:border-slate-500'
+                              ? 'bg-ember-500 border-ember-500 text-iron-950'
+                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
                           }`}
                         >
                           {obj.label}
@@ -503,8 +500,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('postType', type.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.postType === type.value
-                              ? 'bg-orange-500 border-orange-500 text-white'
-                              : 'border-slate-600 text-slate-300 hover:border-slate-500'
+                              ? 'bg-ember-500 border-ember-500 text-iron-950'
+                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
                           }`}
                         >
                           {type.label}
@@ -514,7 +511,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-2">
+                    <label className="block text-sm font-semibold mb-2 text-smoke-300">
                       Sujet du post (Optionnel)
                     </label>
                     <textarea
@@ -522,7 +519,7 @@ export default function OnboardingPage() {
                       value={formData.postSubject}
                       onChange={handleInputChange}
                       placeholder="Decrivez votre idee..."
-                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 h-20 resize-none"
+                      className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-20 resize-none"
                     />
                   </div>
 
@@ -535,8 +532,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('visualType', visual.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.visualType === visual.value
-                              ? 'bg-orange-500 border-orange-500 text-white'
-                              : 'border-slate-600 text-slate-300 hover:border-slate-500'
+                              ? 'bg-ember-500 border-ember-500 text-iron-950'
+                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
                           }`}
                         >
                           {visual.label}
@@ -545,73 +542,52 @@ export default function OnboardingPage() {
                     </div>
                   </div>
 
-                  <button
+                  <Button
                     onClick={handleForgePost}
                     disabled={isGenerating}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white font-bold py-4 rounded-lg transition"
+                    size="lg"
+                    className="w-full"
                   >
-                    {isGenerating ? '⚡ Forgeage en cours...' : 'Forger le post'}
-                  </button>
+                    {isGenerating ? 'Forgeage en cours...' : 'Forger le post'}
+                  </Button>
                 </div>
               )}
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between items-center">
-              <button
-                onClick={handlePrev}
-                disabled={step === 1}
-                className={`px-6 py-3 rounded-lg font-semibold transition ${
-                  step === 1
-                    ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                    : 'border border-slate-600 text-white hover:bg-slate-700'
-                }`}
-              >
-                Precedent
-              </button>
-
-              <span className="text-slate-400 text-sm">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center gap-3">
+                <Button onClick={handlePrev} disabled={step === 1} variant="outline">
+                  Precedent
+                </Button>
+                {step < 3 ? <Button onClick={handleNext}>Suivant</Button> : <span />}
+              </div>
+              <p className="text-center font-mono text-smoke-500 text-xs uppercase tracking-widest">
                 Etape {step} sur 3
-              </span>
-
-              {step < 3 ? (
-                <button
-                  onClick={handleNext}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
-                >
-                  Suivant
-                </button>
-              ) : null}
+              </p>
             </div>
           </div>
 
           {/* Right: Generated Post */}
           {(generatedPost || isGenerating) && (
             <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:rounded-2xl">
-              <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 space-y-6">
-                <h2 className="text-2xl font-bold">Votre post LinkedIn</h2>
+              <div className="bg-iron-900/50 backdrop-blur border border-iron-800 rounded-2xl p-8 space-y-6">
+                <h2 className="font-display font-bold text-2xl">Votre post LinkedIn</h2>
 
                 {isGenerating ? (
-                  <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600 space-y-3">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="flex gap-1">
-                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
-                      <span className="text-sm text-slate-400">Génération en cours...</span>
+                  <div className="bg-iron-800/50 rounded-lg p-6 border border-iron-700 space-y-4">
+                    <ForgeLoader label="Génération en cours..." />
+                    <div className="space-y-3 pt-2">
+                      <div className="h-3 bg-iron-700 rounded animate-pulse w-full" />
+                      <div className="h-3 bg-iron-700 rounded animate-pulse w-5/6" />
+                      <div className="h-3 bg-iron-700 rounded animate-pulse w-4/6" />
+                      <div className="h-3 bg-iron-700 rounded animate-pulse w-full mt-4" />
+                      <div className="h-3 bg-iron-700 rounded animate-pulse w-3/4" />
+                      <div className="h-3 bg-iron-700 rounded animate-pulse w-5/6" />
                     </div>
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-full" />
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-5/6" />
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-4/6" />
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-full mt-4" />
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-3/4" />
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-5/6" />
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-full mt-4" />
-                    <div className="h-3 bg-slate-600 rounded animate-pulse w-2/3" />
                   </div>
                 ) : (
-                <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600">
+                <div className="bg-iron-800/50 rounded-lg p-6 border border-iron-700">
                   <p className="text-lg leading-relaxed whitespace-pre-wrap">{generatedPost}</p>
                 </div>
                 )}
@@ -639,8 +615,8 @@ export default function OnboardingPage() {
                     onClick={handleCopy}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition border ${
                       copied
-                        ? 'border-green-500 text-green-400 bg-green-500/10'
-                        : 'border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white'
+                        ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
+                        : 'border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100'
                     }`}
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -648,7 +624,7 @@ export default function OnboardingPage() {
                   </button>
                   <button
                     onClick={() => { setGeneratedPost(''); setGeneratedImage(''); setStep(3); }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white transition"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100 transition"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Régénérer
@@ -656,10 +632,10 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Visual generation */}
-                <div className="border-t border-slate-700 pt-5 space-y-4">
+                <div className="border-t border-iron-800 pt-5 space-y-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-300">Visuel LinkedIn</p>
-                    <span className="text-xs text-slate-500">
+                    <p className="text-sm font-semibold text-smoke-300">Visuel LinkedIn</p>
+                    <span className="text-xs text-smoke-500">
                       {formData.visualType === 'quote' ? 'Carte Citation' : formData.visualType === 'image' ? 'Image Illustrative' : 'Sélectionnez un type en étape 3'}
                     </span>
                   </div>
@@ -669,13 +645,13 @@ export default function OnboardingPage() {
                       <button
                         onClick={handleGenerateVisual}
                         disabled={isGeneratingImage || !formData.visualType}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:text-slate-500 text-white"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-quench-500 hover:bg-quench-400 disabled:bg-iron-800 disabled:text-smoke-500 text-iron-950"
                       >
                         <ImageIcon className="w-4 h-4" />
                         {isGeneratingImage ? 'Génération en cours...' : 'Générer le visuel'}
                       </button>
                       {imageError && (
-                        <p className="text-xs text-red-400">{imageError}</p>
+                        <p className="text-xs text-ember-400">{imageError}</p>
                       )}
                     </>
                   ) : (
@@ -683,12 +659,12 @@ export default function OnboardingPage() {
                       <img
                         src={generatedImage}
                         alt="Visuel LinkedIn généré"
-                        className="w-full rounded-lg border border-slate-600"
+                        className="w-full rounded-lg border border-iron-700"
                       />
                       <div className="grid grid-cols-2 gap-3">
                         <button
                           onClick={handleDownloadImage}
-                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm bg-orange-500 hover:bg-orange-600 text-white transition"
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm bg-quench-500 hover:bg-quench-400 text-iron-950 transition"
                         >
                           <Download className="w-4 h-4" />
                           Télécharger
@@ -696,7 +672,7 @@ export default function OnboardingPage() {
                         <button
                           onClick={handleGenerateVisual}
                           disabled={isGeneratingImage}
-                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white transition"
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100 transition"
                         >
                           <RefreshCw className="w-4 h-4" />
                           Nouveau
@@ -708,8 +684,8 @@ export default function OnboardingPage() {
 
                 </>)}
                 {/* Legal disclaimer */}
-                <p className="text-xs text-slate-600 leading-relaxed border-t border-slate-700/50 pt-4">
-                  Cet outil peut afficher des contenus inexacts. Vous êtes seul responsable de l'utilisation du contenu généré, y compris sa conformité aux lois applicables et aux droits des tiers.
+                <p className="text-xs text-smoke-500/70 leading-relaxed border-t border-iron-800/60 pt-4">
+                  Cet outil peut afficher des contenus inexacts. Vous êtes seul responsable de l&apos;utilisation du contenu généré, y compris sa conformité aux lois applicables et aux droits des tiers.
                 </p>
               </div>
             </div>
