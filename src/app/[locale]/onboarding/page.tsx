@@ -1,13 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Copy, Check, RefreshCw, ImageIcon, Download } from 'lucide-react';
-import Logo from '@/components/ui/Logo';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
 import StampNumber from '@/components/ui/StampNumber';
 import ForgeLoader from '@/components/ui/ForgeLoader';
+import Header from '@/components/layout/Header';
+import {
+  THEME_SLUGS,
+  TONE_VALUES,
+  FREQUENCY_VALUES,
+  POST_OBJECTIVE_VALUES,
+  POST_TYPE_VALUES,
+  VISUAL_TYPE_VALUES,
+} from '@/lib/onboardingOptions';
 
 type Step = 1 | 2 | 3;
 
@@ -18,6 +26,10 @@ interface User {
 }
 
 export default function OnboardingPage() {
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('onboarding');
+  const tNav = useTranslations('nav');
   const [step, setStep] = useState<Step>(1);
   const [generatedPost, setGeneratedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -76,12 +88,12 @@ export default function OnboardingPage() {
       if (data.data) {
         const profileField = field === 'linkedin' ? 'linkedinProfile' : 'facebookProfile';
         setFormData(prev => ({ ...prev, [profileField]: data.data }));
-        setScrapeStatus(prev => ({ ...prev, [field]: '✓ Profil extrait automatiquement' }));
+        setScrapeStatus(prev => ({ ...prev, [field]: t('step1.scrapeSuccess') }));
       } else {
-        setScrapeStatus(prev => ({ ...prev, [field]: '⚠ Profil privé — collez le contenu manuellement' }));
+        setScrapeStatus(prev => ({ ...prev, [field]: t('step1.scrapePrivate') }));
       }
     } catch {
-      setScrapeStatus(prev => ({ ...prev, [field]: '⚠ Erreur — collez le contenu manuellement' }));
+      setScrapeStatus(prev => ({ ...prev, [field]: t('step1.scrapeError') }));
     } finally {
       setScraping(prev => ({ ...prev, [field]: false }));
     }
@@ -106,44 +118,12 @@ export default function OnboardingPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const themes = [
-    'Tech', 'SaaS B2B', 'IA et Automatisation', 'Marketing Digital',
-    'Freelancing', 'E-commerce', 'Dev Web/Mobile',
-    'RH', 'Finance', 'Immobilier',
-    'Santé', 'Coaching', 'Dev Personnel',
-    'Education', 'Commerce'
-  ];
-
-  const tones = [
-    { value: 'expert', label: 'Expert' },
-    { value: 'peda', label: 'Pedagogique' },
-    { value: 'story', label: 'Storytelling' },
-    { value: 'humour', label: 'Humour' },
-    { value: 'inspirant', label: 'Inspirant' }
-  ];
-
-  const frequencies = [
-    { value: '1-day', label: '1 post/jour' },
-    { value: '3-week', label: '3 posts/semaine' },
-    { value: '1-week', label: '1 post/semaine' }
-  ];
-
-  const postObjectives = [
-    { value: 'leads', label: 'Generation de leads' },
-    { value: 'visibility', label: 'Visibilite' },
-  ];
-
-  const postTypes = [
-    { value: 'ghostwriter', label: '✍️ Ghostwriter' },
-    { value: 'story', label: 'Story personnelle' },
-    { value: 'advice', label: 'Conseils' },
-    { value: 'carousel', label: 'Carrousel' },
-  ];
-
-  const visualTypes = [
-    { value: 'image', label: 'Image Illustrative' },
-    { value: 'quote', label: 'Carte Citation' }
-  ];
+  const themes = THEME_SLUGS.map((slug) => ({ value: slug, label: t(`step2.themes.${slug}`) }));
+  const tones = TONE_VALUES.map((value) => ({ value, label: t(`step2.tones.${value}`) }));
+  const frequencies = FREQUENCY_VALUES.map((value) => ({ value, label: t(`step2.frequencies.${value}`) }));
+  const postObjectives = POST_OBJECTIVE_VALUES.map((value) => ({ value, label: t(`step3.objectives.${value}`) }));
+  const postTypes = POST_TYPE_VALUES.map((value) => ({ value, label: t(`step3.postTypes.${value}`) }));
+  const visualTypes = VISUAL_TYPE_VALUES.map((value) => ({ value, label: t(`step3.visualTypes.${value}`) }));
 
   const handleNext = () => {
     if (step < 3) setStep((step + 1) as Step);
@@ -155,7 +135,7 @@ export default function OnboardingPage() {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/';
+    router.push('/');
   };
 
   const handleForgePost = async () => {
@@ -164,7 +144,7 @@ export default function OnboardingPage() {
       const response = await fetch('/api/forge-post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, locale })
       });
 
       if (!response.ok) throw new Error('Erreur');
@@ -172,7 +152,7 @@ export default function OnboardingPage() {
       setGeneratedPost(data.post);
     } catch (error) {
       console.error('Erreur:', error);
-      setGeneratedPost('Erreur lors de la génération du post. Vérifiez votre clé API.');
+      setGeneratedPost(t('result.genericError'));
     } finally {
       setIsGenerating(false);
     }
@@ -196,16 +176,17 @@ export default function OnboardingPage() {
           post: generatedPost,
           visualType: formData.visualType,
           themes: formData.themes,
+          locale,
         })
       });
       const data = await response.json();
       if (data.image) {
         setGeneratedImage(data.image);
       } else {
-        setImageError(data.error || 'Erreur lors de la génération');
+        setImageError(data.error || t('result.imageGenericError'));
       }
     } catch {
-      setImageError('Erreur réseau');
+      setImageError(t('result.imageNetworkError'));
     } finally {
       setIsGeneratingImage(false);
     }
@@ -232,25 +213,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-iron-950 text-smoke-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12" suppressHydrationWarning>
-          <div className="flex items-center gap-3">
-            <Logo />
-            {user?.role === 'admin' && (
-              <Badge tone="spark">👑 Admin</Badge>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            {user?.email && (
-              <span className="text-sm text-smoke-500">{user.email}</span>
-            )}
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 border border-iron-700 text-smoke-300 hover:text-smoke-100 rounded-lg hover:border-iron-600 transition text-sm"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
+        <Header variant="app" user={user} onLogout={handleLogout} logoutLabel={tNav('logout')} />
 
         <div
           className={
@@ -284,16 +247,16 @@ export default function OnboardingPage() {
                 <div className="space-y-8">
                   <div>
                     <h2 className="font-display font-bold text-3xl mb-2">
-                      1. Vos informations
+                      {t('step1.title')}
                     </h2>
-                    <p className="text-smoke-500">Remplissez vos infos LinkedIn</p>
+                    <p className="text-smoke-500">{t('step1.subtitle')}</p>
                   </div>
 
                   <div className="space-y-6">
                     {/* LinkedIn URL + auto-scrape */}
                     <div>
                       <label className="block text-sm font-semibold mb-2 text-smoke-300">
-                        URL de votre profil LinkedIn
+                        {t('step1.linkedinUrlLabel')}
                       </label>
                       <div className="flex gap-2">
                         <input
@@ -310,7 +273,7 @@ export default function OnboardingPage() {
                           disabled={scraping.linkedin || !formData.linkedinUrl}
                           className="px-4 py-3 bg-quench-500 hover:bg-quench-400 disabled:bg-iron-700 disabled:text-smoke-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
                         >
-                          {scraping.linkedin ? '⏳' : '🔍 Extraire'}
+                          {scraping.linkedin ? t('step1.extractingBtn') : t('step1.extractBtn')}
                         </button>
                       </div>
                       {scrapeStatus.linkedin && (
@@ -322,13 +285,13 @@ export default function OnboardingPage() {
 
                     <div>
                       <label className="block text-sm font-semibold mb-2 text-smoke-300">
-                        Contenu du profil LinkedIn
+                        {t('step1.linkedinContentLabel')}
                       </label>
                       <textarea
                         name="linkedinProfile"
                         value={formData.linkedinProfile}
                         onChange={handleInputChange}
-                        placeholder="Auto-rempli après extraction, ou collez manuellement : titre, bio, expériences..."
+                        placeholder={t('step1.linkedinContentPlaceholder')}
                         className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-28 resize-none"
                       />
                     </div>
@@ -336,7 +299,7 @@ export default function OnboardingPage() {
                     {/* Facebook URL + auto-scrape */}
                     <div>
                       <label className="block text-sm font-semibold mb-2 text-smoke-300">
-                        URL page Facebook (Optionnel)
+                        {t('step1.facebookUrlLabel')}
                       </label>
                       <div className="flex gap-2">
                         <input
@@ -353,7 +316,7 @@ export default function OnboardingPage() {
                           disabled={scraping.facebook || !formData.facebookUrl}
                           className="px-4 py-3 bg-quench-500 hover:bg-quench-400 disabled:bg-iron-700 disabled:text-smoke-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
                         >
-                          {scraping.facebook ? '⏳' : '🔍 Extraire'}
+                          {scraping.facebook ? t('step1.extractingBtn') : t('step1.extractBtn')}
                         </button>
                       </div>
                       {scrapeStatus.facebook && (
@@ -365,13 +328,13 @@ export default function OnboardingPage() {
 
                     <div>
                       <label className="block text-sm font-semibold mb-2 text-smoke-300">
-                        Contenu page Facebook
+                        {t('step1.facebookContentLabel')}
                       </label>
                       <textarea
                         name="facebookProfile"
                         value={formData.facebookProfile}
                         onChange={handleInputChange}
-                        placeholder="Auto-rempli ou collez manuellement..."
+                        placeholder={t('step1.facebookContentPlaceholder')}
                         className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-20 resize-none"
                       />
                     </div>
@@ -379,14 +342,14 @@ export default function OnboardingPage() {
                     {/* Personal examples */}
                     <div>
                       <label className="block text-sm font-semibold mb-1 text-smoke-300">
-                        Vos posts précédents <span className="text-ember-400">(recommandé pour le mode Ghostwriter)</span>
+                        {t('step1.personalExamplesLabel')} <span className="text-ember-400">{t('step1.personalExamplesBadge')}</span>
                       </label>
-                      <p className="text-xs text-smoke-500 mb-2">Collez 2-3 de vos meilleurs posts LinkedIn — l&apos;IA va copier votre style exact</p>
+                      <p className="text-xs text-smoke-500 mb-2">{t('step1.personalExamplesHint')}</p>
                       <textarea
                         name="personalExamples"
                         value={formData.personalExamples}
                         onChange={handleInputChange}
-                        placeholder={"Post 1 : J'ai lancé mon SaaS sans lever de fonds...\n\nPost 2 : La vérité sur le cold outreach LinkedIn..."}
+                        placeholder={t('step1.personalExamplesPlaceholder')}
                         className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-36 resize-none"
                       />
                     </div>
@@ -399,31 +362,31 @@ export default function OnboardingPage() {
                 <div className="space-y-8">
                   <div>
                     <h2 className="font-display font-bold text-3xl mb-2">
-                      2. Votre strategie de contenu
+                      {t('step2.title')}
                     </h2>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Thematique</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('step2.themesTitle')}</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {themes.map((theme) => (
                         <button
-                          key={theme}
-                          onClick={() => handleMultiSelect('themes', theme)}
+                          key={theme.value}
+                          onClick={() => handleMultiSelect('themes', theme.value)}
                           className={`px-4 py-2 rounded-lg border transition font-medium text-sm ${
-                            formData.themes.includes(theme)
+                            formData.themes.includes(theme.value)
                               ? 'bg-ember-500 border-ember-500 text-iron-950'
                               : 'border-iron-700 text-smoke-300 hover:border-iron-600'
                           }`}
                         >
-                          {theme}
+                          {theme.label}
                         </button>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Ton</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('step2.toneTitle')}</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {tones.map((tone) => (
                         <button
@@ -442,7 +405,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Frequence</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('step2.frequencyTitle')}</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {frequencies.map((freq) => (
                         <button
@@ -467,13 +430,13 @@ export default function OnboardingPage() {
                 <div className="space-y-8">
                   <div>
                     <h2 className="font-display font-bold text-3xl mb-2">
-                      3. Choisissez vos options
+                      {t('step3.title')}
                     </h2>
-                    <p className="text-smoke-500">Finalisez votre post</p>
+                    <p className="text-smoke-500">{t('step3.subtitle')}</p>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Objectif du post</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('step3.objectiveTitle')}</h3>
                     <div className="grid grid-cols-2 gap-3">
                       {postObjectives.map((obj) => (
                         <button
@@ -492,7 +455,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Type de post</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('step3.postTypeTitle')}</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {postTypes.map((type) => (
                         <button
@@ -512,19 +475,19 @@ export default function OnboardingPage() {
 
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-smoke-300">
-                      Sujet du post (Optionnel)
+                      {t('step3.subjectLabel')}
                     </label>
                     <textarea
                       name="postSubject"
                       value={formData.postSubject}
                       onChange={handleInputChange}
-                      placeholder="Decrivez votre idee..."
+                      placeholder={t('step3.subjectPlaceholder')}
                       className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-20 resize-none"
                     />
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Type de visuel</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('step3.visualTypeTitle')}</h3>
                     <div className="grid grid-cols-2 gap-3">
                       {visualTypes.map((visual) => (
                         <button
@@ -548,7 +511,7 @@ export default function OnboardingPage() {
                     size="lg"
                     className="w-full"
                   >
-                    {isGenerating ? 'Forgeage en cours...' : 'Forger le post'}
+                    {isGenerating ? t('step3.forgingBtn') : t('step3.forgeBtn')}
                   </Button>
                 </div>
               )}
@@ -558,12 +521,12 @@ export default function OnboardingPage() {
             <div className="space-y-3">
               <div className="flex justify-between items-center gap-3">
                 <Button onClick={handlePrev} disabled={step === 1} variant="outline">
-                  Precedent
+                  {t('prev')}
                 </Button>
-                {step < 3 ? <Button onClick={handleNext}>Suivant</Button> : <span />}
+                {step < 3 ? <Button onClick={handleNext}>{t('next')}</Button> : <span />}
               </div>
               <p className="text-center font-mono text-smoke-500 text-xs uppercase tracking-widest">
-                Etape {step} sur 3
+                {t('stepLabel', { step })}
               </p>
             </div>
           </div>
@@ -572,11 +535,11 @@ export default function OnboardingPage() {
           {(generatedPost || isGenerating) && (
             <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:rounded-2xl">
               <div className="bg-iron-900/50 backdrop-blur border border-iron-800 rounded-2xl p-8 space-y-6">
-                <h2 className="font-display font-bold text-2xl">Votre post LinkedIn</h2>
+                <h2 className="font-display font-bold text-2xl">{t('result.title')}</h2>
 
                 {isGenerating ? (
                   <div className="bg-iron-800/50 rounded-lg p-6 border border-iron-700 space-y-4">
-                    <ForgeLoader label="Génération en cours..." />
+                    <ForgeLoader label={t('result.generatingLabel')} />
                     <div className="space-y-3 pt-2">
                       <div className="h-3 bg-iron-700 rounded animate-pulse w-full" />
                       <div className="h-3 bg-iron-700 rounded animate-pulse w-5/6" />
@@ -599,14 +562,14 @@ export default function OnboardingPage() {
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-[#0A66C2] hover:bg-[#004182] text-white"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                    Publier
+                    {t('result.publishBtn')}
                   </button>
                   <button
                     onClick={handleShareFacebook}
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-[#1877F2] hover:bg-[#0c5fc7] text-white"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    Partager
+                    {t('result.shareBtn')}
                   </button>
                 </div>
 
@@ -620,23 +583,27 @@ export default function OnboardingPage() {
                     }`}
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {copied ? 'Copié' : 'Copier'}
+                    {copied ? t('result.copiedBtn') : t('result.copyBtn')}
                   </button>
                   <button
                     onClick={() => { setGeneratedPost(''); setGeneratedImage(''); setStep(3); }}
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100 transition"
                   >
                     <RefreshCw className="w-4 h-4" />
-                    Régénérer
+                    {t('result.regenerateBtn')}
                   </button>
                 </div>
 
                 {/* Visual generation */}
                 <div className="border-t border-iron-800 pt-5 space-y-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-smoke-300">Visuel LinkedIn</p>
+                    <p className="text-sm font-semibold text-smoke-300">{t('result.visualLabel')}</p>
                     <span className="text-xs text-smoke-500">
-                      {formData.visualType === 'quote' ? 'Carte Citation' : formData.visualType === 'image' ? 'Image Illustrative' : 'Sélectionnez un type en étape 3'}
+                      {formData.visualType === 'quote'
+                        ? t('step3.visualTypes.quote')
+                        : formData.visualType === 'image'
+                          ? t('step3.visualTypes.image')
+                          : t('result.visualTypeUnselected')}
                     </span>
                   </div>
 
@@ -648,7 +615,7 @@ export default function OnboardingPage() {
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-quench-500 hover:bg-quench-400 disabled:bg-iron-800 disabled:text-smoke-500 text-iron-950"
                       >
                         <ImageIcon className="w-4 h-4" />
-                        {isGeneratingImage ? 'Génération en cours...' : 'Générer le visuel'}
+                        {isGeneratingImage ? t('result.generatingVisualBtn') : t('result.generateVisualBtn')}
                       </button>
                       {imageError && (
                         <p className="text-xs text-ember-400">{imageError}</p>
@@ -658,7 +625,7 @@ export default function OnboardingPage() {
                     <div className="space-y-3">
                       <img
                         src={generatedImage}
-                        alt="Visuel LinkedIn généré"
+                        alt={t('result.generatedImageAlt')}
                         className="w-full rounded-lg border border-iron-700"
                       />
                       <div className="grid grid-cols-2 gap-3">
@@ -667,7 +634,7 @@ export default function OnboardingPage() {
                           className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm bg-quench-500 hover:bg-quench-400 text-iron-950 transition"
                         >
                           <Download className="w-4 h-4" />
-                          Télécharger
+                          {t('result.downloadBtn')}
                         </button>
                         <button
                           onClick={handleGenerateVisual}
@@ -675,7 +642,7 @@ export default function OnboardingPage() {
                           className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100 transition"
                         >
                           <RefreshCw className="w-4 h-4" />
-                          Nouveau
+                          {t('result.newVisualBtn')}
                         </button>
                       </div>
                     </div>
@@ -685,7 +652,7 @@ export default function OnboardingPage() {
                 </>)}
                 {/* Legal disclaimer */}
                 <p className="text-xs text-smoke-500/70 leading-relaxed border-t border-iron-800/60 pt-4">
-                  Cet outil peut afficher des contenus inexacts. Vous êtes seul responsable de l&apos;utilisation du contenu généré, y compris sa conformité aux lois applicables et aux droits des tiers.
+                  {t('result.disclaimer')}
                 </p>
               </div>
             </div>

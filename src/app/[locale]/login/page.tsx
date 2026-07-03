@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Logo from '@/components/ui/Logo';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
+import Header from '@/components/layout/Header';
 
 export default function LoginPage() {
+  const t = useTranslations('login');
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,12 +29,12 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Erreur d\'authentification');
+        throw new Error(data.error || t('genericError'));
       }
 
       router.push('/onboarding');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur');
+      setError(err instanceof Error ? err.message : t('genericErrorFallback'));
     } finally {
       setIsLoading(false);
     }
@@ -43,14 +45,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="flex justify-center mb-8">
-            <Logo showBeta={false} />
-          </div>
+          <Header variant="minimal" />
           <h1 className="font-display font-bold text-4xl mb-2">
-            {isSignUp ? 'Créer un compte' : 'Se connecter'}
+            {isSignUp ? t('signUpTitle') : t('signInTitle')}
           </h1>
           <p className="text-smoke-500">
-            {isSignUp ? 'Rejoignez LinkedInForge' : 'Accédez à votre atelier'}
+            {isSignUp ? t('signUpSubtitle') : t('signInSubtitle')}
           </p>
         </div>
 
@@ -66,24 +66,24 @@ export default function LoginPage() {
           {/* Email Form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold mb-2 text-smoke-300">Email</label>
+              <label className="block text-sm font-semibold mb-2 text-smoke-300">{t('emailLabel')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@exemple.com"
+                placeholder={t('emailPlaceholder')}
                 className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 transition"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2 text-smoke-300">Mot de passe</label>
+              <label className="block text-sm font-semibold mb-2 text-smoke-300">{t('passwordLabel')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isSignUp ? 'Min. 8 caractères' : ''}
+                placeholder={isSignUp ? t('passwordPlaceholder') : ''}
                 className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 transition"
                 required
                 minLength={8}
@@ -91,7 +91,7 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full" size="lg">
-              {isLoading ? 'Traitement...' : isSignUp ? 'Créer mon compte' : 'Se connecter'}
+              {isLoading ? t('processing') : isSignUp ? t('signUpSubmit') : t('signInSubmit')}
             </Button>
           </form>
 
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <div className="text-center text-sm text-smoke-500">
             {isSignUp ? (
               <>
-                Vous avez un compte ?{' '}
+                {t('haveAccount')}{' '}
                 <button
                   onClick={() => {
                     setIsSignUp(false);
@@ -107,12 +107,12 @@ export default function LoginPage() {
                   }}
                   className="text-quench-400 hover:text-quench-400/80 transition"
                 >
-                  Se connecter
+                  {t('switchToSignIn')}
                 </button>
               </>
             ) : (
               <>
-                Pas encore de compte ?{' '}
+                {t('noAccount')}{' '}
                 <button
                   onClick={() => {
                     setIsSignUp(true);
@@ -120,7 +120,7 @@ export default function LoginPage() {
                   }}
                   className="text-quench-400 hover:text-quench-400/80 transition"
                 >
-                  S&apos;inscrire
+                  {t('switchToSignUp')}
                 </button>
               </>
             )}
@@ -129,9 +129,9 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-smoke-500/70 text-xs mt-8">
-          En continuant, vous acceptez nos{' '}
+          {t('termsPrefix')}{' '}
           <a href="#" className="hover:text-smoke-300 transition">
-            Conditions d&apos;utilisation
+            {t('termsLink')}
           </a>
         </p>
       </div>

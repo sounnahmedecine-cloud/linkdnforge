@@ -1,0 +1,388 @@
+{
+  "metadata": {
+    "title": "LinkedInForge — Posts de LinkedIn forjados, no escritos",
+    "description": "LinkedInForge convierte tus ideas en bruto en posts de LinkedIn de alta autoridad. Pensado para freelancers y emprendedores."
+  },
+  "nav": {
+    "pricing": "Precios",
+    "cta": "Empezar",
+    "ctaOnboarding": "Empezar",
+    "logout": "Cerrar sesión"
+  },
+  "login": {
+    "signUpTitle": "Crear una cuenta",
+    "signInTitle": "Iniciar sesión",
+    "signUpSubtitle": "Únete a LinkedInForge",
+    "signInSubtitle": "Accede a tu taller",
+    "genericError": "Error de autenticación",
+    "genericErrorFallback": "Error",
+    "emailLabel": "Email",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Mín. 8 caracteres",
+    "processing": "Procesando...",
+    "signUpSubmit": "Crear mi cuenta",
+    "signInSubmit": "Iniciar sesión",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "noAccount": "¿Aún no tienes cuenta?",
+    "switchToSignIn": "Iniciar sesión",
+    "switchToSignUp": "Registrarse",
+    "termsPrefix": "Al continuar, aceptas nuestros",
+    "termsLink": "Términos de servicio"
+  },
+  "onboarding": {
+    "stepLabel": "Paso {step} de 3",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "step1": {
+      "title": "1. Tu información",
+      "subtitle": "Completa tus datos de LinkedIn",
+      "linkedinUrlLabel": "URL de tu perfil de LinkedIn",
+      "extractBtn": "🔍 Extraer",
+      "extractingBtn": "⏳",
+      "linkedinContentLabel": "Contenido del perfil de LinkedIn",
+      "linkedinContentPlaceholder": "Se rellena automáticamente tras la extracción, o pégalo manualmente: título, bio, experiencia...",
+      "facebookUrlLabel": "URL de página de Facebook (Opcional)",
+      "facebookContentLabel": "Contenido de la página de Facebook",
+      "facebookContentPlaceholder": "Autocompletado o pégalo manualmente...",
+      "personalExamplesLabel": "Tus posts anteriores",
+      "personalExamplesBadge": "(recomendado para el modo Ghostwriter)",
+      "personalExamplesHint": "Pega 2-3 de tus mejores posts de LinkedIn — la IA copiará tu estilo exacto",
+      "personalExamplesPlaceholder": "Post 1: Lancé mi SaaS sin levantar fondos...\n\nPost 2: La verdad sobre el cold outreach en LinkedIn...",
+      "scrapeSuccess": "✓ Perfil extraído automáticamente",
+      "scrapePrivate": "⚠ Perfil privado — pega el contenido manualmente",
+      "scrapeError": "⚠ Error — pega el contenido manualmente"
+    },
+    "step2": {
+      "title": "2. Tu estrategia de contenido",
+      "themesTitle": "Temática",
+      "toneTitle": "Tono",
+      "frequencyTitle": "Frecuencia",
+      "themes": {
+        "tech": "Tech",
+        "saasB2B": "SaaS B2B",
+        "aiAutomation": "IA y Automatización",
+        "digitalMarketing": "Marketing Digital",
+        "freelancing": "Freelancing",
+        "ecommerce": "E-commerce",
+        "webMobileDev": "Dev Web/Móvil",
+        "hr": "RRHH",
+        "finance": "Finanzas",
+        "realEstate": "Inmobiliario",
+        "health": "Salud",
+        "coaching": "Coaching",
+        "personalDev": "Desarrollo Personal",
+        "education": "Educación",
+        "commerce": "Comercio"
+      },
+      "tones": {
+        "expert": "Experto",
+        "peda": "Pedagógico",
+        "story": "Storytelling",
+        "humour": "Humor",
+        "inspirant": "Inspirador"
+      },
+      "frequencies": {
+        "1-day": "1 post/día",
+        "3-week": "3 posts/semana",
+        "1-week": "1 post/semana"
+      }
+    },
+    "step3": {
+      "title": "3. Elige tus opciones",
+      "subtitle": "Finaliza tu post",
+      "objectiveTitle": "Objetivo del post",
+      "postTypeTitle": "Tipo de post",
+      "subjectLabel": "Tema del post (Opcional)",
+      "subjectPlaceholder": "Describe tu idea...",
+      "visualTypeTitle": "Tipo de visual",
+      "forgeBtn": "Forjar el post",
+      "forgingBtn": "Forjando...",
+      "objectives": {
+        "leads": "Generación de leads",
+        "visibility": "Visibilidad"
+      },
+      "postTypes": {
+        "ghostwriter": "✍️ Ghostwriter",
+        "story": "Historia personal",
+        "advice": "Consejos",
+        "carousel": "Carrusel"
+      },
+      "visualTypes": {
+        "image": "Imagen Ilustrativa",
+        "quote": "Tarjeta de Cita"
+      }
+    },
+    "result": {
+      "title": "Tu post de LinkedIn",
+      "generatingLabel": "Generando...",
+      "publishBtn": "Publicar",
+      "shareBtn": "Compartir",
+      "copyBtn": "Copiar",
+      "copiedBtn": "Copiado",
+      "regenerateBtn": "Regenerar",
+      "visualLabel": "Visual de LinkedIn",
+      "visualTypeUnselected": "Selecciona un tipo en el paso 3",
+      "generateVisualBtn": "Generar el visual",
+      "generatingVisualBtn": "Generando...",
+      "downloadBtn": "Descargar",
+      "newVisualBtn": "Nuevo",
+      "disclaimer": "Esta herramienta puede mostrar contenido inexacto. Eres el único responsable del uso del contenido generado, incluido su cumplimiento con las leyes aplicables y los derechos de terceros.",
+      "genericError": "Error al generar el post. Verifica tu clave API.",
+      "imageGenericError": "Error al generar",
+      "imageNetworkError": "Error de red",
+      "generatedImageAlt": "Visual de LinkedIn generado"
+    }
+  },
+  "pricing": {
+    "badge": "Tarifas",
+    "title": "Precios pensados para ti",
+    "subtitle": "Nada de suscripciones a 100€/mes. LinkedInForge está diseñado para emprendedores independientes — precios honestos, funciones que importan.",
+    "toggle": { "monthly": "Mensual", "yearly": "Anual", "yearlyDiscount": "-20%" },
+    "perMonth": "/ mes",
+    "billedYearly": "Facturado {amount}€ / año",
+    "popularBadge": "Más popular",
+    "soonLabel": "Próximamente",
+    "featureLabels": {
+      "posts": "Generación de posts",
+      "ghostwriter": "Modo Ghostwriter",
+      "toneStyles": "Estilos de tono",
+      "variants": "Variantes por post",
+      "visuals": "Generación de visuales",
+      "autoProfile": "Extracción automática de perfil",
+      "personalExamples": "Posts anteriores (estilo personal)",
+      "history": "Historial de posts",
+      "calendar": "Calendario editorial",
+      "analytics": "Analíticas",
+      "multiAccount": "Múltiples cuentas de LinkedIn",
+      "support": "Soporte"
+    },
+    "featureGroups": [
+      { "label": "Generación de contenido", "keys": ["posts", "ghostwriter", "toneStyles", "variants"] },
+      { "label": "Personalización", "keys": ["autoProfile", "personalExamples", "visuals"] },
+      { "label": "Productividad", "keys": ["history", "calendar", "analytics", "multiAccount"] },
+      { "label": "Soporte", "keys": ["support"] }
+    ],
+    "plans": [
+      {
+        "id": "free",
+        "name": "Gratis",
+        "monthly": 0,
+        "yearly": 0,
+        "desc": "Para descubrir LinkedInForge",
+        "cta": "Empezar gratis",
+        "ctaHref": "/onboarding",
+        "popular": false,
+        "features": {
+          "posts": "5 posts / mes",
+          "ghostwriter": false,
+          "toneStyles": "1 estilo",
+          "variants": false,
+          "visuals": false,
+          "autoProfile": false,
+          "personalExamples": false,
+          "history": false,
+          "calendar": false,
+          "analytics": false,
+          "multiAccount": false,
+          "support": "Email"
+        }
+      },
+      {
+        "id": "solo",
+        "name": "Solo",
+        "monthly": 9,
+        "yearly": 7,
+        "desc": "Para creadores habituales",
+        "cta": "Probar Solo",
+        "ctaHref": "/onboarding",
+        "popular": false,
+        "features": {
+          "posts": "30 posts / mes",
+          "ghostwriter": true,
+          "toneStyles": "Todos los estilos",
+          "variants": false,
+          "visuals": "10 visuales / mes",
+          "autoProfile": true,
+          "personalExamples": true,
+          "history": false,
+          "calendar": false,
+          "analytics": false,
+          "multiAccount": false,
+          "support": "Email prioritario"
+        }
+      },
+      {
+        "id": "pro",
+        "name": "Pro",
+        "monthly": 19,
+        "yearly": 15,
+        "desc": "Para emprendedores serios",
+        "cta": "Pasar a Pro",
+        "ctaHref": "/onboarding",
+        "popular": true,
+        "features": {
+          "posts": "Ilimitado",
+          "ghostwriter": true,
+          "toneStyles": "Todos los estilos",
+          "variants": "3 variantes",
+          "visuals": "Ilimitado",
+          "autoProfile": true,
+          "personalExamples": true,
+          "history": true,
+          "calendar": "Próximamente",
+          "analytics": "Próximamente",
+          "multiAccount": false,
+          "support": "Chat prioritario"
+        }
+      },
+      {
+        "id": "agency",
+        "name": "Agencia",
+        "monthly": 49,
+        "yearly": 39,
+        "desc": "Para equipos y agencias",
+        "cta": "Contactar ventas",
+        "ctaHref": "mailto:contact@linkdnforge.com",
+        "popular": false,
+        "features": {
+          "posts": "Ilimitado",
+          "ghostwriter": true,
+          "toneStyles": "Todos los estilos",
+          "variants": "5 variantes",
+          "visuals": "Ilimitado",
+          "autoProfile": true,
+          "personalExamples": true,
+          "history": true,
+          "calendar": "Próximamente",
+          "analytics": "Avanzadas — Próximamente",
+          "multiAccount": "5 cuentas",
+          "support": "Gestor de cuenta dedicado"
+        }
+      }
+    ],
+    "comparisonTitle": "Comparación detallada",
+    "featureColumnLabel": "Función",
+    "faqTitle": "Preguntas frecuentes",
+    "faq": [
+      {
+        "q": "¿Puedo cambiar de plan en cualquier momento?",
+        "a": "Sí, puedes subir o bajar de plan cuando quieras. El cambio se aplica de inmediato."
+      },
+      {
+        "q": "¿El plan gratuito caduca?",
+        "a": "No. El plan gratuito es permanente — sin período de prueba, sin tarjeta de crédito. Tienes 5 posts al mes para siempre."
+      },
+      {
+        "q": "¿Qué IA se usa para generar los posts?",
+        "a": "LinkedInForge funciona con Gemini de Google, uno de los modelos de lenguaje más avanzados del mercado."
+      },
+      {
+        "q": "¿Las funciones 'Próximamente' están incluidas en el precio?",
+        "a": "Sí. Todas las funciones marcadas como 'Próximamente' se incluirán en tu plan sin coste adicional en cuanto estén disponibles."
+      }
+    ],
+    "finalCta": {
+      "title": "Empieza gratis",
+      "note": "Sin tarjeta de crédito · Acceso inmediato · 5 posts gratis",
+      "cta": "Crear mi cuenta gratis"
+    },
+    "copyright": "© 2026 LinkedInForge. Todos los derechos reservados."
+  },
+  "landing": {
+    "badge": "Generación IA · Posts de LinkedIn",
+    "heroTitlePre": "Posts de LinkedIn",
+    "heroTitleHighlight": "forjados",
+    "heroTitleSuffix": ", no escritos.",
+    "heroSubtitle": "LinkedInForge convierte una idea en bruto en un post de alta autoridad, listo para publicar. Pensado para freelancers, emprendedores y e-commerce que no tienen una hora para perder frente a una página en blanco.",
+    "ctaPrimary": "Forjar mi post",
+    "ctaSecondary": "Ver la demo",
+    "mockup": {
+      "draftLabel": "Borrador — 23:41",
+      "draftText": "ayer lancé algo, mucho curro detrás, tengo que hablar de ello pero no sé cómo decirlo sin que suene vacío...",
+      "forgedLabel": "Forjado en 6s",
+      "you": "Tú",
+      "justNow": "Ahora mismo · 🌐",
+      "postText": "Ayer lancé un producto en el que llevo trabajando 3 meses.\n\nEstas son las 3 cosas que me hubiera gustado saber antes de empezar 👇",
+      "likes": "👍 482",
+      "comments": "💬 37 comentarios",
+      "share": "↗️ Compartir"
+    },
+    "introBand": {
+      "title": "Llena tu calendario de contenido en segundos.",
+      "body": "Añade tu perfil, elige tu estilo, obtén un post listo para publicar — y el visual que lo acompaña. Sin perder más noches frente a una página en blanco."
+    },
+    "guide": {
+      "sectionLabel": "Por qué LinkedInForge",
+      "title": "Descuidar LinkedIn es dejar clientes potenciales sobre la mesa",
+      "body": "Los freelancers y emprendedores lo saben: producir contenido regular, impactante y auténtico sigue siendo una de las tareas más temidas del oficio. LinkedInForge cambia las reglas — alimenta tu calendario editorial, promociona un lanzamiento o posiciónate como referente de tu sector.",
+      "howItWorks": "Cómo funciona",
+      "steps": [
+        {
+          "title": "Añade tu perfil",
+          "body": "Pega la URL de tu perfil de LinkedIn — LinkedInForge extrae lo esencial para personalizar cada post a tu imagen. Añade 2 o 3 posts anteriores y la IA reproduce tu ritmo, tu vocabulario, tu voz."
+        },
+        {
+          "title": "Define tu estrategia",
+          "body": "Elige tus temas, tu tono (Experto, Storytelling, Pedagógico, Humor o Inspirador) y tu frecuencia de publicación. El contenido se adapta a tu posicionamiento real, no a una plantilla genérica."
+        },
+        {
+          "title": "Elige el tipo de post",
+          "body": "Historia personal, consejos prácticos, carrusel o modo Ghostwriter (Hook + 3 insights contraintuitivos + CTA). Especifica tu objetivo y el tema, si ya tienes uno en mente."
+        },
+        {
+          "title": "Genera y publica",
+          "body": "Con un clic, LinkedInForge forja tu post. Cópialo, publícalo en LinkedIn o Facebook, y descarga el visual generado por IA que lo acompaña. Cero fricción, resultado profesional."
+        }
+      ],
+      "goldenRuleLabel": "La regla de oro",
+      "goldenRuleTitle": "Diseñado para sonar humano, no a IA",
+      "goldenRuleBody": "Sin frases hechas, sin patrones detectables, sin «me di cuenta de que». LinkedInForge está calibrado para emprendedores tech y freelancers — no para el mercado generalista. Cada post está pensado para ahorrarte tiempo generando resultados reales.",
+      "tryFree": "Probar gratis"
+    },
+    "pricingTeaser": {
+      "label": "Precios",
+      "title": "Simples y transparentes",
+      "popular": "Más popular",
+      "cta": "Empezar",
+      "plans": [
+        {
+          "name": "Gratis",
+          "price": "0€",
+          "desc": "Para probar",
+          "features": ["5 posts / mes", "Generación simple", "1 estilo de tono"]
+        },
+        {
+          "name": "Pro",
+          "price": "19€",
+          "desc": "/ mes",
+          "features": ["Posts ilimitados", "3 variantes por post", "Visuales ilimitados", "Modo Ghostwriter"],
+          "popular": true
+        },
+        {
+          "name": "Agencia",
+          "price": "49€",
+          "desc": "/ mes",
+          "features": ["Todo lo de Pro, más:", "Múltiples cuentas de LinkedIn", "Soporte dedicado"]
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "¿Listo para forjar tu próximo post?",
+      "body": "Únete a los freelancers y emprendedores que usan LinkedInForge para generar leads cualificados.",
+      "cta": "Empezar gratis",
+      "note": "Sin tarjeta de crédito · Acceso inmediato"
+    },
+    "footer": {
+      "tagline": "Posts de LinkedIn que convierten.",
+      "product": "Producto",
+      "features": "Funcionalidades",
+      "pricing": "Precios",
+      "legal": "Legal",
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "socials": "Redes",
+      "copyright": "© 2026 LinkedInForge. Todos los derechos reservados."
+    }
+  }
+}

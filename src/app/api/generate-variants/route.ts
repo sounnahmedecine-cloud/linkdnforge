@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveLocale, type PromptLocale } from '@/lib/prompts/themes';
 
 export async function POST(request: NextRequest) {
   try {
-    const { content } = await request.json();
+    const { content, locale: rawLocale } = await request.json();
+    const locale = resolveLocale(rawLocale);
 
     if (!content) {
       return NextResponse.json(
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const variants = await generateWithGemini(content, apiKey);
+    const variants = await generateWithGemini(content, apiKey, locale);
 
     return NextResponse.json({ variants });
   } catch (error) {
@@ -55,14 +57,32 @@ function mockVariants(originalContent: string) {
   ];
 }
 
-async function generateWithGemini(content: string, apiKey: string) {
-  const prompt = `Tu es un expert LinkedIn. Génère 3 variantes optimisées du post suivant pour maximiser l'engagement. Pour chaque variante, assigne un score d'engagement de 0-100.
+const VARIANTS_PROMPTS: Record<PromptLocale, (content: string) => string> = {
+  fr: (content) => `Tu es un expert LinkedIn. Génère 3 variantes optimisées du post suivant pour maximiser l'engagement. Pour chaque variante, assigne un score d'engagement de 0-100.
 
 Réponds UNIQUEMENT avec ce JSON (sans markdown, sans explication):
 {"variants":[{"text":"variante 1","score":85},{"text":"variante 2","score":90},{"text":"variante 3","score":78}]}
 
 Post original:
-${content}`;
+${content}`,
+  en: (content) => `You are a LinkedIn expert. Generate 3 optimized variants of the following post to maximize engagement. For each variant, assign an engagement score from 0-100.
+
+Reply ONLY with this JSON (no markdown, no explanation):
+{"variants":[{"text":"variant 1","score":85},{"text":"variant 2","score":90},{"text":"variant 3","score":78}]}
+
+Original post:
+${content}`,
+  es: (content) => `Eres un experto de LinkedIn. Genera 3 variantes optimizadas del siguiente post para maximizar el engagement. Para cada variante, asigna una puntuación de engagement de 0-100.
+
+Responde ÚNICAMENTE con este JSON (sin markdown, sin explicación):
+{"variants":[{"text":"variante 1","score":85},{"text":"variante 2","score":90},{"text":"variante 3","score":78}]}
+
+Post original:
+${content}`,
+};
+
+async function generateWithGemini(content: string, apiKey: string, locale: PromptLocale) {
+  const prompt = VARIANTS_PROMPTS[locale](content);
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,

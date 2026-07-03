@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { localizeThemes, resolveLocale, type PromptLocale } from '@/lib/prompts/themes';
 
 export async function POST(request: NextRequest) {
   try {
-    const { post, visualType, themes } = await request.json();
+    const { post, visualType, themes, locale: rawLocale } = await request.json();
+    const locale = resolveLocale(rawLocale);
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -11,10 +13,11 @@ export async function POST(request: NextRequest) {
 
     let quote = '';
     if (visualType === 'quote') {
-      quote = await extractAndCorrectQuote(post, apiKey);
+      quote = await extractAndCorrectQuote(post, apiKey, locale);
     }
 
-    const prompt = buildImagePrompt(post, visualType, themes, quote);
+    const themeLabels = localizeThemes(themes, locale);
+    const prompt = buildImagePrompt(post, visualType, themeLabels, quote, locale);
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
@@ -49,11 +52,23 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function extractAndCorrectQuote(post: string, apiKey: string): Promise<string> {
-  const prompt = `Tu es un correcteur de français expert. Lis ce post LinkedIn et extrais la phrase la plus percutante et mémorable (maximum 80 caractères). Corrige toutes les fautes d'orthographe et de grammaire. Réponds UNIQUEMENT avec la phrase corrigée, sans guillemets, sans explication.
+const QUOTE_CORRECTION_PROMPTS: Record<PromptLocale, (post: string) => string> = {
+  fr: (post) => `Tu es un correcteur de français expert. Lis ce post LinkedIn et extrais la phrase la plus percutante et mémorable (maximum 80 caractères). Corrige toutes les fautes d'orthographe et de grammaire. Réponds UNIQUEMENT avec la phrase corrigée, sans guillemets, sans explication.
 
 Post :
-${post}`;
+${post}`,
+  en: (post) => `You are an expert English copy editor. Read this LinkedIn post and extract the single most striking, memorable sentence (maximum 80 characters). Fix all spelling and grammar mistakes. Reply ONLY with the corrected sentence, no quotes, no explanation.
+
+Post:
+${post}`,
+  es: (post) => `Eres un corrector de español experto. Lee este post de LinkedIn y extrae la frase más impactante y memorable (máximo 80 caracteres). Corrige todas las faltas de ortografía y gramática. Responde ÚNICAMENTE con la frase corregida, sin comillas, sin explicación.
+
+Post:
+${post}`,
+};
+
+async function extractAndCorrectQuote(post: string, apiKey: string, locale: PromptLocale): Promise<string> {
+  const prompt = QUOTE_CORRECTION_PROMPTS[locale](post);
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -77,11 +92,17 @@ ${post}`;
   return extracted.slice(0, 80);
 }
 
-function buildImagePrompt(post: string, visualType: string, themes: string[], quote: string): string {
-  const theme = themes?.[0] || 'business';
+const LANGUAGE_NAMES: Record<PromptLocale, string> = {
+  fr: 'French',
+  en: 'English',
+  es: 'Spanish',
+};
+
+function buildImagePrompt(post: string, visualType: string, themeLabels: string[], quote: string, locale: PromptLocale): string {
+  const theme = themeLabels?.[0] || 'business';
 
   if (visualType === 'quote') {
-    return `Professional LinkedIn quote card. Minimal elegant design. Deep navy blue background (#0f172a). Render this exact French text with perfect spelling, letter by letter, no changes: "${quote}". Large white bold sans-serif font. Subtle horizontal accent line in orange (#f97316). Small "in" LinkedIn logo bottom right in white. No gradients. No people. Clean whitespace. Square 1:1 format. The text must be reproduced exactly as given, character by character.`;
+    return `Professional LinkedIn quote card. Minimal elegant design. Deep navy blue background (#0f172a). Render this exact ${LANGUAGE_NAMES[locale]} text with perfect spelling, letter by letter, no changes: "${quote}". Large white bold sans-serif font. Subtle horizontal accent line in orange (#f97316). Small "in" LinkedIn logo bottom right in white. No gradients. No people. Clean whitespace. Square 1:1 format. The text must be reproduced exactly as given, character by character.`;
   }
 
   return `Professional LinkedIn post illustration for the topic: "${theme}". Abstract minimal business illustration. Modern flat design. Blue and slate color palette (#0ea5e9, #1e293b, white). No text. No people. Clean geometric shapes suggesting growth, technology or expertise. Suitable as a LinkedIn post background. Landscape 1200x627 format.`;

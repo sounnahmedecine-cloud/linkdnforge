@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import NextLink from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { twMerge } from 'tailwind-merge';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
 
@@ -39,6 +40,16 @@ export function Button(props: LinkButtonProps | NativeButtonProps) {
 
   if (props.href) {
     const { variant: _v, size: _s, className: _c, children: _ch, href, ...rest } = props;
+    const isInternalPath = href.startsWith('/');
+
+    if (!isInternalPath) {
+      return (
+        <NextLink href={href} className={classes} {...rest}>
+          {children}
+        </NextLink>
+      );
+    }
+
     return (
       <Link href={href} className={classes} {...rest}>
         {children}

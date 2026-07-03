@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildForgePostPrompt } from '@/lib/prompts/forge-post';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,27 +46,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getToneDescription(tone: string): string {
-  const tones: Record<string, string> = {
-    expert: 'Expert - Partage ton savoir avec autorité et certitude',
-    peda: 'Pédagogique - Explique, enseigne, vulgarise pour tous',
-    story: 'Storytelling - Raconte une histoire personnelle inspirante',
-    humour: 'Humour - Léger, amusant, décalé sans être irrespectueux',
-    inspirant: 'Inspirant - Motivant, élévateur, donne envie d\'agir'
-  };
-  return tones[tone] || tones.expert;
-}
-
-function getPostTypeDescription(type: string): string {
-  const types: Record<string, string> = {
-    story: 'Story personnelle - Raconte une anecdote ou un moment clé de ta vie',
-    advice: 'Conseils - Donne 3-5 tips concrets et actionnables',
-    carousel: 'Carrousel - Prépare le texte pour un carrousel (format multi-images)',
-    ghostwriter: 'Ghostwriter - Hook + 3 insights contre-intuitifs + CTA (150 mots, style personnel)'
-  };
-  return types[type] || types.advice;
-}
-
 function generateMockPost(formData: any): string {
   const themes = formData.themes?.join(', ') || 'votre domaine';
   const tone = formData.tone || 'expert';
@@ -91,8 +71,7 @@ Qu'en pensez-vous? Avez-vous rencontré des défis similaires?
 }
 
 async function generateWithGemini(formData: any, apiKey: string): Promise<string> {
-  const isGhostwriter = formData.postType === 'ghostwriter';
-  const prompt = isGhostwriter ? buildGhostwriterPrompt(formData) : buildStandardPrompt(formData);
+  const prompt = buildForgePostPrompt(formData);
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -112,63 +91,4 @@ async function generateWithGemini(formData: any, apiKey: string): Promise<string
 
   const data = await response.json();
   return data.candidates[0].content.parts[0].text.trim();
-}
-
-function buildGhostwriterPrompt(formData: any): string {
-  return `Tu es un expert LinkedIn francophone qui écrit à la PREMIÈRE PERSONNE DU SINGULIER (je, j'ai, mon, ma, mes).
-Tu vas rédiger un vrai post LinkedIn développé, humain, expert — pas un résumé, pas une liste vide.
-${formData.personalExamples ? `\nSTYLE À IMITER (voix, rythme, tournures de l'utilisateur) :\n${formData.personalExamples}\n` : ''}
-${formData.linkedinProfile ? `PROFIL LINKEDIN :\n${formData.linkedinProfile}\n` : ''}
-THÈMES : ${formData.themes?.join(', ') || 'Entrepreneuriat / Tech / Business'}
-OBJECTIF : ${formData.postObjective === 'leads' ? 'Générer des leads — montrer mon expertise, donner envie de me contacter' : 'Visibilité & engagement — toucher un max de personnes'}
-SUJET DU POST : ${formData.postSubject || 'Mon expertise et ce que j\'ai appris'}
-
-STRUCTURE OBLIGATOIRE :
-1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote qui intrigue
-2. DÉVELOPPEMENT (8-10 lignes) : explique le problème vécu, ce que tu as fait, 2 insights concrets tirés de ton expérience
-3. ENSEIGNEMENT (2-3 lignes) : la leçon clé, ton point de vue personnel
-4. CTA (1 ligne) : question directe au lecteur
-
-RÈGLES ABSOLUES :
-- TOUJOURS à la 1ère personne du singulier : "J'ai créé", "Je vois", "Mon expérience", "Chez moi", "J'ai décidé"
-- JAMAIS à la 2ème personne pour parler de l'auteur
-- 300 à 350 mots MAXIMUM — c'est un post long, complet, qui apporte de la vraie valeur
-- Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
-- ZÉRO jargon IA : pas de "déclic", "game-changer", "révolutionnaire", "j'ai réalisé que", "en tant qu'entrepreneur"
-- Ton humain, direct, expert — concret, spécifique, jamais générique
-- 0-2 emojis max, placés naturellement
-- Sauts de ligne fréquents entre les idées pour la lisibilité LinkedIn
-
-GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. RESPECTE STRICTEMENT LA LIMITE DE 400 MOTS.`;
-}
-
-function buildStandardPrompt(formData: any): string {
-  return `Tu es un expert LinkedIn francophone qui écrit à la PREMIÈRE PERSONNE DU SINGULIER (je, j'ai, mon, ma, mes).
-Tu rédiges un post LinkedIn complet, humain et expert — pas un résumé, un vrai post développé.
-
-CONTEXTE :
-- Thèmes : ${formData.themes?.join(', ') || 'Entrepreneuriat / Business / Tech'}
-- Ton : ${getToneDescription(formData.tone)}
-- Type : ${getPostTypeDescription(formData.postType)}
-- Objectif : ${formData.postObjective === 'leads' ? 'Générer des leads — montrer mon expertise, donner envie de me contacter' : 'Visibilité & engagement — toucher un max de personnes'}
-${formData.linkedinProfile ? `- Profil LinkedIn : ${formData.linkedinProfile}` : ''}
-${formData.personalExamples ? `- Style à imiter (voix de l'utilisateur) : ${formData.personalExamples}` : ''}
-- Sujet : ${formData.postSubject || 'Mon expertise et ce que j\'ai appris'}
-
-STRUCTURE OBLIGATOIRE :
-1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote qui intrigue
-2. DÉVELOPPEMENT (8-10 lignes) : explique le problème vécu, ce que tu as fait, 2 insights concrets tirés de ton expérience
-3. ENSEIGNEMENT (2-3 lignes) : la leçon clé, ton point de vue personnel
-4. CTA (1 ligne) : question directe au lecteur
-
-RÈGLES ABSOLUES :
-- TOUJOURS à la 1ère personne du singulier : "J'ai", "Je", "Mon", "Ma", "Chez moi", "J'ai décidé"
-- JAMAIS : "Bonjour 👋", "Après plusieurs années d'expérience...", "En tant qu'entrepreneur..."
-- 300 à 350 mots MAXIMUM — post long, complet, qui apporte de la vraie valeur
-- Chaque idée doit être développée, expliquée, illustrée — pas juste mentionnée
-- Ton humain, direct, expert — concret et spécifique, jamais générique
-- 0-2 emojis max
-- Sauts de ligne fréquents entre les idées pour la lisibilité LinkedIn
-
-GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. RESPECTE STRICTEMENT LA LIMITE DE 400 MOTS.`;
 }
