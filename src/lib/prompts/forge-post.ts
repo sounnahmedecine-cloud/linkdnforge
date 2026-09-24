@@ -11,6 +11,7 @@ interface ForgePostFormData {
   locale?: string;
   targetUrlContent?: string;
   targetNetwork?: string;
+  targetUrl?: string;
 }
 
 const TONE_DESCRIPTIONS: Record<PromptLocale, Record<string, string>> = {
@@ -301,7 +302,7 @@ CONSIGNES DE RÉDACTION :
 - Va droit au but dès la première ligne sur le problème que le produit résout. Ne raconte aucune réflexion introspective ni d'anecdotes sur ton passé.
 - Utilise un vocabulaire simple, clair et terre-à-terre. Bannis totalement le jargon de startup et les anglicismes à la mode.
 - Explique concrètement le problème résolu et la solution apportée.
-- Ajoute un appel à l'action à la fin.
+- Ajoute obligatoirement un appel à l'action (Call-to-Action) à la toute fin du post en incluant ce lien précis : ${formData.targetUrl}
 - Va à l'essentiel (moins de 250 mots). Formule ça comme un post naturel, pas comme un communiqué de presse.`;
     }
     // Fallback for EN/ES can be similar or just use FR for now since user is testing FR
@@ -311,7 +312,7 @@ ${truncated}
 -----------------------
 Author Context: Themes: ${themeLabels.join(', ')}. ${formData.personalExamples ? `Style: ${formData.personalExamples}` : ''}
 Tone: ${getToneDescription(formData.tone, 'en')}.
-Focus heavily on the product details and value proposition. Do not invent a fake personal backstory (no "I just had an insight"). Be direct, authentic, and avoid LinkedIn cliches. Add a clear call to action. Max 250 words.`;
+Focus heavily on the product details and value proposition. Do not invent a fake personal backstory (no "I just had an insight"). Be direct, authentic, and avoid LinkedIn cliches. Add a clear call to action at the very end including this exact link: ${formData.targetUrl}. Max 250 words.`;
   }
 
   const isGhostwriter = formData.postType === 'ghostwriter';
