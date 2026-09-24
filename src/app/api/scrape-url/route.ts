@@ -4,12 +4,14 @@ export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
 
-    if (!url || !url.startsWith('http')) {
+    if (!url) {
       return NextResponse.json({ error: 'URL invalide' }, { status: 400 });
     }
 
+    const finalUrl = url.startsWith('http') ? url : `https://${url}`;
+
     // Use Jina Reader API to get markdown content
-    const response = await fetch(`https://r.jina.ai/${url}`);
+    const response = await fetch(`https://r.jina.ai/${finalUrl}`);
     
     if (!response.ok) {
       throw new Error('Erreur lors du scraping de l\'URL');
