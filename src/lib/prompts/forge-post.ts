@@ -298,8 +298,8 @@ ${formData.personalExamples ? `- Style à imiter : ${formData.personalExamples}`
 CONSIGNES DE RÉDACTION :
 - Ton : ${getToneDescription(formData.tone, 'fr')}
 - Le post DOIT être centré sur le PRODUIT/SITE, avec des détails précis tirés du texte. Ne sois pas générique.
-- NE CRÉE PAS de fausse histoire personnelle ("j'ai eu un déclic", "j'ai longtemps cru"). Sois direct et authentique.
-- N'utilise AUCUN cliché LinkedIn ("game-changer", "insight", "masterclass").
+- Va droit au but dès la première ligne sur le problème que le produit résout. Ne raconte aucune réflexion introspective ni d'anecdotes sur ton passé.
+- Utilise un vocabulaire simple, clair et terre-à-terre. Bannis totalement le jargon de startup et les anglicismes à la mode.
 - Explique concrètement le problème résolu et la solution apportée.
 - Ajoute un appel à l'action à la fin.
 - Va à l'essentiel (moins de 250 mots). Formule ça comme un post naturel, pas comme un communiqué de presse.`;
