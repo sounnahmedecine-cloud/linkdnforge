@@ -89,12 +89,12 @@ function buildUrlContext(content: string | undefined, locale: PromptLocale): str
   if (!content) return '';
   const truncated = content.substring(0, 2000);
   if (locale === 'en') {
-    return `\n--- WEBSITE/PRODUCT TO PROMOTE ---\n${truncated}\n----------------------------------\nThe goal is to promote this product naturally and engagingly, highlighting the pain point it solves.`;
+    return `\n\n⚠️ CRITICAL INSTRUCTION: THE MAIN SUBJECT OF THE POST IS THIS WEBSITE/PRODUCT:\n--- WEBSITE CONTENT ---\n${truncated}\n----------------------------------\nYour absolute goal is to talk about THIS specific product/service, the pain it solves, and its value proposition. The LinkedIn profile info and themes provided earlier are ONLY to give the author's "voice" and context, but they MUST NOT replace the main subject of the website. Write the post to naturally promote this link.`;
   }
   if (locale === 'es') {
-    return `\n--- SITIO/PRODUCTO A PROMOCIONAR ---\n${truncated}\n----------------------------------\nEl objetivo es promocionar este producto de forma natural, destacando el problema que resuelve.`;
+    return `\n\n⚠️ INSTRUCCIÓN CRÍTICA: EL TEMA PRINCIPAL DEL POST ES ESTE SITIO/PRODUCTO:\n--- CONTENIDO DEL SITIO ---\n${truncated}\n----------------------------------\nTu objetivo absoluto es hablar de ESTE producto/servicio específico, el problema que resuelve y su propuesta de valor. La información del perfil de LinkedIn y los temas se usan SOLO para dar la "voz" y contexto del autor, pero NO deben reemplazar el tema del sitio. Redacta el post para promocionar este enlace.`;
   }
-  return `\n--- SITE/PRODUIT À PROMOUVOIR ---\n${truncated}\n----------------------------------\nL'objectif est de promouvoir ce produit de manière naturelle et engageante, en mettant en avant la douleur qu'il résout.`;
+  return `\n\n⚠️ INSTRUCTION CRITIQUE : LE SUJET PRINCIPAL DU POST EST CE SITE/PRODUIT :\n--- CONTENU DU SITE ---\n${truncated}\n----------------------------------\nTon but absolu est de parler de CE produit/service précis, de la douleur qu'il résout, et de sa proposition de valeur. Les informations du profil LinkedIn et les thèmes donnés plus haut ne servent qu'à donner la "voix" et le contexte de l'auteur, mais ne doivent PAS remplacer le sujet du site. Formule le post pour faire la promotion de ce lien.`;
 }
 
 function buildGhostwriterPromptFr(formData: ForgePostFormData, themeLabels: string[]): string {
