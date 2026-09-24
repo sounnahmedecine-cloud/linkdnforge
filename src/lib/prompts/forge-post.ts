@@ -9,6 +9,8 @@ interface ForgePostFormData {
   linkedinProfile?: string;
   personalExamples?: string;
   locale?: string;
+  targetUrlContent?: string;
+  targetNetwork?: string;
 }
 
 const TONE_DESCRIPTIONS: Record<PromptLocale, Record<string, string>> = {
@@ -81,6 +83,18 @@ function objectiveText(postObjective: string | undefined, locale: PromptLocale):
   return isLeads
     ? 'Générer des leads — montrer mon expertise, donner envie de me contacter'
     : 'Visibilité & engagement — toucher un max de personnes';
+}
+
+function buildUrlContext(content: string | undefined, locale: PromptLocale): string {
+  if (!content) return '';
+  const truncated = content.substring(0, 2000);
+  if (locale === 'en') {
+    return `\n--- WEBSITE/PRODUCT TO PROMOTE ---\n${truncated}\n----------------------------------\nThe goal is to promote this product naturally and engagingly, highlighting the pain point it solves.`;
+  }
+  if (locale === 'es') {
+    return `\n--- SITIO/PRODUCTO A PROMOCIONAR ---\n${truncated}\n----------------------------------\nEl objetivo es promocionar este producto de forma natural, destacando el problema que resuelve.`;
+  }
+  return `\n--- SITE/PRODUIT À PROMOUVOIR ---\n${truncated}\n----------------------------------\nL'objectif est de promouvoir ce produit de manière naturelle et engageante, en mettant en avant la douleur qu'il résout.`;
 }
 
 function buildGhostwriterPromptFr(formData: ForgePostFormData, themeLabels: string[]): string {
@@ -277,5 +291,6 @@ export function buildForgePostPrompt(formData: ForgePostFormData): string {
   const themeLabels = localizeThemes(formData.themes, locale);
   const isGhostwriter = formData.postType === 'ghostwriter';
   const builders = isGhostwriter ? GHOSTWRITER_BUILDERS : STANDARD_BUILDERS;
-  return builders[locale](formData, themeLabels);
+  const basePrompt = builders[locale](formData, themeLabels);
+  return basePrompt + buildUrlContext(formData.targetUrlContent, locale);
 }

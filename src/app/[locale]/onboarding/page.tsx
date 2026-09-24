@@ -51,6 +51,7 @@ export default function OnboardingPage() {
     postType: '',
     postSubject: '',
     visualType: '',
+    targetUrl: '',
   });
   const [scraping, setScraping] = useState<{ linkedin: boolean; facebook: boolean }>({ linkedin: false, facebook: false });
   const [scrapeStatus, setScrapeStatus] = useState<{ linkedin: string; facebook: string }>({ linkedin: '', facebook: '' });
@@ -141,10 +142,27 @@ export default function OnboardingPage() {
   const handleForgePost = async () => {
     setIsGenerating(true);
     try {
+      let targetUrlContent = undefined;
+      if (formData.targetUrl) {
+        try {
+          const scrapeRes = await fetch('/api/scrape-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: formData.targetUrl })
+          });
+          if (scrapeRes.ok) {
+            const data = await scrapeRes.json();
+            targetUrlContent = data.data;
+          }
+        } catch (e) {
+          console.error('Erreur scraping URL:', e);
+        }
+      }
+
       const response = await fetch('/api/forge-post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, locale })
+        body: JSON.stringify({ ...formData, locale, targetUrlContent })
       });
 
       if (!response.ok) throw new Error('Erreur');
@@ -471,6 +489,21 @@ export default function OnboardingPage() {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-smoke-300">
+                      URL du site ou article à promouvoir (Optionnel)
+                    </label>
+                    <p className="text-xs text-smoke-500 mb-2">Collez un lien (SaaS, blog) que l'IA va lire pour générer votre post.</p>
+                    <input
+                      type="text"
+                      name="targetUrl"
+                      value={formData.targetUrl}
+                      onChange={handleInputChange}
+                      placeholder="https://..."
+                      className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 mb-6"
+                    />
                   </div>
 
                   <div>
