@@ -85,17 +85,7 @@ function objectiveText(postObjective: string | undefined, locale: PromptLocale):
     : 'Visibilité & engagement — toucher un max de personnes';
 }
 
-function buildUrlContext(content: string | undefined, locale: PromptLocale): string {
-  if (!content) return '';
-  const truncated = content.substring(0, 2000);
-  if (locale === 'en') {
-    return `\n\n⚠️ CRITICAL INSTRUCTION: THE MAIN SUBJECT OF THE POST IS THIS WEBSITE/PRODUCT:\n--- WEBSITE CONTENT ---\n${truncated}\n----------------------------------\nYour absolute goal is to talk about THIS specific product/service, the pain it solves, and its value proposition. The LinkedIn profile info and themes provided earlier are ONLY to give the author's "voice" and context, but they MUST NOT replace the main subject of the website. Write the post to naturally promote this link.`;
-  }
-  if (locale === 'es') {
-    return `\n\n⚠️ INSTRUCCIÓN CRÍTICA: EL TEMA PRINCIPAL DEL POST ES ESTE SITIO/PRODUCTO:\n--- CONTENIDO DEL SITIO ---\n${truncated}\n----------------------------------\nTu objetivo absoluto es hablar de ESTE producto/servicio específico, el problema que resuelve y su propuesta de valor. La información del perfil de LinkedIn y los temas se usan SOLO para dar la "voz" y contexto del autor, pero NO deben reemplazar el tema del sitio. Redacta el post para promocionar este enlace.`;
-  }
-  return `\n\n⚠️ INSTRUCTION CRITIQUE : LE SUJET PRINCIPAL DU POST EST CE SITE/PRODUIT :\n--- CONTENU DU SITE ---\n${truncated}\n----------------------------------\nTon but absolu est de parler de CE produit/service précis, de la douleur qu'il résout, et de sa proposition de valeur. Les informations du profil LinkedIn et les thèmes donnés plus haut ne servent qu'à donner la "voix" et le contexte de l'auteur, mais ne doivent PAS remplacer le sujet du site. Formule le post pour faire la promotion de ce lien.`;
-}
+
 
 function buildGhostwriterPromptFr(formData: ForgePostFormData, themeLabels: string[]): string {
   return `Tu es un expert LinkedIn francophone qui écrit à la PREMIÈRE PERSONNE DU SINGULIER (je, j'ai, mon, ma, mes).
@@ -289,8 +279,42 @@ const STANDARD_BUILDERS: Record<PromptLocale, (f: ForgePostFormData, themes: str
 export function buildForgePostPrompt(formData: ForgePostFormData): string {
   const locale = resolveLocale(formData.locale);
   const themeLabels = localizeThemes(formData.themes, locale);
+
+  // DEDICATED PROMO PROMPT IF URL IS PROVIDED
+  if (formData.targetUrlContent) {
+    const truncated = formData.targetUrlContent.substring(0, 2000);
+    if (locale === 'fr') {
+      return `Tu es un expert en copywriting. Ton objectif est de faire la promotion d'un produit ou article, en te basant STRICTEMENT sur le contenu de son site.
+
+--- CONTENU DU SITE ---
+${truncated}
+-----------------------
+
+CONTEXTE DE L'AUTEUR :
+- Thèmes : ${themeLabels.join(', ')}
+${formData.linkedinProfile ? `- Profil : ${formData.linkedinProfile}` : ''}
+${formData.personalExamples ? `- Style à imiter : ${formData.personalExamples}` : ''}
+
+CONSIGNES DE RÉDACTION :
+- Ton : ${getToneDescription(formData.tone, 'fr')}
+- Le post DOIT être centré sur le PRODUIT/SITE, avec des détails précis tirés du texte. Ne sois pas générique.
+- NE CRÉE PAS de fausse histoire personnelle ("j'ai eu un déclic", "j'ai longtemps cru"). Sois direct et authentique.
+- N'utilise AUCUN cliché LinkedIn ("game-changer", "insight", "masterclass").
+- Explique concrètement le problème résolu et la solution apportée.
+- Ajoute un appel à l'action à la fin.
+- Va à l'essentiel (moins de 250 mots). Formule ça comme un post naturel, pas comme un communiqué de presse.`;
+    }
+    // Fallback for EN/ES can be similar or just use FR for now since user is testing FR
+    return `You are a copywriting expert. Write a social media post promoting this product/website based on its content:
+--- WEBSITE CONTENT ---
+${truncated}
+-----------------------
+Author Context: Themes: ${themeLabels.join(', ')}. ${formData.personalExamples ? `Style: ${formData.personalExamples}` : ''}
+Tone: ${getToneDescription(formData.tone, 'en')}.
+Focus heavily on the product details and value proposition. Do not invent a fake personal backstory (no "I just had an insight"). Be direct, authentic, and avoid LinkedIn cliches. Add a clear call to action. Max 250 words.`;
+  }
+
   const isGhostwriter = formData.postType === 'ghostwriter';
   const builders = isGhostwriter ? GHOSTWRITER_BUILDERS : STANDARD_BUILDERS;
-  const basePrompt = builders[locale](formData, themeLabels);
-  return basePrompt + buildUrlContext(formData.targetUrlContent, locale);
+  return builders[locale](formData, themeLabels);
 }
