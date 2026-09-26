@@ -41,6 +41,15 @@ export function Button(props: LinkButtonProps | NativeButtonProps) {
   if (props.href) {
     const { variant: _v, size: _s, className: _c, children: _ch, href, ...rest } = props;
     const isInternalPath = href.startsWith('/');
+    const isApiRoute = href.startsWith('/api');
+
+    if (isApiRoute) {
+      return (
+        <a href={href} className={classes} {...(rest as any)}>
+          {children}
+        </a>
+      );
+    }
 
     if (!isInternalPath) {
       return (
