@@ -195,7 +195,11 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <Button href="/onboarding" variant={plan.popular ? 'primary' : 'outline'} className="w-full">
+                <Button 
+                  href={`/api/stripe/checkout?plan=${plan.name.toLowerCase()}&billing=${plan.desc.includes('an') || plan.desc.includes('year') ? 'yearly' : 'monthly'}`} 
+                  variant={plan.popular ? 'primary' : 'outline'} 
+                  className="w-full"
+                >
                   {t('pricingTeaser.cta')}
                 </Button>
               </div>
