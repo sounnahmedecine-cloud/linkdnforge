@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { Check, Minus, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
@@ -60,7 +60,6 @@ function FeatureValue({ value, soonLabel }: { value: string | boolean; soonLabel
 export default function PricingPage() {
   const tNav = useTranslations('nav');
   const t = useTranslations('pricing');
-  const [yearly, setYearly] = useState(false);
 
   const plans = t.raw('plans') as Plan[];
   const featureGroups = t.raw('featureGroups') as FeatureGroup[];
@@ -81,30 +80,16 @@ export default function PricingPage() {
             {t('title')}
           </h1>
           <p className="text-lg text-smoke-500 leading-relaxed">{t('subtitle')}</p>
-
-          {/* Toggle */}
-          <div className="inline-flex items-center gap-1 bg-iron-900/60 border border-iron-800 rounded-xl p-1.5">
-            <button
-              onClick={() => setYearly(false)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition ${!yearly ? 'bg-iron-800 text-smoke-100' : 'text-smoke-500 hover:text-smoke-100'}`}
-            >
-              {t('toggle.monthly')}
-            </button>
-            <button
-              onClick={() => setYearly(true)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 ${yearly ? 'bg-iron-800 text-smoke-100' : 'text-smoke-500 hover:text-smoke-100'}`}
-            >
-              {t('toggle.yearly')}
-              <span className="font-mono text-[11px] bg-quench-500/15 text-quench-400 border border-quench-500/30 px-2 py-0.5 rounded-full">{t('toggle.yearlyDiscount')}</span>
-            </button>
-          </div>
         </div>
 
         {/* Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {plans.map((plan) => (
+          {plans.flatMap((plan) => [
+            { ...plan, isYearly: false, displayId: `${plan.id}-monthly`, popular: false },
+            { ...plan, isYearly: true, displayId: `${plan.id}-yearly`, popular: plan.id === 'pro' }
+          ]).map((plan) => (
             <div
-              key={plan.id}
+              key={plan.displayId}
               className={`relative rounded-2xl p-7 flex flex-col gap-6 border transition ${
                 plan.popular
                   ? 'bg-ember-500/[0.06] border-ember-500/50 shadow-[0_0_40px_-16px_rgba(255,90,31,0.4)]'
@@ -120,28 +105,28 @@ export default function PricingPage() {
               )}
 
               <div className="space-y-2">
-                <h2 className="text-xl font-display font-bold">{plan.name}</h2>
+                <h2 className="text-xl font-display font-bold">
+                  {plan.name} <span className="text-sm font-normal text-smoke-500 ml-1">({plan.isYearly ? 'Annuel' : 'Mensuel'})</span>
+                </h2>
                 <p className="text-sm text-smoke-500">{plan.desc}</p>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-end gap-1">
                   <span className={`font-mono text-5xl font-semibold ${plan.popular ? 'text-ember-400' : 'text-smoke-100'}`}>
-                    {plan.monthly === 0 ? '0' : `${yearly ? plan.yearly : plan.monthly}`}€
+                    {plan.isYearly ? plan.yearly : plan.monthly}€
                   </span>
-                  {plan.monthly > 0 && (
-                    <span className="text-smoke-500 text-sm pb-2">{t('perMonth')}</span>
-                  )}
+                  <span className="text-smoke-500 text-sm pb-2">{t('perMonth')}</span>
                 </div>
-                {yearly && plan.monthly > 0 && (
-                  <p className="text-xs text-smoke-500">
+                {plan.isYearly && (
+                  <p className="text-xs text-smoke-500 font-semibold text-quench-400">
                     {t('billedYearly', { amount: plan.yearly * 12 })}
                   </p>
                 )}
               </div>
 
               <Button
-                href={`${plan.ctaHref}&billing=${yearly ? 'yearly' : 'monthly'}`}
+                href={`${plan.ctaHref}&billing=${plan.isYearly ? 'yearly' : 'monthly'}`}
                 variant={plan.popular ? 'primary' : 'outline'}
                 className="w-full"
               >
