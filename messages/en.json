@@ -341,9 +341,29 @@
           ]
         },
         {
+          "name": "Starter",
+          "price": "9€",
+          "desc": "/ month (billed yearly)",
+          "features": [
+            "15 posts / month",
+            "Basic generation",
+            "Auto profile"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": "29€",
+          "desc": "/ month",
+          "features": [
+            "Unlimited posts",
+            "Ghostwriter",
+            "Visuals included"
+          ]
+        },
+        {
           "name": "Pro",
           "price": "19€",
-          "desc": "/ month (billed annually)",
+          "desc": "/ month (billed yearly)",
           "features": [
             "Unlimited posts",
             "Ghostwriter",

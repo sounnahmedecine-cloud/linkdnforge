@@ -167,10 +167,10 @@ export default function Home() {
               {t('pricingTeaser.title')}
             </h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plans.map((plan) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {plans.map((plan, index) => (
               <div
-                key={plan.name}
+                key={plan.name + index}
                 className={`rounded-xl p-8 border transition ${
                   plan.popular
                     ? 'bg-ember-500/[0.06] border-ember-500/50'

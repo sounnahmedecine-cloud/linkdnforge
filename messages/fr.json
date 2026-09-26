@@ -341,6 +341,26 @@
           ]
         },
         {
+          "name": "Starter",
+          "price": "9€",
+          "desc": "/ mois (en annuel)",
+          "features": [
+            "15 posts / mois",
+            "Génération basique",
+            "Profil auto"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": "29€",
+          "desc": "/ mois",
+          "features": [
+            "Posts illimités",
+            "Ghostwriter",
+            "Visuels inclus"
+          ]
+        },
+        {
           "name": "Pro",
           "price": "19€",
           "desc": "/ mois (en annuel)",
