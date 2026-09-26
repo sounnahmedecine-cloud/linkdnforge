@@ -141,7 +141,7 @@ export default function PricingPage() {
               </div>
 
               <Button
-                href={plan.ctaHref}
+                href={`${plan.ctaHref}&billing=${yearly ? 'yearly' : 'monthly'}`}
                 variant={plan.popular ? 'primary' : 'outline'}
                 className="w-full"
               >

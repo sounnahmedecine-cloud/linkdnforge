@@ -136,9 +136,13 @@
   },
   "pricing": {
     "badge": "Pricing",
-    "title": "Pricing built for you",
-    "subtitle": "No $100/month subscription. LinkedInForge is built for independent entrepreneurs — honest prices, features that matter.",
-    "toggle": { "monthly": "Monthly", "yearly": "Yearly", "yearlyDiscount": "-20%" },
+    "title": "Stop letting lack of time kill your sales",
+    "subtitle": "Automate your LinkedIn & Facebook visibility on autopilot while you run your business.",
+    "toggle": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "yearlyDiscount": "Launch Promo (-35%)"
+    },
     "perMonth": "/ month",
     "billedYearly": "Billed ${amount} / year",
     "popularBadge": "Most popular",
@@ -158,106 +162,86 @@
       "support": "Support"
     },
     "featureGroups": [
-      { "label": "Content generation", "keys": ["posts", "ghostwriter", "toneStyles", "variants"] },
-      { "label": "Personalization", "keys": ["autoProfile", "personalExamples", "visuals"] },
-      { "label": "Productivity", "keys": ["history", "calendar", "analytics", "multiAccount"] },
-      { "label": "Support", "keys": ["support"] }
+      {
+        "label": "Content generation",
+        "keys": [
+          "posts",
+          "ghostwriter",
+          "toneStyles",
+          "variants"
+        ]
+      },
+      {
+        "label": "Personalization",
+        "keys": [
+          "autoProfile",
+          "personalExamples",
+          "visuals"
+        ]
+      },
+      {
+        "label": "Productivity",
+        "keys": [
+          "history",
+          "calendar",
+          "analytics",
+          "multiAccount"
+        ]
+      },
+      {
+        "label": "Support",
+        "keys": [
+          "support"
+        ]
+      }
     ],
     "plans": [
       {
-        "id": "free",
-        "name": "Free",
-        "monthly": 0,
-        "yearly": 0,
-        "desc": "To discover LinkedInForge",
-        "cta": "Start for free",
-        "ctaHref": "/onboarding",
+        "id": "starter",
+        "name": "Starter",
+        "monthly": 29,
+        "yearly": 24,
+        "desc": "To get started and reclaim your time.",
+        "cta": "Get Started",
+        "ctaHref": "/api/stripe/checkout?plan=starter",
         "popular": false,
         "features": {
-          "posts": "5 posts / month",
+          "posts": "15 posts / month",
           "ghostwriter": false,
-          "toneStyles": "1 style",
-          "variants": false,
+          "toneStyles": "3 styles",
+          "variants": "2 variants / post",
           "visuals": false,
-          "autoProfile": false,
-          "personalExamples": false,
-          "history": false,
-          "calendar": false,
-          "analytics": false,
-          "multiAccount": false,
-          "support": "Email"
-        }
-      },
-      {
-        "id": "solo",
-        "name": "Solo",
-        "monthly": 9,
-        "yearly": 7,
-        "desc": "For regular creators",
-        "cta": "Try Solo",
-        "ctaHref": "/onboarding",
-        "popular": false,
-        "features": {
-          "posts": "30 posts / month",
-          "ghostwriter": true,
-          "toneStyles": "All styles",
-          "variants": false,
-          "visuals": "10 visuals / month",
           "autoProfile": true,
-          "personalExamples": true,
-          "history": false,
-          "calendar": false,
-          "analytics": false,
+          "personalExamples": false,
+          "history": true,
+          "calendar": "Soon",
+          "analytics": "Soon",
           "multiAccount": false,
-          "support": "Priority email"
+          "support": "Standard"
         }
       },
       {
         "id": "pro",
         "name": "Pro",
-        "monthly": 19,
-        "yearly": 15,
-        "desc": "For serious entrepreneurs",
-        "cta": "Go Pro",
-        "ctaHref": "/onboarding",
+        "monthly": 49,
+        "yearly": 19,
+        "desc": "Launch Promo: 60% off on yearly!",
+        "cta": "Claim Offer",
+        "ctaHref": "/api/stripe/checkout?plan=pro",
         "popular": true,
         "features": {
           "posts": "Unlimited",
           "ghostwriter": true,
           "toneStyles": "All styles",
-          "variants": "3 variants",
-          "visuals": "Unlimited",
+          "variants": "5 variants / post",
+          "visuals": true,
           "autoProfile": true,
           "personalExamples": true,
           "history": true,
           "calendar": "Soon",
           "analytics": "Soon",
-          "multiAccount": false,
-          "support": "Priority chat"
-        }
-      },
-      {
-        "id": "agency",
-        "name": "Agency",
-        "monthly": 49,
-        "yearly": 39,
-        "desc": "For teams and agencies",
-        "cta": "Contact sales",
-        "ctaHref": "mailto:contact@linkdnforge.com",
-        "popular": false,
-        "features": {
-          "posts": "Unlimited",
-          "ghostwriter": true,
-          "toneStyles": "All styles",
-          "variants": "5 variants",
-          "visuals": "Unlimited",
-          "autoProfile": true,
-          "personalExamples": true,
-          "history": true,
-          "calendar": "Soon",
-          "analytics": "Advanced — Soon",
-          "multiAccount": "5 accounts",
-          "support": "Dedicated account manager"
+          "multiAccount": "Soon",
+          "support": "Priority"
         }
       }
     ],
@@ -290,55 +274,55 @@
     "copyright": "© 2026 LinkedInForge. All rights reserved."
   },
   "landing": {
-    "badge": "AI generation · LinkedIn posts",
-    "heroTitlePre": "LinkedIn posts",
-    "heroTitleHighlight": "forged",
-    "heroTitleSuffix": ", not written.",
-    "heroSubtitle": "LinkedInForge turns a raw idea into a high-authority, publish-ready post. Built for freelancers, founders and e-commerce entrepreneurs who don't have an hour to spare staring at a blank page.",
-    "ctaPrimary": "Forge my post",
-    "ctaSecondary": "Watch the demo",
+    "badge": "AI LinkedIn & Facebook Post Generator",
+    "heroTitlePre": "Generate LinkedIn posts from a",
+    "heroTitleHighlight": "simple URL.",
+    "heroTitleSuffix": "In 1 click.",
+    "heroSubtitle": "You are busy running your business. You don't have 2h a day to write on LinkedIn. Enter your SaaS, app or product URL: our AI analyzes it and writes an expert post in your own style. Stop sacrificing your acquisition to a lack of time.",
+    "ctaPrimary": "Create my first post",
+    "ctaSecondary": "See how it works",
     "mockup": {
-      "draftLabel": "Draft — 11:41 PM",
-      "draftText": "launched something yesterday, put a ton of work into it, need to talk about it but idk how to say it without sounding hollow...",
-      "forgedLabel": "Forged in 6s",
+      "draftLabel": "Your Product URL",
+      "draftText": "https://my-awesome-saas.com",
+      "forgedLabel": "Generated in 6s (Ghostwriter Mode)",
       "you": "You",
-      "justNow": "Just now · 🌐",
-      "postText": "Yesterday, I launched a product I've been working on for 3 months.\n\nHere are the 3 things I wish I'd known before starting 👇",
+      "justNow": "Just now • 🌐",
+      "postText": "I just launched the new version of my tool (and it wasn't easy).\n\nAfter 3 months of building, we managed to cut processing time by 4. \n\nHere are the 3 technical choices that made the difference 👇",
       "likes": "👍 482",
       "comments": "💬 37 comments",
-      "share": "↗️ Share"
+      "share": "🔁 Share"
     },
     "introBand": {
-      "title": "Fill your content calendar in seconds.",
-      "body": "Add your profile, pick your style, get a publish-ready post — plus the visual that goes with it. No more evenings lost to a blank page."
+      "title": "Your LinkedIn acquisition strategy on autopilot.",
+      "body": "The first LinkedIn post generator built for busy founders. Enter your website URL, and the AI handles the rest. No more blank page syndrome or robotic ChatGPT texts."
     },
     "guide": {
-      "sectionLabel": "Why LinkedInForge",
-      "title": "Neglecting LinkedIn means leaving leads on the table",
-      "body": "Freelancers and founders know it: producing regular, sharp, authentic content is one of the most dreaded parts of the job. LinkedInForge changes that — feed your editorial calendar, promote a launch, or position yourself as the go-to name in your field.",
-      "howItWorks": "How it works",
+      "sectionLabel": "Automate acquisition without losing your soul",
+      "title": "Not posting means letting competitors steal your clients.",
+      "body": "The pain is the same for all young entrepreneurs: you know LinkedIn and Facebook are massive levers. But between product and sales, time is severely lacking. LinkedInForge is the only AI post generator that copies your voice and turns your links into viral content.",
+      "howItWorks": "How the LinkedInForge AI works",
       "steps": [
         {
-          "title": "Add your profile",
-          "body": "Paste your LinkedIn profile URL — LinkedInForge extracts the essentials to personalize every post to your image. Add 2 or 3 past posts and the AI mirrors your rhythm, vocabulary and voice."
+          "title": "1. Paste your project URL",
+          "body": "No need to explain your business to an AI. Paste your SaaS, website or article link. Our algorithm scrapes the page and instantly understands your value proposition."
         },
         {
-          "title": "Define your strategy",
-          "body": "Pick your topics, your tone (Expert, Storytelling, Educational, Humor or Inspirational) and your posting frequency. Content adapts to your real positioning, not a generic template."
+          "title": "2. The AI clones your real voice",
+          "body": "Ghostwriter Mode analyzes your past posts. No more smooth ChatGPT vocabulary. The generated text uses your expressions, your rhythm, and your tone."
         },
         {
-          "title": "Choose the post type",
-          "body": "Personal story, actionable tips, carousel, or Ghostwriter mode (Hook + 3 counter-intuitive insights + CTA). Specify your objective and topic, if you already have one in mind."
+          "title": "3. Choose your marketing angle",
+          "body": "Storytelling, product launch, or educational? Select your post's goal. The tool structures the content with a strong hook and a CTA that converts."
         },
         {
-          "title": "Generate and publish",
-          "body": "In one click, LinkedInForge forges your post. Copy it, publish it on LinkedIn or Facebook, and download the AI-generated visual that comes with it. Zero friction, professional result."
+          "title": "4. Publish and collect leads",
+          "body": "In 6 seconds, you get an ultra-high-quality LinkedIn post and a custom-generated visual. Your online presence stays active, your authority grows, and you go back to running your business."
         }
       ],
-      "goldenRuleLabel": "The golden rule",
-      "goldenRuleTitle": "Built to sound human, not AI",
-      "goldenRuleBody": "No canned phrases, no telltale patterns, no \"I realized that\". LinkedInForge is tuned for tech founders and freelancers — not the mass market. Every post is designed to save you time while driving real results.",
-      "tryFree": "Try for free"
+      "goldenRuleLabel": "Our Anti-Robot Promise",
+      "goldenRuleTitle": "Zero bullshit. 100% organic conversion.",
+      "goldenRuleBody": "The LinkedIn algorithm hates standard AI-generated content. LinkedInForge is calibrated to fly under the radar. Proven structures used by top copywriters, paired with direct extraction from your URLs. The result? Maximum visibility for minimal effort.",
+      "tryFree": "Test with my project URL"
     },
     "pricingTeaser": {
       "label": "Pricing",
@@ -347,23 +331,25 @@
       "cta": "Get started",
       "plans": [
         {
-          "name": "Free",
-          "price": "$0",
-          "desc": "To try it out",
-          "features": ["5 posts / month", "Basic generation", "1 tone style"]
+          "name": "Starter",
+          "price": "29€",
+          "desc": "/ month",
+          "features": [
+            "15 posts / month",
+            "Basic generation",
+            "Auto profile"
+          ]
         },
         {
           "name": "Pro",
-          "price": "$19",
-          "desc": "/ month",
-          "features": ["Unlimited posts", "3 variants per post", "Unlimited visuals", "Ghostwriter mode"],
+          "price": "19€",
+          "desc": "/ month (billed annually)",
+          "features": [
+            "Unlimited posts",
+            "Ghostwriter",
+            "Visuals included"
+          ],
           "popular": true
-        },
-        {
-          "name": "Agency",
-          "price": "$49",
-          "desc": "/ month",
-          "features": ["Everything in Pro, plus:", "Multiple LinkedIn accounts", "Dedicated support"]
         }
       ]
     },

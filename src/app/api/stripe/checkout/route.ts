@@ -1,0 +1,64 @@
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2023-10-16' as any,
+});
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const plan = searchParams.get('plan');
+  // Check if we want monthly or yearly billing
+  const billing = searchParams.get('billing') || 'yearly';
+
+  try {
+    let priceData: any = {};
+    let mode: 'payment' | 'subscription' = 'subscription';
+
+    if (plan === 'pro') {
+      priceData = {
+        currency: 'eur',
+        product_data: {
+          name: 'LinkdnForge Pro',
+          description: billing === 'yearly' ? 'Offre de lancement (-60%)' : 'Abonnement Pro Mensuel',
+        },
+        // Pro: 19€/mo if yearly (228€ total), 49€/mo if monthly
+        unit_amount: billing === 'yearly' ? 22800 : 4900,
+        recurring: {
+          interval: billing === 'yearly' ? 'year' : 'month',
+        },
+      };
+    } else {
+      priceData = {
+        currency: 'eur',
+        product_data: {
+          name: 'LinkdnForge Starter',
+          description: 'Abonnement Starter',
+        },
+        // Starter: 24€/mo if yearly (288€ total), 29€/mo if monthly
+        unit_amount: billing === 'yearly' ? 28800 : 2900,
+        recurring: {
+          interval: billing === 'yearly' ? 'year' : 'month',
+        },
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: priceData,
+          quantity: 1,
+        },
+      ],
+      mode,
+      success_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/onboarding?success=true`,
+      cancel_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/pricing?canceled=true`,
+    });
+
+    return NextResponse.redirect(session.url as string, 303);
+  } catch (err: any) {
+    console.error('Stripe error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
