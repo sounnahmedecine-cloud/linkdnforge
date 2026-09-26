@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16' as any,
-});
+export const dynamic = 'force-dynamic'; // Prevent static generation during build
 
 export async function GET(request: Request) {
+  // Initialize Stripe inside the handler to avoid build-time errors if ENV is missing
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy', {
+    apiVersion: '2023-10-16' as any,
+  });
+
   const { searchParams } = new URL(request.url);
   const plan = searchParams.get('plan');
   // Check if we want monthly or yearly billing
