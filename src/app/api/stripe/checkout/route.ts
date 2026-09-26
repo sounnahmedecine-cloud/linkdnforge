@@ -23,10 +23,10 @@ export async function GET(request: Request) {
         currency: 'eur',
         product_data: {
           name: 'LinkdnForge Pro',
-          description: billing === 'yearly' ? 'Offre de lancement (-60%)' : 'Abonnement Pro Mensuel',
+          description: billing === 'yearly' ? 'Offre de lancement (-34%)' : 'Abonnement Pro Mensuel',
         },
-        // Pro: 19€/mo if yearly (228€ total), 49€/mo if monthly
-        unit_amount: billing === 'yearly' ? 22800 : 4900,
+        // Pro: 19€/mo if yearly (228€ total), 29€/mo if monthly
+        unit_amount: billing === 'yearly' ? 22800 : 2900,
         recurring: {
           interval: billing === 'yearly' ? 'year' : 'month',
         },
@@ -38,8 +38,8 @@ export async function GET(request: Request) {
           name: 'LinkdnForge Starter',
           description: 'Abonnement Starter',
         },
-        // Starter: 24€/mo if yearly (288€ total), 29€/mo if monthly
-        unit_amount: billing === 'yearly' ? 28800 : 2900,
+        // Starter: 9€/mo if yearly (108€ total), 14€/mo if monthly
+        unit_amount: billing === 'yearly' ? 10800 : 1400,
         recurring: {
           interval: billing === 'yearly' ? 'year' : 'month',
         },

@@ -199,8 +199,8 @@
       {
         "id": "starter",
         "name": "Starter",
-        "monthly": 29,
-        "yearly": 24,
+        "monthly": 14,
+        "yearly": 9,
         "desc": "To get started and reclaim your time.",
         "cta": "Start 14-day free trial",
         "ctaHref": "/api/stripe/checkout?plan=starter",
@@ -223,7 +223,7 @@
       {
         "id": "pro",
         "name": "Pro",
-        "monthly": 49,
+        "monthly": 29,
         "yearly": 19,
         "desc": "Launch Promo: 60% off on yearly!",
         "cta": "Start 14-day free trial",
@@ -332,7 +332,7 @@
       "plans": [
         {
           "name": "Starter",
-          "price": "29€",
+          "price": "14€",
           "desc": "/ month",
           "features": [
             "15 posts / month",
