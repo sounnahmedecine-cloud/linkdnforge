@@ -106,7 +106,7 @@ export default function PricingPage() {
 
               <div className="space-y-2">
                 <h2 className="text-xl font-display font-bold">
-                  {plan.name} <span className="text-sm font-normal text-smoke-500 ml-1">({plan.isYearly ? 'Annuel' : 'Mensuel'})</span>
+                  {plan.name} <span className="text-sm font-normal text-smoke-500 ml-1">({plan.isYearly ? 'Engagement 1 an' : 'Sans engagement'})</span>
                 </h2>
                 <p className="text-sm text-smoke-500">{plan.desc}</p>
               </div>

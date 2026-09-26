@@ -343,7 +343,7 @@
         {
           "name": "Starter",
           "price": "9€",
-          "desc": "/ mois (en annuel)",
+          "desc": "/ mois (engagement 1 an)",
           "features": [
             "15 posts / mois",
             "Génération basique",
@@ -363,7 +363,7 @@
         {
           "name": "Pro",
           "price": "19€",
-          "desc": "/ mois (en annuel)",
+          "desc": "/ mois (engagement 1 an)",
           "features": [
             "Posts illimités",
             "Ghostwriter",
