@@ -202,7 +202,7 @@
         "monthly": 29,
         "yearly": 24,
         "desc": "Pour démarrer et retrouver du temps.",
-        "cta": "Démarrer",
+        "cta": "Essai gratuit 14 jours",
         "ctaHref": "/api/stripe/checkout?plan=starter",
         "popular": false,
         "features": {
@@ -226,7 +226,7 @@
         "monthly": 49,
         "yearly": 19,
         "desc": "Offre de Lancement : -60% sur l'annuel !",
-        "cta": "Profiter de l'offre",
+        "cta": "Essai gratuit 14 jours",
         "ctaHref": "/api/stripe/checkout?plan=pro",
         "popular": true,
         "features": {
@@ -268,7 +268,7 @@
     ],
     "finalCta": {
       "title": "Commencez gratuitement",
-      "note": "Aucune carte bancaire · Accès immédiat · 5 posts offerts",
+      "note": "Carte requise pour l'essai. Annulable en 1 clic.",
       "cta": "Créer mon compte gratuit"
     },
     "copyright": "© 2026 LinkedInForge. Tous droits réservés."
@@ -328,7 +328,7 @@
       "label": "Tarifs",
       "title": "Investissez dans votre visibilité (sans y passer vos nuits)",
       "popular": "Plus populaire",
-      "cta": "Commencer",
+      "cta": "Démarrer l'essai gratuit",
       "plans": [
         {
           "name": "Starter",
@@ -356,8 +356,8 @@
     "finalCta": {
       "title": "Prêt à forger votre prochain post ?",
       "body": "Rejoignez les freelances et entrepreneurs qui utilisent LinkedInForge pour générer des leads qualifiés.",
-      "cta": "Commencer gratuitement",
-      "note": "Aucune carte bancaire requise · Accès immédiat"
+      "cta": "Démarrer l'essai gratuit",
+      "note": "14 jours d'essai gratuit. Annulable en un clic."
     },
     "footer": {
       "tagline": "Posts LinkedIn qui convertissent.",

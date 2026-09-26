@@ -202,7 +202,7 @@
         "monthly": 29,
         "yearly": 24,
         "desc": "Para empezar y recuperar tu tiempo.",
-        "cta": "Empezar",
+        "cta": "Prueba gratis de 14 días",
         "ctaHref": "/api/stripe/checkout?plan=starter",
         "popular": false,
         "features": {
@@ -226,7 +226,7 @@
         "monthly": 49,
         "yearly": 19,
         "desc": "Promo de lanzamiento: ¡-60% en anual!",
-        "cta": "Aprovechar oferta",
+        "cta": "Prueba gratis de 14 días",
         "ctaHref": "/api/stripe/checkout?plan=pro",
         "popular": true,
         "features": {
@@ -268,7 +268,7 @@
     ],
     "finalCta": {
       "title": "Empieza gratis",
-      "note": "Sin tarjeta de crédito · Acceso inmediato · 5 posts gratis",
+      "note": "Tarjeta requerida. Cancela en 1 clic.",
       "cta": "Crear mi cuenta gratis"
     },
     "copyright": "© 2026 LinkedInForge. Todos los derechos reservados."
@@ -328,7 +328,7 @@
       "label": "Precios",
       "title": "Simples y transparentes",
       "popular": "Más popular",
-      "cta": "Empezar",
+      "cta": "Iniciar prueba gratis",
       "plans": [
         {
           "name": "Starter",
@@ -356,8 +356,8 @@
     "finalCta": {
       "title": "¿Listo para forjar tu próximo post?",
       "body": "Únete a los freelancers y emprendedores que usan LinkedInForge para generar leads cualificados.",
-      "cta": "Empezar gratis",
-      "note": "Sin tarjeta de crédito · Acceso inmediato"
+      "cta": "Iniciar prueba gratis",
+      "note": "Prueba gratis de 14 días. Cancela en cualquier momento."
     },
     "footer": {
       "tagline": "Posts de LinkedIn que convierten.",

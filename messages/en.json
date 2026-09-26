@@ -202,7 +202,7 @@
         "monthly": 29,
         "yearly": 24,
         "desc": "To get started and reclaim your time.",
-        "cta": "Get Started",
+        "cta": "Start 14-day free trial",
         "ctaHref": "/api/stripe/checkout?plan=starter",
         "popular": false,
         "features": {
@@ -226,7 +226,7 @@
         "monthly": 49,
         "yearly": 19,
         "desc": "Launch Promo: 60% off on yearly!",
-        "cta": "Claim Offer",
+        "cta": "Start 14-day free trial",
         "ctaHref": "/api/stripe/checkout?plan=pro",
         "popular": true,
         "features": {
@@ -268,7 +268,7 @@
     ],
     "finalCta": {
       "title": "Start for free",
-      "note": "No credit card · Instant access · 5 free posts",
+      "note": "Card required for trial. Cancel anytime.",
       "cta": "Create my free account"
     },
     "copyright": "© 2026 LinkedInForge. All rights reserved."
@@ -328,7 +328,7 @@
       "label": "Pricing",
       "title": "Simple and transparent",
       "popular": "Most popular",
-      "cta": "Get started",
+      "cta": "Start free trial",
       "plans": [
         {
           "name": "Starter",
@@ -356,8 +356,8 @@
     "finalCta": {
       "title": "Ready to forge your next post?",
       "body": "Join the freelancers and founders using LinkedInForge to generate qualified leads.",
-      "cta": "Start for free",
-      "note": "No credit card required · Instant access"
+      "cta": "Start free trial",
+      "note": "14-day free trial. Cancel anytime."
     },
     "footer": {
       "tagline": "LinkedIn posts that convert.",

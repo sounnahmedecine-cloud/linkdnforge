@@ -55,6 +55,9 @@ export async function GET(request: Request) {
         },
       ],
       mode,
+      subscription_data: {
+        trial_period_days: 14,
+      },
       success_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/onboarding?success=true`,
       cancel_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/pricing?canceled=true`,
     });
