@@ -173,6 +173,24 @@ GENERA EL POST DIRECTAMENTE, SIN INTRODUCCIÓN NI EXPLICACIÓN. RESPETA ESTRICTA
 }
 
 function buildStandardPromptFr(formData: ForgePostFormData, themeLabels: string[]): string {
+  const isCarousel = formData.postType === 'carousel';
+
+  const structure = isCarousel ? `
+STRUCTURE OBLIGATOIRE POUR CARROUSEL :
+Tu dois générer le texte d'un carrousel diapositive par diapositive.
+- [Slide 1 : Titre] : Le titre d'accroche (très court et visuel).
+- [Slide 2 à 5 : Contenu] : Une idée forte par slide avec 1-2 phrases explicatives max.
+- [Slide 6 : Conclusion] : L'enseignement clé.
+- [Slide 7 : CTA] : L'appel à l'action.
+Formatte explicitement chaque partie avec "[Slide X]".
+` : `
+STRUCTURE OBLIGATOIRE :
+1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote qui intrigue
+2. DÉVELOPPEMENT (8-10 lignes) : explique le problème vécu, ce que tu as fait, 2 insights concrets tirés de ton expérience
+3. ENSEIGNEMENT (2-3 lignes) : la leçon clé, ton point de vue personnel
+4. CTA (1 ligne) : question directe au lecteur
+`;
+
   return `Tu es un expert LinkedIn francophone qui écrit à la PREMIÈRE PERSONNE DU SINGULIER (je, j'ai, mon, ma, mes).
 Tu rédiges un post LinkedIn complet, humain et expert — pas un résumé, un vrai post développé.
 
@@ -185,11 +203,7 @@ ${formData.linkedinProfile ? `- Profil LinkedIn : ${formData.linkedinProfile}` :
 ${formData.personalExamples ? `- Style à imiter (voix de l'utilisateur) : ${formData.personalExamples}` : ''}
 - Sujet : ${formData.postSubject || 'Mon expertise et ce que j\'ai appris'}
 
-STRUCTURE OBLIGATOIRE :
-1. HOOK (2-3 lignes) : accroche forte à la 1ère personne — question provocante, chiffre concret, ou mini-anecdote qui intrigue
-2. DÉVELOPPEMENT (8-10 lignes) : explique le problème vécu, ce que tu as fait, 2 insights concrets tirés de ton expérience
-3. ENSEIGNEMENT (2-3 lignes) : la leçon clé, ton point de vue personnel
-4. CTA (1 ligne) : question directe au lecteur
+${structure}
 
 RÈGLES ABSOLUES :
 - TOUJOURS à la 1ère personne du singulier : "J'ai", "Je", "Mon", "Ma", "Chez moi", "J'ai décidé"
@@ -204,6 +218,24 @@ GÉNÈRE LE POST DIRECTEMENT, SANS INTRODUCTION NI EXPLICATION. RESPECTE STRICTE
 }
 
 function buildStandardPromptEn(formData: ForgePostFormData, themeLabels: string[]): string {
+  const isCarousel = formData.postType === 'carousel';
+
+  const structure = isCarousel ? `
+REQUIRED STRUCTURE FOR CAROUSEL:
+You must generate the text for a carousel, slide by slide.
+- [Slide 1: Title]: The hook title (very short and visual).
+- [Slide 2 to 5: Content]: One strong idea per slide with 1-2 explanatory sentences max.
+- [Slide 6: Conclusion]: The key takeaway.
+- [Slide 7: CTA]: The Call to Action.
+Explicitly format each part with "[Slide X]".
+` : `
+REQUIRED STRUCTURE:
+1. HOOK (2-3 lines): strong first-person opener — a provocative question, a concrete number, or a short intriguing anecdote
+2. BODY (8-10 lines): explain the problem you lived through, what you did, 2 concrete insights from your experience
+3. TAKEAWAY (2-3 lines): the key lesson, your personal point of view
+4. CTA (1 line): a direct question to the reader
+`;
+
   return `You are an English-speaking LinkedIn expert writing in the FIRST PERSON SINGULAR (I, I've, my).
 You write a complete, human, expert LinkedIn post — not a summary, a real developed post.
 
@@ -216,11 +248,7 @@ ${formData.linkedinProfile ? `- LinkedIn profile: ${formData.linkedinProfile}` :
 ${formData.personalExamples ? `- Style to match (user's voice): ${formData.personalExamples}` : ''}
 - Topic: ${formData.postSubject || 'My expertise and what I\'ve learned'}
 
-REQUIRED STRUCTURE:
-1. HOOK (2-3 lines): strong first-person opener — a provocative question, a concrete number, or a short intriguing anecdote
-2. BODY (8-10 lines): explain the problem you lived through, what you did, 2 concrete insights from your experience
-3. TAKEAWAY (2-3 lines): the key lesson, your personal point of view
-4. CTA (1 line): a direct question to the reader
+${structure}
 
 ABSOLUTE RULES:
 - ALWAYS first person singular: "I've", "I", "My", "In my case", "I decided"
@@ -235,6 +263,24 @@ GENERATE THE POST DIRECTLY, WITHOUT INTRODUCTION OR EXPLANATION. STRICTLY RESPEC
 }
 
 function buildStandardPromptEs(formData: ForgePostFormData, themeLabels: string[]): string {
+  const isCarousel = formData.postType === 'carousel';
+
+  const structure = isCarousel ? `
+ESTRUCTURA OBLIGATORIA PARA CARRUSEL:
+Debes generar el texto de un carrusel, diapositiva por diapositiva.
+- [Slide 1: Título]: El título gancho (muy corto y visual).
+- [Slide 2 a 5: Contenido]: Una idea fuerte por slide con 1-2 frases explicativas máximo.
+- [Slide 6: Conclusión]: El aprendizaje clave.
+- [Slide 7: CTA]: La llamada a la acción.
+Formatea explícitamente cada parte con "[Slide X]".
+` : `
+ESTRUCTURA OBLIGATORIA:
+1. HOOK (2-3 líneas): apertura potente en primera persona — pregunta provocadora, cifra concreta o mini-anécdota que enganche
+2. DESARROLLO (8-10 líneas): explica el problema vivido, lo que hiciste, 2 insights concretos de tu experiencia
+3. APRENDIZAJE (2-3 líneas): la lección clave, tu punto de vista personal
+4. CTA (1 línea): pregunta directa al lector
+`;
+
   return `Eres un experto de LinkedIn hispanohablante que escribe en PRIMERA PERSONA DEL SINGULAR (yo, he, mi).
 Redactas un post de LinkedIn completo, humano y experto — no un resumen, un post real y desarrollado.
 
@@ -247,11 +293,7 @@ ${formData.linkedinProfile ? `- Perfil de LinkedIn: ${formData.linkedinProfile}`
 ${formData.personalExamples ? `- Estilo a imitar (voz del usuario): ${formData.personalExamples}` : ''}
 - Tema: ${formData.postSubject || 'Mi experiencia y lo que he aprendido'}
 
-ESTRUCTURA OBLIGATORIA:
-1. HOOK (2-3 líneas): apertura potente en primera persona — pregunta provocadora, cifra concreta o mini-anécdota que enganche
-2. DESARROLLO (8-10 líneas): explica el problema vivido, lo que hiciste, 2 insights concretos de tu experiencia
-3. APRENDIZAJE (2-3 líneas): la lección clave, tu punto de vista personal
-4. CTA (1 línea): pregunta directa al lector
+${structure}
 
 REGLAS ABSOLUTAS:
 - SIEMPRE en primera persona del singular: "He", "Yo", "Mi", "En mi caso", "Decidí"

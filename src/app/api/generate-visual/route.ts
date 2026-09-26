@@ -99,11 +99,16 @@ const LANGUAGE_NAMES: Record<PromptLocale, string> = {
 };
 
 function buildImagePrompt(post: string, visualType: string, themeLabels: string[], quote: string, locale: PromptLocale): string {
-  const theme = themeLabels?.[0] || 'business';
-
   if (visualType === 'quote') {
     return `Professional LinkedIn quote card. Minimal elegant design. Deep navy blue background (#0f172a). Render this exact ${LANGUAGE_NAMES[locale]} text with perfect spelling, letter by letter, no changes: "${quote}". Large white bold sans-serif font. Subtle horizontal accent line in orange (#f97316). Small "in" LinkedIn logo bottom right in white. No gradients. No people. Clean whitespace. Square 1:1 format. The text must be reproduced exactly as given, character by character.`;
   }
 
-  return `Professional LinkedIn post illustration for the topic: "${theme}". Abstract minimal business illustration. Modern flat design. Blue and slate color palette (#0ea5e9, #1e293b, white). No text. No people. Clean geometric shapes suggesting growth, technology or expertise. Suitable as a LinkedIn post background. Landscape 1200x627 format.`;
+  // Use the post content to generate a highly relevant contextual image
+  const postContext = post.slice(0, 400).replace(/\n/g, ' ').trim();
+
+  return `Create a highly professional and conceptual illustration for a LinkedIn post. 
+The core message of the post is: "${postContext}".
+Generate a modern, visually striking, and relevant image that perfectly captures this specific message and concept. 
+Style: Minimalist 3D or flat vector, sleek corporate aesthetic, soft cinematic lighting, professional color palette (slate, deep blue, clean white, subtle warm accents).
+Important: Do NOT include any text, letters, or words in the image. No generic geometric shapes unless they directly represent the post's subject. The image must look like a high-end editorial illustration for a B2B SaaS or professional audience. Landscape 1200x627 format.`;
 }
