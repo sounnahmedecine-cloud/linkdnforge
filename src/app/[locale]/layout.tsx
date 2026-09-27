@@ -6,6 +6,7 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { FirebaseAnalytics } from "@/components/FirebaseAnalytics";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import "../globals.css";
 
 const display = Big_Shoulders_Display({
@@ -106,9 +107,11 @@ export default async function RootLayout({
             alt=""
           />
         </noscript>
-        <NextIntlClientProvider messages={messages}>
-          {children}
-        </NextIntlClientProvider>
+        <PostHogProvider>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+          </NextIntlClientProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
