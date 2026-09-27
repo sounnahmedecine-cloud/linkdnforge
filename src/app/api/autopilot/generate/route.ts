@@ -73,9 +73,18 @@ export async function POST(request: NextRequest) {
     let contentParts: any[] = [{ text: promptText }];
 
     if (videoUrl) {
-      try {
-        console.log('Téléchargement de la vidéo pour analyse Gemini:', videoUrl);
-        const videoResponse = await fetch(videoUrl);
+      if (videoUrl.includes('generativelanguage.googleapis.com')) {
+        console.log('Utilisation directe du File URI Google AI:', videoUrl);
+        contentParts.push({
+          fileData: {
+            fileUri: videoUrl,
+            mimeType: videoMeta?.mimeType || 'video/mp4',
+          },
+        });
+      } else {
+        try {
+          console.log('Téléchargement de la vidéo pour analyse Gemini:', videoUrl);
+          const videoResponse = await fetch(videoUrl);
         if (videoResponse.ok) {
           const videoBuffer = Buffer.from(await videoResponse.arrayBuffer());
           const fileSizeMB = videoBuffer.byteLength / (1024 * 1024);
@@ -126,8 +135,9 @@ export async function POST(request: NextRequest) {
             }
           }
         }
-      } catch (videoErr) {
-        console.error('Erreur lors de l’analyse vidéo avec Gemini, repli sur le texte:', videoErr);
+        } catch (videoErr) {
+          console.error('Erreur lors de l’analyse vidéo avec Gemini, repli sur le texte:', videoErr);
+        }
       }
     }
 

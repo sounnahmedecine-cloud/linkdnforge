@@ -2,8 +2,6 @@
 
 import { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import { UploadCloud, Film, CheckCircle2, AlertCircle, X, Loader2 } from 'lucide-react';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
 
 interface VideoDropzoneProps {
   onVideoUploaded: (videoUrl: string, fileMeta: { name: string; size: number; duration?: number }) => void;
@@ -46,33 +44,52 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
     const localUrl = URL.createObjectURL(file);
     setPreviewUrl(localUrl);
 
-    // Upload to Firebase Storage
+    // Upload via same-origin Next.js API (bypasses CORS completely)
     try {
       setUploadProgress(0);
-      const uniqueName = `autopilot-videos/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const storageRef = ref(storage, uniqueName);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const formData = new FormData();
+      formData.append('file', file);
 
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-          setUploadProgress(progress);
-        },
-        (error) => {
-          console.error('Erreur Firebase Storage:', error);
-          setErrorMessage('Erreur lors du transfert de la vidéo vers le cloud. Vérifiez votre connexion.');
-          setUploadProgress(null);
-        },
-        async () => {
-          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          setUploadProgress(100);
-          onVideoUploaded(downloadUrl, {
-            name: file.name,
-            size: file.size,
-          });
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/autopilot/upload', true);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 95); // Reserve 95-100% for Google AI registration
+          setUploadProgress(percent);
         }
-      );
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            setUploadProgress(100);
+            onVideoUploaded(data.fileUri, {
+              name: file.name,
+              size: file.size,
+            });
+          } catch (e) {
+            setErrorMessage('Erreur lors de la lecture de la réponse du serveur.');
+            setUploadProgress(null);
+          }
+        } else {
+          try {
+            const errData = JSON.parse(xhr.responseText);
+            setErrorMessage(errData.error || `Erreur serveur (${xhr.status})`);
+          } catch {
+            setErrorMessage(`Erreur lors du transfert de la vidéo (${xhr.status}).`);
+          }
+          setUploadProgress(null);
+        }
+      };
+
+      xhr.onerror = () => {
+        setErrorMessage('Erreur de connexion réseau lors du transfert de la vidéo.');
+        setUploadProgress(null);
+      };
+
+      xhr.send(formData);
     } catch (err: any) {
       console.error(err);
       setErrorMessage(err.message || 'Erreur inconnue.');
