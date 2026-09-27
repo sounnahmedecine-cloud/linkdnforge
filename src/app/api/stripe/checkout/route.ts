@@ -61,7 +61,7 @@ export async function GET(request: Request) {
       metadata: {
         plan: plan || 'starter',
       },
-      success_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/onboarding?success=true`,
+      success_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/setup?success=true`,
       cancel_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/pricing?canceled=true`,
     });
 
