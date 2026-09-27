@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { buildVideoPostPrompt } from '@/lib/prompts/video-post-prompt';
+import {
+  buildClassifierPrompt,
+  fallbackClassification,
+  ClassificationResult,
+} from '@/lib/prompts/content-classifier';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
-export const maxDuration = 60; // Allow maximum timeout for video analysis
+export const maxDuration = 60; // Allow maximum timeout for multimodal analysis
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +22,7 @@ export async function POST(request: NextRequest) {
       targetUrlContent: providedContent,
       videoMeta,
       postSubject,
+      editorialStyle = 'auto',
       tone,
       themes,
       postObjective,
@@ -36,7 +42,9 @@ export async function POST(request: NextRequest) {
 
     // 1. Scrape target URL if provided and not yet scraped
     let targetUrlContent = providedContent || '';
-    let screenshotUrl = targetUrl ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`)}?w=1200&h=675` : null;
+    let screenshotUrl = targetUrl
+      ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`)}?w=1200&h=675`
+      : null;
     let ogImage: string | null = null;
 
     if (targetUrl) {
@@ -63,7 +71,51 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Prepare the prompt text
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+
+    // 2. ÉTAPE 1 : CLASSIFICATION ÉDITORIALE IA (Content Classifier)
+    let classification: ClassificationResult;
+    try {
+      const classifierPrompt = buildClassifierPrompt({
+        targetUrl,
+        targetUrlContent,
+        videoFileName: videoMeta?.name,
+        videoDescription: videoMeta?.description,
+        postSubject,
+        userRequestedStyle: editorialStyle,
+        postObjective,
+        targetNetwork,
+        locale,
+      });
+
+      const classifyResult = await model.generateContent(classifierPrompt);
+      const classifyText = (await classifyResult.response).text().trim();
+
+      const jsonMatch = classifyText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        classification = JSON.parse(jsonMatch[0]);
+      } else {
+        classification = fallbackClassification({
+          targetUrl,
+          targetUrlContent,
+          videoFileName: videoMeta?.name,
+          postSubject,
+          userRequestedStyle: editorialStyle,
+        });
+      }
+    } catch (classifyErr) {
+      console.warn('Erreur lors de la classification éditoriale, bascule sur le fallback:', classifyErr);
+      classification = fallbackClassification({
+        targetUrl,
+        targetUrlContent,
+        videoFileName: videoMeta?.name,
+        postSubject,
+        userRequestedStyle: editorialStyle,
+      });
+    }
+
+    // 3. ÉTAPE 2 : GHOSTWRITER & GÉNÉRATEUR ADAPTÉ À LA STRUCTURE
     const promptText = buildVideoPostPrompt({
       targetUrl,
       targetUrlContent,
@@ -77,12 +129,10 @@ export async function POST(request: NextRequest) {
       linkedinProfile,
       targetNetwork,
       locale,
+      classification,
     });
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
-
-    // 3. Process video if videoUrl is present
+    // 4. Traitement multimodal vidéo si présente
     let contentParts: any[] = [{ text: promptText }];
 
     if (videoUrl) {
@@ -98,63 +148,63 @@ export async function POST(request: NextRequest) {
         try {
           console.log('Téléchargement de la vidéo pour analyse Gemini:', videoUrl);
           const videoResponse = await fetch(videoUrl);
-        if (videoResponse.ok) {
-          const videoBuffer = Buffer.from(await videoResponse.arrayBuffer());
-          const fileSizeMB = videoBuffer.byteLength / (1024 * 1024);
-          console.log(`Taille vidéo téléchargée : ${fileSizeMB.toFixed(2)} Mo`);
+          if (videoResponse.ok) {
+            const videoBuffer = Buffer.from(await videoResponse.arrayBuffer());
+            const fileSizeMB = videoBuffer.byteLength / (1024 * 1024);
+            console.log(`Taille vidéo téléchargée : ${fileSizeMB.toFixed(2)} Mo`);
 
-          // If under 20MB, send inline base64 for ultra-fast processing
-          if (fileSizeMB <= 20) {
-            contentParts.push({
-              inlineData: {
-                data: videoBuffer.toString('base64'),
-                mimeType: 'video/mp4',
-              },
-            });
-          } else {
-            // For files between 20MB and 100MB, use Google AI File Manager
-            const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}-${videoMeta?.name || 'video.mp4'}`);
-            fs.writeFileSync(tempFilePath, videoBuffer);
-
-            try {
-              const fileManager = new GoogleAIFileManager(apiKey);
-              const uploadResult = await fileManager.uploadFile(tempFilePath, {
-                mimeType: 'video/mp4',
-                displayName: videoMeta?.name || 'Video Autopilot',
+            // If under 20MB, send inline base64 for ultra-fast processing
+            if (fileSizeMB <= 20) {
+              contentParts.push({
+                inlineData: {
+                  data: videoBuffer.toString('base64'),
+                  mimeType: 'video/mp4',
+                },
               });
+            } else {
+              // For files between 20MB and 100MB, use Google AI File Manager
+              const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}-${videoMeta?.name || 'video.mp4'}`);
+              fs.writeFileSync(tempFilePath, videoBuffer);
 
-              let file = await fileManager.getFile(uploadResult.file.name);
-              let attempts = 0;
-              while (file.state === 'PROCESSING' && attempts < 20) {
-                await new Promise((resolve) => setTimeout(resolve, 3000));
-                file = await fileManager.getFile(uploadResult.file.name);
-                attempts++;
-              }
-
-              if (file.state === 'ACTIVE') {
-                contentParts.push({
-                  fileData: {
-                    fileUri: file.uri,
-                    mimeType: file.mimeType,
-                  },
+              try {
+                const fileManager = new GoogleAIFileManager(apiKey);
+                const uploadResult = await fileManager.uploadFile(tempFilePath, {
+                  mimeType: 'video/mp4',
+                  displayName: videoMeta?.name || 'Video Autopilot',
                 });
-              } else {
-                console.warn('La vidéo n’a pas terminé son traitement, génération en mode texte enrichi');
-              }
-            } finally {
-              if (fs.existsSync(tempFilePath)) {
-                fs.unlinkSync(tempFilePath);
+
+                let file = await fileManager.getFile(uploadResult.file.name);
+                let attempts = 0;
+                while (file.state === 'PROCESSING' && attempts < 20) {
+                  await new Promise((resolve) => setTimeout(resolve, 3000));
+                  file = await fileManager.getFile(uploadResult.file.name);
+                  attempts++;
+                }
+
+                if (file.state === 'ACTIVE') {
+                  contentParts.push({
+                    fileData: {
+                      fileUri: file.uri,
+                      mimeType: file.mimeType,
+                    },
+                  });
+                } else {
+                  console.warn('La vidéo n’a pas terminé son traitement, génération en mode texte enrichi');
+                }
+              } finally {
+                if (fs.existsSync(tempFilePath)) {
+                  fs.unlinkSync(tempFilePath);
+                }
               }
             }
           }
-        }
         } catch (videoErr) {
           console.error('Erreur lors de l’analyse vidéo avec Gemini, repli sur le texte:', videoErr);
         }
       }
     }
 
-    // 4. Generate content with Gemini
+    // 5. Génération finale avec Gemini
     const result = await model.generateContent(contentParts);
     const response = await result.response;
     const rawText = response.text().trim();
@@ -192,6 +242,7 @@ export async function POST(request: NextRequest) {
       success: true,
       post,
       tiktokPost: tiktokPost || null,
+      classification,
       explanation,
       hasVideo: !!videoUrl,
       videoUrl: videoUrl || null,

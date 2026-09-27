@@ -34,6 +34,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const [generatedPost, setGeneratedPost] = useState('');
   const [tiktokPost, setTiktokPost] = useState('');
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
+  const [detectedClassification, setDetectedClassification] = useState<any>(null);
   const [selectedNetworkView, setSelectedNetworkView] = useState<'linkedin' | 'tiktok'>('linkedin');
   const [copied, setCopied] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -41,6 +42,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
 
   // Preset demo values
   const PRESET_URL = 'https://linkedinforge.woosenteur.fr';
+  const PRESET_PRODUCT = 'https://dubainegoce.fr/parfum/eclair-lattafa-100ml';
   const PRESET_IDEA = "Pourquoi la plupart des créateurs sur LinkedIn abandonnent après 3 semaines (et la méthode pour durer)";
 
   const handleSelectPreset = (mode: 'url' | 'idea', value: string) => {
@@ -110,6 +112,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
         const data = await response.json();
         setGeneratedPost(data.post);
         setTiktokPost(data.tiktokPost || '');
+        setDetectedClassification(data.classification || null);
         setScreenshotUrl(data.screenshotUrl || null);
       }
 
@@ -329,14 +332,21 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                   onClick={() => handleSelectPreset('url', PRESET_URL)}
                   className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
                 >
-                  🌐 URL : linkedinforge.woosenteur.fr
+                  🌐 URL SaaS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPreset('url', PRESET_PRODUCT)}
+                  className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-amber-300 hover:text-white hover:border-amber-500/50 transition font-semibold"
+                >
+                  🛍️ Produit : Dubaï Négoce (Parfum)
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSelectPreset('idea', PRESET_IDEA)}
                   className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
                 >
-                  💡 Idée : Méthode de création de contenu
+                  💡 Idée : Création de contenu
                 </button>
               </div>
             )}
@@ -358,6 +368,26 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Classification Notification */}
+              {detectedClassification && (
+                <div className="bg-orange-50 border border-orange-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-in fade-in">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">✨</span>
+                    <div>
+                      <span className="font-bold text-slate-900">
+                        Classification IA : {detectedClassification.detectedLabel}
+                      </span>
+                      <p className="text-slate-600 mt-0.5">
+                        {detectedClassification.detectedReason}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="font-mono font-bold text-orange-800 bg-orange-100 px-2.5 py-1 rounded-full shrink-0 self-start sm:self-auto">
+                    Architecture 2-Étapes
+                  </span>
+                </div>
+              )}
+
               {/* Top Bar with Switcher */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-2">

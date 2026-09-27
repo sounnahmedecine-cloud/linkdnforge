@@ -53,11 +53,13 @@ export default function OnboardingPage() {
   const [autopilotVideoUrl, setAutopilotVideoUrl] = useState<string>('');
   const [autopilotVideoMeta, setAutopilotVideoMeta] = useState<{ name: string; size: number } | null>(null);
   const [postExplanation, setPostExplanation] = useState<any>(null);
+  const [detectedClassification, setDetectedClassification] = useState<any>(null);
   const [tiktokPost, setTiktokPost] = useState<string>('');
   const [selectedNetworkView, setSelectedNetworkView] = useState<'linkedin' | 'tiktok'>('linkedin');
   const [siteScreenshotUrl, setSiteScreenshotUrl] = useState<string | null>(null);
   const [siteOgImage, setSiteOgImage] = useState<string | null>(null);
   const [activeVisualMode, setActiveVisualMode] = useState<'screenshot' | 'og'>('screenshot');
+  const [mockupMediaView, setMockupMediaView] = useState<'video' | 'screenshot' | 'og'>('video');
 
   const [formData, setFormData] = useState({
     linkedinUrl: '',
@@ -66,6 +68,7 @@ export default function OnboardingPage() {
     facebookUrl: '',
     personalExamples: '',
     themes: [] as string[],
+    editorialStyle: 'auto',
     tone: 'expert',
     frequency: '',
     postObjective: 'leads',
@@ -107,7 +110,7 @@ export default function OnboardingPage() {
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -188,6 +191,7 @@ export default function OnboardingPage() {
             targetUrl: formData.targetUrl,
             videoMeta: autopilotVideoMeta,
             postSubject: formData.postSubject,
+            editorialStyle: formData.editorialStyle || 'auto',
             tone: formData.tone,
             themes: formData.themes,
             postObjective: formData.postObjective,
@@ -206,8 +210,16 @@ export default function OnboardingPage() {
         setGeneratedPost(data.post);
         setTiktokPost(data.tiktokPost || '');
         setPostExplanation(data.explanation || null);
+        setDetectedClassification(data.classification || null);
         setSiteScreenshotUrl(data.screenshotUrl || null);
         setSiteOgImage(data.ogImage || null);
+        if (data.screenshotUrl && !autopilotVideoUrl) {
+          setMockupMediaView('screenshot');
+        } else if (autopilotVideoUrl) {
+          setMockupMediaView('video');
+        } else if (data.ogImage) {
+          setMockupMediaView('og');
+        }
         return;
       }
 
@@ -490,13 +502,68 @@ export default function OnboardingPage() {
                   />
                 </div>
 
-                {/* Tone */}
+                {/* 4. Style Rédactionnel (Format & Intention) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                      <span>📐</span> 4. Style rédactionnel (Format & Intention)
+                    </label>
+                    <span className="text-[11px] text-orange-600 font-semibold bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">
+                      Structure IA
+                    </span>
+                  </div>
+                  
+                  <select
+                    name="editorialStyle"
+                    value={formData.editorialStyle || 'auto'}
+                    onChange={handleInputChange}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-orange-500 shadow-sm"
+                  >
+                    <option value="auto">✨ Automatique — Recommandé (Analyse IA de la source)</option>
+                    <option value="product">🛍️ Produit / E-commerce (Parfums, cosmétiques, fiches vente)</option>
+                    <option value="expert">💼 Expertise / Thought Leadership</option>
+                    <option value="editorial">📰 Éditorial / Analyse de fond</option>
+                    <option value="educational">🎓 Éducatif / How-to & Conseils</option>
+                    <option value="announcement">📢 Annonce / Nouveauté & Lancement</option>
+                    <option value="story">📖 Storytelling & Coulisses</option>
+                    <option value="news">📰 Actualité & Tendances factuelles</option>
+                    <option value="testimonial">⭐ Avis client & Témoignage</option>
+                  </select>
+
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs text-slate-600 leading-relaxed">
+                    {formData.editorialStyle === 'product' ? (
+                      <span><strong>Mode Produit :</strong> Présente le produit, ses notes/caractéristiques concrètes, l'univers sensoriel et invite directement à commander.</span>
+                    ) : formData.editorialStyle === 'expert' ? (
+                      <span><strong>Mode Expertise :</strong> Développe une thèse professionnelle : constat terrain → analyse → conviction forte → débat.</span>
+                    ) : formData.editorialStyle === 'educational' ? (
+                      <span><strong>Mode Éducatif :</strong> Guide l'audience étape par étape avec conseils concrets et erreurs à éviter.</span>
+                    ) : formData.editorialStyle === 'announcement' ? (
+                      <span><strong>Mode Annonce :</strong> Met l'accent sur la nouveauté, ce qui change et le bénéfice immédiat.</span>
+                    ) : (
+                      <span><strong>✨ Mode Automatique :</strong> LinkedInForge détecte automatiquement si votre contenu est un produit e-commerce, un article d'expertise ou une vidéo et adapte la structure idéale.</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 5. Ton Ghostwriter (Voix & Personnalité) */}
                 <div>
-                  <label className="block text-sm font-bold text-slate-800 mb-2">
-                    4. Ton & Style Ghostwriter
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {tones.map((tItem) => (
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                      <span>🎭</span> 5. Ton de la voix (Ghostwriter)
+                    </label>
+                    <span className="text-[11px] text-slate-500">Personnalité & Vocabulaire</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { value: 'expert', label: '🎯 Expert' },
+                      { value: 'pedagogique', label: '📚 Pédagogique' },
+                      { value: 'inspirant', label: '✨ Inspirant' },
+                      { value: 'chaleureux', label: '🤝 Chaleureux' },
+                      { value: 'direct', label: '⚡ Direct' },
+                      { value: 'premium', label: '💎 Premium' },
+                      { value: 'humour', label: '😄 Humour' },
+                      { value: 'professionnel', label: '👔 Pro' },
+                    ].map((tItem) => (
                       <button
                         key={tItem.value}
                         type="button"
@@ -513,10 +580,10 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                {/* Objective */}
+                {/* 6. Objective */}
                 <div>
                   <label className="block text-sm font-bold text-slate-800 mb-2">
-                    5. Objectif de la publication
+                    6. Objectif de la publication
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {postObjectives.map((obj) => (
@@ -928,7 +995,45 @@ export default function OnboardingPage() {
                     )}
                   </div>
                 ) : (
-                /* LinkedIn & Facebook Mockup */
+                <>
+                {/* 2-Step AI Classification Card */}
+                {detectedClassification && (
+                  <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-white border border-orange-200/90 rounded-2xl p-4 my-4 space-y-2.5 shadow-sm animate-in fade-in duration-300">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">✨</span>
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                            Style Détecté : {detectedClassification.detectedLabel}
+                          </span>
+                          <span className="block text-[11px] text-slate-500">
+                            Intention : {detectedClassification.primaryIntent} · Audience : {detectedClassification.audience}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">
+                        IA 2-Étapes
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                      {detectedClassification.detectedReason}
+                    </p>
+
+                    {detectedClassification.recommendedStructure && detectedClassification.recommendedStructure.length > 0 && (
+                      <div className="pt-2 border-t border-orange-200/60 flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <span className="font-bold text-slate-800">Structure appliquée :</span>
+                        {detectedClassification.recommendedStructure.map((step: string, sIdx: number) => (
+                          <span key={sIdx} className="inline-flex items-center gap-1 bg-white border border-slate-200/90 px-2 py-0.5 rounded-md text-slate-700 font-medium shadow-2xs">
+                            <span className="text-orange-500 font-bold">{sIdx + 1}.</span> {step}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* LinkedIn & Facebook Mockup */}
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden font-sans shadow-sm my-6">
                   {/* Header */}
                   <div className="flex items-center gap-3 p-4">
@@ -956,29 +1061,75 @@ export default function OnboardingPage() {
                     {generatedPost}
                   </div>
 
+                  {/* Media Switcher in Mockup when multiple media exist */}
+                  {(autopilotVideoUrl && (siteScreenshotUrl || siteOgImage)) && (
+                    <div className="mx-4 mb-2.5 flex items-center justify-between p-1.5 bg-slate-100 rounded-xl border border-slate-200 text-xs">
+                      <span className="font-semibold text-slate-600 pl-2">Média affiché :</span>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setMockupMediaView('video')}
+                          className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                            mockupMediaView === 'video'
+                              ? 'bg-white shadow text-slate-900 font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          🎥 Vidéo
+                        </button>
+                        {siteScreenshotUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setMockupMediaView('screenshot')}
+                            className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                              mockupMediaView === 'screenshot'
+                                ? 'bg-white shadow text-orange-600 font-bold'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            📸 Capture Hero du site
+                          </button>
+                        )}
+                        {siteOgImage && (
+                          <button
+                            type="button"
+                            onClick={() => setMockupMediaView('og')}
+                            className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                              mockupMediaView === 'og'
+                                ? 'bg-white shadow text-blue-600 font-bold'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            🖼️ Image Produit
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Video Attachment in Mockup */}
-                  {autopilotVideoUrl && (
+                  {autopilotVideoUrl && (mockupMediaView === 'video' || (!siteScreenshotUrl && !siteOgImage)) && (
                     <div className="mx-4 mb-3 rounded-xl overflow-hidden bg-black aspect-video max-h-72 border border-slate-200 shadow-inner flex items-center justify-center">
                       <video src={autopilotVideoUrl} controls className="w-full h-full object-contain" />
                     </div>
                   )}
 
                   {/* Website Hero Screenshot or OG Image in Mockup */}
-                  {!autopilotVideoUrl && (siteScreenshotUrl || siteOgImage) && (
+                  {(siteScreenshotUrl || siteOgImage) && (mockupMediaView === 'screenshot' || mockupMediaView === 'og' || !autopilotVideoUrl) && (
                     <div className="mx-4 mb-3 space-y-2">
                       <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 aspect-video max-h-72 group">
                         <img
-                          src={activeVisualMode === 'screenshot' && siteScreenshotUrl ? siteScreenshotUrl : (siteOgImage || siteScreenshotUrl || '')}
-                          alt="Capture d'écran du site web"
+                          src={mockupMediaView === 'og' && siteOgImage ? siteOgImage : (siteScreenshotUrl || siteOgImage || '')}
+                          alt="Capture du site ou produit"
                           className="w-full h-full object-cover object-top transition duration-300 group-hover:scale-105"
                           loading="lazy"
                         />
                         <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md">
-                          <span>📸 Capture Hero du site</span>
+                          <span>{mockupMediaView === 'og' ? '🖼️ Image Produit' : '📸 Capture Hero du site'}</span>
                         </div>
                         <button
                           onClick={handleDownloadScreenshot}
-                          className="absolute bottom-2.5 right-2.5 bg-white/90 hover:bg-white text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 transition"
+                          className="absolute bottom-2.5 right-2.5 bg-white/95 hover:bg-white text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 transition"
                           title="Télécharger l'image pour votre post"
                         >
                           <Download className="w-3.5 h-3.5" />
@@ -989,9 +1140,9 @@ export default function OnboardingPage() {
                         <div className="flex justify-end gap-2 text-xs">
                           <button
                             type="button"
-                            onClick={() => setActiveVisualMode('screenshot')}
+                            onClick={() => { setMockupMediaView('screenshot'); setActiveVisualMode('screenshot'); }}
                             className={`px-2.5 py-1 rounded-md font-medium transition ${
-                              activeVisualMode === 'screenshot'
+                              mockupMediaView === 'screenshot'
                                 ? 'bg-orange-100 text-orange-700 font-bold'
                                 : 'text-slate-500 hover:text-slate-800'
                             }`}
@@ -1000,14 +1151,14 @@ export default function OnboardingPage() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => setActiveVisualMode('og')}
+                            onClick={() => { setMockupMediaView('og'); setActiveVisualMode('og'); }}
                             className={`px-2.5 py-1 rounded-md font-medium transition ${
-                              activeVisualMode === 'og'
+                              mockupMediaView === 'og'
                                 ? 'bg-orange-100 text-orange-700 font-bold'
                                 : 'text-slate-500 hover:text-slate-800'
                             }`}
                           >
-                            Image Officielle (OG)
+                            Image Produit (OG)
                           </button>
                         </div>
                       )}
@@ -1046,6 +1197,7 @@ export default function OnboardingPage() {
                     </button>
                   </div>
                 </div>
+                </>
                 )}
 
                 {postExplanation && (
@@ -1162,6 +1314,65 @@ export default function OnboardingPage() {
                     {t('result.regenerateBtn')}
                   </button>
                 </div>
+
+                {/* Captured Webpage or Product Hero Visual */}
+                {(siteScreenshotUrl || siteOgImage) && (
+                  <div className="border-t border-slate-200 pt-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                        <span>📸</span> Visuel capturé de la page
+                      </p>
+                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <span>✓</span> Haute Définition
+                      </span>
+                    </div>
+
+                    <div className="relative rounded-xl overflow-hidden border border-slate-200 aspect-video max-h-56 bg-slate-100 group shadow-sm">
+                      <img
+                        src={activeVisualMode === 'screenshot' && siteScreenshotUrl ? siteScreenshotUrl : (siteOgImage || siteScreenshotUrl || '')}
+                        alt="Capture Hero de la page"
+                        className="w-full h-full object-cover object-top"
+                      />
+                      <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg">
+                        {activeVisualMode === 'og' && siteOgImage ? '🖼️ Photo Produit' : '📸 Capture Hero du site'}
+                      </div>
+                      <button
+                        onClick={handleDownloadScreenshot}
+                        className="absolute bottom-2.5 right-2.5 bg-white/95 hover:bg-white text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 transition"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Télécharger le visuel (HD)
+                      </button>
+                    </div>
+
+                    {siteScreenshotUrl && siteOgImage && (
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setActiveVisualMode('screenshot'); setMockupMediaView('screenshot'); }}
+                          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold border transition ${
+                            activeVisualMode === 'screenshot'
+                              ? 'bg-orange-50 border-orange-300 text-orange-700 font-bold'
+                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          📸 Capture Hero du site
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setActiveVisualMode('og'); setMockupMediaView('og'); }}
+                          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold border transition ${
+                            activeVisualMode === 'og'
+                              ? 'bg-orange-50 border-orange-300 text-orange-700 font-bold'
+                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          🖼️ Photo Produit (OG)
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Visual generation */}
                 <div className="border-t border-slate-200 pt-5 space-y-4">

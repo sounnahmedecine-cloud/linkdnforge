@@ -1,3 +1,5 @@
+import { ClassificationResult } from './content-classifier';
+
 export interface VideoPostPromptOptions {
   targetUrl?: string;
   targetUrlContent?: string;
@@ -11,6 +13,7 @@ export interface VideoPostPromptOptions {
   linkedinProfile?: string;
   targetNetwork?: 'linkedin' | 'facebook' | 'both';
   locale?: string;
+  classification?: ClassificationResult;
 }
 
 export function buildVideoPostPrompt(options: VideoPostPromptOptions): string {
@@ -22,16 +25,21 @@ export function buildVideoPostPrompt(options: VideoPostPromptOptions): string {
     postSubject = '',
     tone = 'expert',
     themes = [],
-    postObjective = 'visibilité & engagement',
+    postObjective = 'visibilité & conversion',
     personalExamples = '',
     linkedinProfile = '',
     targetNetwork = 'linkedin',
     locale = 'fr',
+    classification,
   } = options;
 
   const hasVideo = !!videoFileName && videoFileName !== 'video.mp4';
   const hasUrl = !!targetUrl;
   const hasSubject = !!postSubject;
+
+  const contentType = classification?.contentType || 'EXPERT_OPINION';
+  const primaryIntent = classification?.primaryIntent || 'INFORM';
+  const recommendedStructure = classification?.recommendedStructure || [];
 
   return `RÈGLE ABSOLUE : Commence DIRECTEMENT le post dès le tout premier mot.
 N'écris JAMAIS de phrase d'introduction meta (comme "Voici une proposition de post...", "Voici le texte :", etc.) ni de conclusion hors post.
@@ -39,93 +47,116 @@ Pas de balises markdown de titre (# ou ##) au début. Le post doit être immédi
 
 ---
 RÔLE :
-Tu es le Ghostwriter d'élite et copywriter stratégique pour le compte de l'utilisateur. Ton objectif est de transformer les éléments fournis (vidéo, URL et/ou sujet) en une publication virale, captivante et humaine pour ${targetNetwork === 'facebook' ? 'Facebook' : 'LinkedIn'}.
+Tu es le Ghostwriter d'élite de LinkedInForge. Tu dois rédiger une publication à partir du contenu fourni.
+IMPORTANT : Tu ne dois JAMAIS appliquer une structure LinkedIn générique ou corporative à tous les contenus.
 
 ---
-CASCADE DE PRIORITÉ DES SOURCES :
-${hasVideo ? '✓ VIDÉO DÉTECTÉE : Analyse en priorité absolue les paroles (audio), le message et les visuels de la vidéo.' : '• Aucune vidéo fournie : passe aux sources suivantes.'}
-${hasUrl ? `✓ URL FOURNIE (${targetUrl}) : Incorpore la proposition de valeur, les bénéfices ou le contenu du site.` : '• Aucune URL fournie.'}
-${hasSubject ? `✓ SUJET DÉFINI PAR L'AUTEUR : "${postSubject}"` : ''}
-
-${targetUrlContent ? `---
-CONTENU EXTRAIT DE L'URL CIBLE :
-${targetUrlContent.slice(0, 3000)}` : ''}
-
-${hasVideo ? `---
-CONTEXTE VIDÉO :
-- Fichier : ${videoFileName}
-${videoDescription ? `- Notes : ${videoDescription}` : ''}
-- Consigne : Ton texte DOIT refléter fidèlement le contenu parlé et montré dans la vidéo.` : ''}
-
-${hasSubject ? `---
-ANGLE / SUJET DEMANDÉ :
-${postSubject}` : ''}
+RÉSULTAT DE LA CLASSIFICATION ÉDITORIALE IA :
+- Famille de contenu : ${contentType} (${classification?.detectedLabel || 'Standard'})
+- Intention principale : ${primaryIntent}
+- Audience ciblée : ${classification?.audience || 'Audience qualifiée'}
+- Angle émotionnel recommandé : ${classification?.emotionalAngle || 'Engagement'}
+- Structure à suivre impérativement :
+${recommendedStructure.map((step, idx) => `  ${idx + 1}. ${step}`).join('\n')}
 
 ---
-STYLE & PERSONNALITÉ :
-- Ton recherché : ${tone} (adopte ce ton avec naturel et conviction).
-- Thématiques clés : ${themes.length > 0 ? themes.join(', ') : 'Innovation, Entrepreneuriat, Partage de valeur'}.
-- Objectif de la publication : ${postObjective}.
-${personalExamples ? `- Exemples du style d'écriture de l'auteur :\n${personalExamples.slice(0, 1000)}` : ''}
+RÈGLES ÉDITORIALES PAR FAMILLE :
+
+${contentType === 'PRODUCT' ? `🛍️ RÈGLES SPÉCIFIQUES FICHE PRODUIT / E-COMMERCE :
+- Ce post a pour but de PRÉSENTER, DONNER ENVIE et VENDRE un produit précis.
+- NE TRANSFORME PAS ce produit en article d'opinion abstrait sur l'industrie.
+- Mets en valeur l'expérience concrète : sensorialité, notes (tête/cœur/fond pour un parfum), tenue, design du flacon, émotion procurée.
+- Inclus les faits réels extraits du produit (nom exact, marque, contenance, et prix si mentionné).
+- Structure recommandée :
+  1. Hook produit : Stopper le scroll avec une question sensorielle, un paradoxe séduisant ou une accroche irrésistible.
+  2. Expérience & bénéfices : Décrire ce que l'on ressent en le portant/l'utilisant.
+  3. Caractéristiques vérifiées : Les notes olfactives et détails réels du produit.
+  4. Pour qui : À quelle personne ou quelle occasion ce produit convient à merveille.
+  5. Appel à l'action direct : Inviter à commander ou découvrir sur la boutique avec le lien : ${targetUrl || 'le lien en commentaire'}.` : ''}
+
+${contentType === 'EXPERT_OPINION' ? `💼 RÈGLES SPÉCIFIQUES EXPERTISE / THOUGHT LEADERSHIP :
+- Observation de terrain → Problème ou paradoxe → Analyse sans concession → Conviction forte → Enseignements concrets → Question ouverte de débat & CTA.` : ''}
+
+${contentType === 'EDITORIAL' ? `📰 RÈGLES SPÉCIFIQUES ÉDITORIAL / ARTICLE :
+- Hook captivant → Contexte du sujet → Analyse détaillée avec arguments pesés → Perspective d'avenir → Conclusion forte.` : ''}
+
+${contentType === 'ANNOUNCEMENT' ? `📢 RÈGLES SPÉCIFIQUES ANNONCE / LANCEMENT :
+- NOUVEAUTÉ claire dès l'accroche → Ce qui change concrètement → Bénéfices immédiats → Détails pratiques et disponibilité → CTA vers ${targetUrl || 'la découverte'}.` : ''}
+
+${contentType === 'EDUCATIONAL' ? `🎓 RÈGLES SPÉCIFIQUES ÉDUCATIF / CONSEIL :
+- Problème fréquent de l'audience → Les 3 à 5 étapes ou conseils clés actionnables → L'erreur majeure à éviter → Synthèse mémorable.` : ''}
+
+${contentType === 'STORY' ? `📖 RÈGLES SPÉCIFIQUES STORYTELLING / COULISSES :
+- Situation de départ authentique → Défi / épreuve ou tension vécue → Le déclic ou la découverte → Résolution → Morale inspirante partagée.` : ''}
+
+${contentType === 'NEWS' ? `📰 RÈGLES SPÉCIFIQUES ACTUALITÉ / TENDANCE :
+- Le fait vérifié → Le contexte → Pourquoi cette actualité compte maintenant → Conséquences prévisibles (ne jamais inventer de faits non sourcés).` : ''}
+
+${contentType === 'TESTIMONIAL' ? `⭐ RÈGLES SPÉCIFIQUES TÉMOIGNAGE / CAS CLIENT :
+- Situation initiale du client → L'obstacle résolu → Le résultat concret obtenu → Preuve / citation sincère → Ce qu'il faut en retenir.` : ''}
+
+---
+TON & STYLE GHOSTWRITER (COMMENT RACONTER) :
+- Ton de voix : "${tone}"
+  * Le ton Ghostwriter influence le vocabulaire, le rythme et l'émotion, mais NE DOIT PAS déformer la structure éditoriale du produit ou du sujet.
+  * Si le ton est "Inspirant", apporte de l'élégance, de l'émerveillement et du désir.
+  * Si le ton est "Expert", apporte de la précision technique et des analyses pointues.
+  * Si le ton est "Chaleureux", adopte une proximité sincère de connaisseur qui partage sa pépite.
+  * Si le ton est "Direct", va droit au but avec des phrases courtes et percutantes.
+  * Si le ton est "Premium", soigne la beauté des mots et l'exclusivité.
+${personalExamples ? `- Exemples d'écrits réels de l'auteur pour reproduire son rythme :\n${personalExamples.slice(0, 1000)}` : ''}
 ${linkedinProfile ? `- Profil de l'auteur :\n${linkedinProfile.slice(0, 500)}` : ''}
 
 ---
-STRUCTURE RECOMMANDÉE DU POST :
-1. LE HOOK (Accroche - 1 à 2 lignes) :
-   - Doit stopper le scroll immédiatement.
-   - Fait écho au problème ou à la révélation majeure de la vidéo.
-   - Saut de ligne après le hook.
+SOURCES FACTUELLES :
+${hasVideo ? `✓ VIDÉO JOINTE : ${videoFileName} (analyse les paroles et visuels)` : ''}
+${videoDescription ? `- Notes vidéo : ${videoDescription}` : ''}
+${hasUrl ? `✓ URL FOURNIE : ${targetUrl}` : ''}
+${targetUrlContent ? `- CONTENU REÇU DE LA PAGE :\n${targetUrlContent.slice(0, 3000)}` : ''}
+${hasSubject ? `✓ SUJET SPÉCIFIÉ : ${postSubject}` : ''}
 
-2. LE DÉVELOPPEMENT / LES INSIGHTS (Corps du post) :
-   - Explique pourquoi ce qui est montré dans la vidéo est crucial.
-   - Partage 2 à 4 points clairs, actionnables ou contre-intuitifs.
-   - Phrases courtes, aérées, avec des listes à puces simples (✓ ou tirets discrets).
-
-3. LE CALL TO ACTION (Passage à l'action) :
-   - Invite à regarder la vidéo complète.
-   ${targetUrl ? `- Si pertinent pour en savoir plus, invite à visiter : ${targetUrl}` : ''}
-   - Pose une question ouverte pour susciter les commentaires et le débat sous le post.
-
-4. HASHTAGS :
-   - 3 à 5 hashtags stratégiques, ultra-ciblés et professionnels en fin de post.
+---
+RÈGLE D'OR CONTRE LES HALLUCINATIONS :
+- Ne crée AUCUNE caractéristique ou ingrédient absent des sources.
+- Conserve les noms de produits, prix, marques et faits réels.
 
 ---
 FORMAT DE RÉPONSE OBLIGATOIRE :
 Réponds strictement selon ce format structuré avec ces balises :
 
 [POST_START]
-(Ici, écris directement le post expert prêt à être copié et publié sur LinkedIn/Facebook, avec aération, hook percutant, bullet points et hashtags pro)
+(Ici, écris directement le post prêt à être copié et publié sur ${targetNetwork === 'facebook' ? 'Facebook' : 'LinkedIn'}, adapté à la famille ${contentType} et au ton ${tone}, avec aération, hook percutant et 3 à 5 hashtags pertinents)
 [POST_END]
 
 [TIKTOK_START]
-(Ici, écris la légende courte et ultra-dynamique spécialement calibrée pour TikTok & Instagram Reels :
-- 1ère ligne : Accroche choc en majuscules / émoji pour retenir l'attention dans les 3 premières secondes
-- 2e partie : 2 à 3 phrases ultra-rythmées qui donnent envie d'enregistrer la vidéo
-- 3e partie : Appel à l'action court ("Lien en bio" ou "Commente X pour recevoir...")
-- Hashtags viraux : 5 à 7 hashtags percutants ex: #fyp #pourtoi #viral #[thematique])
+(Ici, écris le script / légende courte spécialement calibré pour TikTok & Instagram Reels :
+- 1ère ligne : Accroche choc en majuscules avec émoji (pour stopper le scroll en 3 secondes)
+- 2e partie : 2 à 3 phrases ultra-dynamiques mettant en avant le produit/sujet
+- 3e partie : Appel à l'action rapide ("Lien en bio", "Dispo sur le site")
+- Hashtags : 5 à 7 hashtags ciblés dont #fyp #pourtoi)
 [TIKTOK_END]
 
 [EXPLANATION_START]
 {
+  "editorialFamily": {
+    "label": "${classification?.detectedLabel || 'Classification IA'}",
+    "reason": "${classification?.detectedReason || 'Analyse automatique de la source'}",
+    "structureApplied": ${JSON.stringify(recommendedStructure)}
+  },
   "sources": {
-    "videoFindings": ["1er fait précis tiré de la vidéo", "2e fait précis"],
-    "webpageFindings": ["Proposition de valeur ou fait tiré du site web"]
+    "videoFindings": ["Fait précis tiré de la vidéo si applicable"],
+    "webpageFindings": ["Caractéristique, prix ou proposition extraite de l'URL"]
   },
   "analysis": {
-    "visualElements": ["Éléments visuels clés détectés à l'écran"],
-    "spokenClaims": ["Affirmation ou message oral marquant prononcé dans la vidéo"]
+    "visualElements": ["Éléments visuels repérés"],
+    "spokenClaims": ["Message marquant identifié"]
   },
   "qualityCheck": {
     "passed": true,
     "hallucinationDetected": false,
-    "notes": "Toutes les affirmations du post sont vérifiées et conformes aux sources fournies."
+    "sourceGrounded": true
   },
-  "videoInsights": ["1er élément clé tiré de la vidéo", "2e élément clé"],
-  "urlInsights": ["Élément clé ou proposition de valeur tirée du site web"],
-  "ghostwriterStyle": "Brève explication du ton et de la structure adoptée"
+  "ghostwriterStyle": "Ton ${tone} combiné à la structure ${contentType}"
 }
-[EXPLANATION_END]
-
-Langue du post : ${locale === 'en' ? 'Anglais' : locale === 'es' ? 'Espagnol' : 'Français'}.
-Génère maintenant :`;
+[EXPLANATION_END]`;
 }

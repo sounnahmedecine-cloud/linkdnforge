@@ -26,9 +26,13 @@ export async function POST(request: NextRequest) {
       if (jinaResponse.ok) {
         const text = await jinaResponse.text();
         if (text && text.trim().length > 50) {
+          const imgMatch = text.match(/!\[.*?\]\((https?:\/\/[^\s\)]+?\.(?:jpg|jpeg|png|webp|avif)[^\s\)]*)\)/i);
+          const ogImage = imgMatch ? imgMatch[1] : null;
+
           return NextResponse.json({
             data: text.slice(0, 10000),
             screenshotUrl,
+            ogImage,
             source: 'jina'
           });
         }
