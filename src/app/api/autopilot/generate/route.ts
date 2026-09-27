@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       targetUrl,
       targetUrlContent: providedContent,
       videoMeta,
+      postSubject,
       tone,
       themes,
       postObjective,
@@ -55,8 +56,9 @@ export async function POST(request: NextRequest) {
     const promptText = buildVideoPostPrompt({
       targetUrl,
       targetUrlContent,
-      videoFileName: videoMeta?.name || 'video.mp4',
+      videoFileName: videoMeta?.name || '',
       videoDescription: videoMeta?.description || '',
+      postSubject,
       tone,
       themes,
       postObjective,

@@ -3,6 +3,7 @@ export interface VideoPostPromptOptions {
   targetUrlContent?: string;
   videoFileName?: string;
   videoDescription?: string;
+  postSubject?: string;
   tone?: string;
   themes?: string[];
   postObjective?: string;
@@ -18,6 +19,7 @@ export function buildVideoPostPrompt(options: VideoPostPromptOptions): string {
     targetUrlContent = '',
     videoFileName = '',
     videoDescription = '',
+    postSubject = '',
     tone = 'expert',
     themes = [],
     postObjective = 'visibilité & engagement',
@@ -27,23 +29,37 @@ export function buildVideoPostPrompt(options: VideoPostPromptOptions): string {
     locale = 'fr',
   } = options;
 
+  const hasVideo = !!videoFileName && videoFileName !== 'video.mp4';
+  const hasUrl = !!targetUrl;
+  const hasSubject = !!postSubject;
+
   return `RÈGLE ABSOLUE : Commence DIRECTEMENT le post dès le tout premier mot.
 N'écris JAMAIS de phrase d'introduction meta (comme "Voici une proposition de post...", "Voici le texte :", etc.) ni de conclusion hors post.
 Pas de balises markdown de titre (# ou ##) au début. Le post doit être immédiatement publiable tel quel.
 
 ---
 RÔLE :
-Tu es le Ghostwriter d'élite et copywriter stratégique pour le compte de l'utilisateur. Ton objectif est de transformer une vidéo et un lien de produit/SaaS en une publication virale, captivante et humaine pour ${targetNetwork === 'facebook' ? 'Facebook' : 'LinkedIn'}.
+Tu es le Ghostwriter d'élite et copywriter stratégique pour le compte de l'utilisateur. Ton objectif est de transformer les éléments fournis (vidéo, URL et/ou sujet) en une publication virale, captivante et humaine pour ${targetNetwork === 'facebook' ? 'Facebook' : 'LinkedIn'}.
 
 ---
-CONTEXTE DE L'URL CIBLE (${targetUrl || 'Produit'}):
-${targetUrlContent ? targetUrlContent.slice(0, 3000) : 'Pas de contenu extrait, base-toi sur la vidéo et les thématiques.'}
+CASCADE DE PRIORITÉ DES SOURCES :
+${hasVideo ? '✓ VIDÉO DÉTECTÉE : Analyse en priorité absolue les paroles (audio), le message et les visuels de la vidéo.' : '• Aucune vidéo fournie : passe aux sources suivantes.'}
+${hasUrl ? `✓ URL FOURNIE (${targetUrl}) : Incorpore la proposition de valeur, les bénéfices ou le contenu du site.` : '• Aucune URL fournie.'}
+${hasSubject ? `✓ SUJET DÉFINI PAR L'AUTEUR : "${postSubject}"` : ''}
 
----
-CONTEXTE DE LA VIDÉO ANALYSÉE :
-- Nom du fichier : ${videoFileName || 'Vidéo de présentation'}
-${videoDescription ? `- Notes / Contexte : ${videoDescription}` : ''}
-- Consigne d'analyse multimodale : Analyse avec précision le contenu parlé (audio/voix), les messages clés et les visuels de la vidéo attachée. Le texte du post DOIT faire écho direct au sujet traité dans la vidéo.
+${targetUrlContent ? `---
+CONTENU EXTRAIT DE L'URL CIBLE :
+${targetUrlContent.slice(0, 3000)}` : ''}
+
+${hasVideo ? `---
+CONTEXTE VIDÉO :
+- Fichier : ${videoFileName}
+${videoDescription ? `- Notes : ${videoDescription}` : ''}
+- Consigne : Ton texte DOIT refléter fidèlement le contenu parlé et montré dans la vidéo.` : ''}
+
+${hasSubject ? `---
+ANGLE / SUJET DEMANDÉ :
+${postSubject}` : ''}
 
 ---
 STYLE & PERSONNALITÉ :

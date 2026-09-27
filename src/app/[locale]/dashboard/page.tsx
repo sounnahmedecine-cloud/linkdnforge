@@ -174,6 +174,7 @@ export default function OnboardingPage() {
             videoUrl: autopilotVideoUrl,
             targetUrl: formData.targetUrl,
             videoMeta: autopilotVideoMeta,
+            postSubject: formData.postSubject,
             tone: formData.tone,
             themes: formData.themes,
             postObjective: formData.postObjective,
@@ -346,10 +347,13 @@ export default function OnboardingPage() {
 
                 {/* Video Dropzone */}
                 <div>
-                  <label className="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    <Film className="w-4 h-4 text-orange-500" />
-                    1. Votre Vidéo (MP4, MOV, WebM)
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                      <Film className="w-4 h-4 text-orange-500" />
+                      1. Votre Vidéo (Optionnel)
+                    </label>
+                    <span className="text-xs text-slate-500">Priorité 1 (Analyse Audio & Vision)</span>
+                  </div>
                   <VideoDropzone
                     onVideoUploaded={(url, meta) => {
                       setAutopilotVideoUrl(url);
@@ -364,24 +368,45 @@ export default function OnboardingPage() {
 
                 {/* Target URL */}
                 <div>
-                  <label className="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    <Globe2 className="w-4 h-4 text-blue-500" />
-                    2. URL du site, produit ou article à promouvoir
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                      <Globe2 className="w-4 h-4 text-blue-500" />
+                      2. URL du site ou produit (Optionnel)
+                    </label>
+                    <span className="text-xs text-slate-500">Priorité 2 (Scraping offre & proposition)</span>
+                  </div>
                   <input
                     type="url"
                     name="targetUrl"
                     value={formData.targetUrl}
                     onChange={handleInputChange}
-                    placeholder="https://playnour.online ou votre lien..."
+                    placeholder="https://woosenteur.fr/ ou votre site..."
                     className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 text-sm shadow-sm"
+                  />
+                </div>
+
+                {/* Free Subject / Angle */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      3. Sujet libre ou angle particulier (Optionnel)
+                    </label>
+                    <span className="text-xs text-slate-500">Priorité 3 (Si pas de vidéo ni d'URL)</span>
+                  </div>
+                  <textarea
+                    name="postSubject"
+                    value={formData.postSubject}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Pourquoi déléguer la rédaction LinkedIn est la clé pour doubler ses leads en 2026..."
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 text-sm shadow-sm h-20 resize-none"
                   />
                 </div>
 
                 {/* Tone */}
                 <div>
                   <label className="block text-sm font-bold text-slate-800 mb-2">
-                    3. Ton & Style Ghostwriter
+                    4. Ton & Style Ghostwriter
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {tones.map((tItem) => (
@@ -404,7 +429,7 @@ export default function OnboardingPage() {
                 {/* Objective */}
                 <div>
                   <label className="block text-sm font-bold text-slate-800 mb-2">
-                    4. Objectif de la publication
+                    5. Objectif de la publication
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {postObjectives.map((obj) => (
@@ -426,11 +451,19 @@ export default function OnboardingPage() {
 
                 <Button
                   onClick={handleForgePost}
-                  disabled={isGenerating || (!autopilotVideoUrl && !formData.targetUrl)}
+                  disabled={isGenerating || (!autopilotVideoUrl && !formData.targetUrl && !formData.postSubject && formData.themes.length === 0)}
                   size="lg"
                   className="w-full py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-lg shadow-orange-500/25 transition-transform hover:scale-[1.01]"
                 >
-                  {isGenerating ? 'Analyse multimodale & rédaction en cours...' : '🚀 Lancer le Pilote Automatique (Générer le Post)'}
+                  {isGenerating ? (
+                    'Génération en cours...'
+                  ) : autopilotVideoUrl ? (
+                    '🚀 Analyser la Vidéo & Générer le Post'
+                  ) : formData.targetUrl ? (
+                    '🚀 Analyser l’URL & Générer le Post'
+                  ) : (
+                    '🚀 Rédiger avec le Ghostwriter'
+                  )}
                 </Button>
               </div>
             ) : (
