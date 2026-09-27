@@ -58,9 +58,18 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   };
 
   const handleGenerate = async () => {
-    // Check local storage for free trial
-    const hasUsedTrial = localStorage.getItem('linkdnforge_free_trial');
-    if (hasUsedTrial) {
+    // Check local storage for free trials count
+    let trialCount = 0;
+    const oldTrial = localStorage.getItem('linkdnforge_free_trial');
+    const newTrials = localStorage.getItem('linkdnforge_free_trials_count');
+    
+    if (newTrials) {
+      trialCount = parseInt(newTrials, 10);
+    } else if (oldTrial === 'used') {
+      trialCount = 1;
+    }
+
+    if (trialCount >= 5) {
       setShowPaywall(true);
       return;
     }
@@ -96,7 +105,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
       const data = await response.json();
       
       setGeneratedPost(data.post);
-      localStorage.setItem('linkdnforge_free_trial', 'used');
+      localStorage.setItem('linkdnforge_free_trials_count', (trialCount + 1).toString());
     } catch (error) {
       console.error(error);
       setGeneratedPost(t('result.genericError'));
