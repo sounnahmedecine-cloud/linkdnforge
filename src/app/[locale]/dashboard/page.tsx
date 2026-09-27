@@ -12,15 +12,26 @@ import IdeaForge from '@/components/studio/IdeaForge';
 import StudioResult from '@/components/studio/StudioResult';
 import GhostwriterProfileView from '@/components/studio/GhostwriterProfileView';
 import RecentPostsList from '@/components/studio/RecentPostsList';
-import { StudioTab, RecentPost, GhostwriterProfile } from '@/lib/studio/types';
+import SocialConnectionsView from '@/components/studio/SocialConnectionsView';
+import ContentCalendarView from '@/components/studio/ContentCalendarView';
+import {
+  StudioTab,
+  RecentPost,
+  GhostwriterProfile,
+  SocialConnections,
+  ScheduledPost,
+} from '@/lib/studio/types';
 import {
   getRecentPosts,
   saveRecentPost,
   deleteRecentPost,
   getGhostwriterProfile,
   saveGhostwriterProfile,
+  getSocialConnections,
+  saveSocialConnections,
+  getScheduledPosts,
 } from '@/lib/studio/storage';
-import { Sparkles, SlidersHorizontal, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface User {
   email: string;
@@ -56,6 +67,12 @@ export default function DashboardPage() {
     editorialStyle: 'auto',
     themes: [],
   });
+  const [socialConnections, setSocialConnections] = useState<SocialConnections>({
+    bufferToken: '',
+    bufferProfileIdTiktok: '',
+    bufferProfileIdInstagram: '',
+  });
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
 
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
@@ -85,6 +102,8 @@ export default function DashboardPage() {
     // 2. Load storage
     setRecentPosts(getRecentPosts());
     setGhostwriterProfile(getGhostwriterProfile());
+    setSocialConnections(getSocialConnections());
+    setScheduledPosts(getScheduledPosts());
   }, []);
 
   const handleLogout = async () => {
@@ -179,7 +198,7 @@ export default function DashboardPage() {
       setCurrentSiteOgImage(data.ogImage || null);
 
       // Save to recent posts history
-      const saved = saveRecentPost({
+      saveRecentPost({
         sourceType: params.sourceType,
         title:
           data.classification?.keyEntities?.productName ||
@@ -329,6 +348,28 @@ export default function DashboardPage() {
                   </div>
                 )}
 
+                {currentTab === 'accounts' && (
+                  <SocialConnectionsView
+                    connections={socialConnections}
+                    onUpdateConnections={(updated) => {
+                      setSocialConnections(updated);
+                    }}
+                    onBack={() => setCurrentTab('hub')}
+                    isAdmin={isAdmin}
+                  />
+                )}
+
+                {currentTab === 'calendar' && (
+                  <ContentCalendarView
+                    scheduledPosts={scheduledPosts}
+                    recentPosts={recentPosts}
+                    onUpdateScheduledPosts={(updated) => {
+                      setScheduledPosts(updated);
+                    }}
+                    onBack={() => setCurrentTab('hub')}
+                  />
+                )}
+
                 {currentTab === 'profile' && (
                   <GhostwriterProfileView
                     profile={ghostwriterProfile}
@@ -354,6 +395,7 @@ export default function DashboardPage() {
                     siteOgImage={currentSiteOgImage}
                     isAdmin={isAdmin}
                     targetUrl={currentTargetUrl}
+                    customBufferToken={socialConnections.bufferToken}
                     onReset={handleResetCurrentPost}
                   />
                 </div>

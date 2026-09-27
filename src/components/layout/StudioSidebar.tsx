@@ -1,7 +1,19 @@
 'use client';
 
 import { StudioTab } from '@/lib/studio/types';
-import { LayoutDashboard, Film, Globe2, Sparkles, BookOpen, User, Crown, LogOut } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Film,
+  Globe2,
+  Sparkles,
+  BookOpen,
+  User,
+  Share2,
+  Calendar,
+  Crown,
+  LogOut,
+  Zap,
+} from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 
 interface StudioSidebarProps {
@@ -21,7 +33,7 @@ export default function StudioSidebar({
   userEmail,
   onLogout,
 }: StudioSidebarProps) {
-  const navItems: { id: StudioTab; label: string; icon: React.ReactNode; badge?: string }[] = [
+  const mainNavItems: { id: StudioTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'hub', label: 'Studio Accueil', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'video', label: 'Vidéo → Contenu', icon: <Film className="w-4 h-4 text-orange-500" /> },
     { id: 'url', label: 'URL → Contenu', icon: <Globe2 className="w-4 h-4 text-blue-500" /> },
@@ -32,7 +44,26 @@ export default function StudioSidebar({
       icon: <BookOpen className="w-4 h-4 text-slate-500" />,
       badge: recentCount > 0 ? String(recentCount) : undefined,
     },
-    { id: 'profile', label: 'Mon Profil Ghostwriter', icon: <User className="w-4 h-4 text-indigo-500" /> },
+  ];
+
+  const proNavItems: { id: StudioTab; label: string; icon: React.ReactNode; isPro?: boolean }[] = [
+    {
+      id: 'accounts',
+      label: 'Réseaux Connectés',
+      icon: <Share2 className="w-4 h-4 text-emerald-500" />,
+      isPro: true,
+    },
+    {
+      id: 'calendar',
+      label: 'Calendrier & Planning',
+      icon: <Calendar className="w-4 h-4 text-blue-500" />,
+      isPro: true,
+    },
+    {
+      id: 'profile',
+      label: 'Mon Profil Ghostwriter',
+      icon: <User className="w-4 h-4 text-indigo-500" />,
+    },
   ];
 
   return (
@@ -49,36 +80,73 @@ export default function StudioSidebar({
           )}
         </div>
 
-        {/* Navigation list */}
-        <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-none">
-          {navItems.map((item) => {
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onSelectTab(item.id)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-left ${
-                  isActive
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-                }`}
-              >
-                <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span
-                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
-                      isActive ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+        {/* Studio Core Section */}
+        <div className="space-y-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold px-3">
+            Création IA
+          </span>
+          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-none">
+            {mainNavItems.map((item) => {
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectTab(item.id)}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-left ${
+                    isActive
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                  }`}
+                >
+                  <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge && (
+                    <span
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                        isActive ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Pro Distribution & Settings Section */}
+        <div className="space-y-1 pt-2 border-t border-slate-100">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold px-3">
+            Distribution & Identité
+          </span>
+          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-none">
+            {proNavItems.map((item) => {
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectTab(item.id)}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-left ${
+                    isActive
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                  }`}
+                >
+                  <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.isPro && (
+                    <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-700 border border-orange-200">
+                      PRO
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
       {/* User footer */}

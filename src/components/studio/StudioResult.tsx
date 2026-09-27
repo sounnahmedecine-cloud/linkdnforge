@@ -31,6 +31,7 @@ interface StudioResultProps {
   siteOgImage?: string | null;
   isAdmin?: boolean;
   targetUrl?: string;
+  customBufferToken?: string;
   onReset: () => void;
 }
 
@@ -45,6 +46,7 @@ export default function StudioResult({
   siteOgImage,
   isAdmin = false,
   targetUrl,
+  customBufferToken,
   onReset,
 }: StudioResultProps) {
   const [selectedNetworkView, setSelectedNetworkView] = useState<'linkedin' | 'tiktok'>('linkedin');
@@ -144,6 +146,7 @@ export default function StudioResult({
           text: tiktokPost || generatedPost,
           mediaUrl: autopilotVideoUrl || (activeVisualMode === 'screenshot' ? siteScreenshotUrl : siteOgImage) || undefined,
           mediaType: autopilotVideoUrl ? 'video' : 'image',
+          customBufferToken,
         }),
       });
 
@@ -245,15 +248,15 @@ export default function StudioResult({
             </button>
           </div>
 
-          {isAdmin ? (
-            /* Founder Buffer Direct MCP */
+          {isAdmin || !!customBufferToken ? (
+            /* Buffer Direct Publishing */
             <div className="pt-3 border-t border-slate-800 space-y-2.5">
               <div className="flex items-center justify-between text-xs text-slate-400">
                 <span className="font-semibold text-amber-300 flex items-center gap-1.5">
-                  👑 Espace Fondateur (Buffer MCP)
+                  {isAdmin ? '👑 Espace Fondateur (Buffer MCP)' : '⚡ Diffusion 1-Clic Active (Buffer)'}
                 </span>
                 <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">
-                  ✓ Vos Comptes Connectés
+                  ✓ Comptes Connectés
                 </span>
               </div>
               <div className="grid sm:grid-cols-2 gap-2">
@@ -264,7 +267,7 @@ export default function StudioResult({
                   className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-black hover:bg-slate-900 text-white border border-slate-700 transition"
                 >
                   {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>🎵</span>}
-                  Publier sur TikTok (@abbi.muslim)
+                  Publier sur TikTok
                 </button>
                 <button
                   type="button"
@@ -273,7 +276,7 @@ export default function StudioResult({
                   className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white transition shadow-md shadow-pink-500/10"
                 >
                   {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>📸</span>}
-                  Publier sur Insta (@aa.mina212)
+                  Publier sur Instagram
                 </button>
               </div>
               {bufferStatusMessage && (

@@ -1,4 +1,12 @@
-export type StudioTab = 'hub' | 'video' | 'url' | 'idea' | 'history' | 'profile';
+export type StudioTab = 
+  | 'hub' 
+  | 'video' 
+  | 'url' 
+  | 'idea' 
+  | 'history' 
+  | 'profile' 
+  | 'accounts' 
+  | 'calendar';
 
 export interface RecentPost {
   id: string;
@@ -27,4 +35,28 @@ export interface GhostwriterProfile {
   personalExamples: string;
   editorialStyle?: string;
   themes?: string[];
+}
+
+export interface SocialConnections {
+  bufferToken?: string;
+  bufferProfileIdTiktok?: string;
+  bufferProfileIdInstagram?: string;
+  linkedinConnected?: boolean;
+  linkedinProfileName?: string;
+  tiktokAccountName?: string;
+  instagramAccountName?: string;
+  facebookPageName?: string;
+  xHandle?: string;
+  snapchatConnected?: boolean;
+}
+
+export interface ScheduledPost {
+  id: string;
+  title: string;
+  post: string;
+  tiktokPost?: string;
+  networks: ('linkedin' | 'tiktok' | 'instagram' | 'facebook' | 'x')[];
+  scheduledFor: string; // ISO string date
+  status: 'scheduled' | 'published' | 'draft';
+  mediaUrl?: string;
 }
