@@ -1050,31 +1050,51 @@ export default function OnboardingPage() {
 
                 {postExplanation && (
                   <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5 shadow-sm animate-in fade-in duration-300">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
-                      <Sparkles className="w-4 h-4 text-orange-500" />
-                      Pourquoi ce post ? (Transparence de l'IA)
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                        <Sparkles className="w-4 h-4 text-orange-500" />
+                        Pourquoi ce post ? (Transparence & Qualité)
+                      </div>
+                      {postExplanation.qualityCheck && (
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                          <span>✓</span> Source-Check IA Validé
+                        </span>
+                      )}
                     </div>
 
-                    {postExplanation.videoInsights && postExplanation.videoInsights.length > 0 && (
+                    {((postExplanation.sources?.videoFindings && postExplanation.sources.videoFindings.length > 0) || (postExplanation.videoInsights && postExplanation.videoInsights.length > 0)) && (
                       <div className="space-y-1">
                         <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <Film className="w-3.5 h-3.5 text-orange-500" /> Éléments détectés dans la vidéo :
+                          <Film className="w-3.5 h-3.5 text-orange-500" /> Faits et messages extraits de la vidéo :
                         </p>
                         <ul className="text-xs text-slate-600 space-y-1 pl-5 list-disc">
-                          {postExplanation.videoInsights.map((pt: string, idx: number) => (
+                          {(postExplanation.sources?.videoFindings || postExplanation.videoInsights).map((pt: string, idx: number) => (
                             <li key={idx}>{pt}</li>
                           ))}
                         </ul>
                       </div>
                     )}
 
-                    {postExplanation.urlInsights && postExplanation.urlInsights.length > 0 && (
+                    {postExplanation.analysis?.visualElements && postExplanation.analysis.visualElements.length > 0 && (
                       <div className="space-y-1">
                         <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                          <Globe2 className="w-3.5 h-3.5 text-blue-500" /> Informations extraites du site web :
+                          <span>👁️</span> Éléments visuels identifiés à l'écran :
                         </p>
                         <ul className="text-xs text-slate-600 space-y-1 pl-5 list-disc">
-                          {postExplanation.urlInsights.map((pt: string, idx: number) => (
+                          {postExplanation.analysis.visualElements.map((pt: string, idx: number) => (
+                            <li key={idx}>{pt}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {((postExplanation.sources?.webpageFindings && postExplanation.sources.webpageFindings.length > 0) || (postExplanation.urlInsights && postExplanation.urlInsights.length > 0)) && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                          <Globe2 className="w-3.5 h-3.5 text-blue-500" /> Proposition de valeur extraite du site web :
+                        </p>
+                        <ul className="text-xs text-slate-600 space-y-1 pl-5 list-disc">
+                          {(postExplanation.sources?.webpageFindings || postExplanation.urlInsights).map((pt: string, idx: number) => (
                             <li key={idx}>{pt}</li>
                           ))}
                         </ul>
@@ -1084,7 +1104,7 @@ export default function OnboardingPage() {
                     {postExplanation.ghostwriterStyle && (
                       <div className="text-xs text-slate-600 border-t border-slate-100 pt-2.5 flex items-start gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                        <span><strong>Style Ghostwriter :</strong> {postExplanation.ghostwriterStyle}</span>
+                        <span><strong>Style Ghostwriter appliqué :</strong> {postExplanation.ghostwriterStyle}</span>
                       </div>
                     )}
                   </div>

@@ -107,6 +107,19 @@ Réponds strictement selon ce format structuré avec ces balises :
 
 [EXPLANATION_START]
 {
+  "sources": {
+    "videoFindings": ["1er fait précis tiré de la vidéo", "2e fait précis"],
+    "webpageFindings": ["Proposition de valeur ou fait tiré du site web"]
+  },
+  "analysis": {
+    "visualElements": ["Éléments visuels clés détectés à l'écran"],
+    "spokenClaims": ["Affirmation ou message oral marquant prononcé dans la vidéo"]
+  },
+  "qualityCheck": {
+    "passed": true,
+    "hallucinationDetected": false,
+    "notes": "Toutes les affirmations du post sont vérifiées et conformes aux sources fournies."
+  },
   "videoInsights": ["1er élément clé tiré de la vidéo", "2e élément clé"],
   "urlInsights": ["Élément clé ou proposition de valeur tirée du site web"],
   "ghostwriterStyle": "Brève explication du ton et de la structure adoptée"
