@@ -59,8 +59,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (missingChunks.length > 0) {
+      console.warn(`[Upload Chunk] Segments manquants pour ${fileId}:`, missingChunks);
       return NextResponse.json(
-        { error: `Segments manquants détectés : ${missingChunks.join(', ')}. Veuillez réessayer le téléversement.` },
+        { 
+          error: `Segments manquants détectés : ${missingChunks.join(', ')}.`,
+          missingChunks 
+        },
         { status: 400 }
       );
     }
@@ -75,7 +79,7 @@ export async function POST(request: NextRequest) {
       const buffer = fs.readFileSync(partPath);
       writeStream.write(buffer);
       try {
-        fs.unlinkSync(partPath); // Free chunk part immediately
+        fs.unlinkSync(partPath); // Free chunk part immediately after copying
       } catch {
         // Ignore unlink error
       }
@@ -141,25 +145,12 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    // Always clean up assembled file and any orphan parts for this fileId
+    // Only clean up the assembled file when present
     if (assembledFilePath && fs.existsSync(assembledFilePath)) {
       try {
         fs.unlinkSync(assembledFilePath);
       } catch {
         // ignore
-      }
-    }
-    if (fileId) {
-      const tmpDir = os.tmpdir();
-      for (let i = 0; i < totalChunks; i++) {
-        const p = path.join(tmpDir, `upload-${fileId}-${i}.part`);
-        if (fs.existsSync(p)) {
-          try {
-            fs.unlinkSync(p);
-          } catch {
-            // ignore
-          }
-        }
       }
     }
   }

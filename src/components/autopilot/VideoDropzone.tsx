@@ -59,57 +59,52 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
+    const uploadSingleChunk = async (chunkIdx: number): Promise<any> => {
+      const start = chunkIdx * CHUNK_SIZE;
+      const end = Math.min(start + CHUNK_SIZE, file.size);
+      const chunkBlob = file.slice(start, end);
+
+      const formData = new FormData();
+      formData.append('chunk', chunkBlob, file.name);
+      formData.append('fileId', fileId);
+      formData.append('chunkIndex', chunkIdx.toString());
+      formData.append('totalChunks', totalChunks.toString());
+      formData.append('fileName', file.name);
+      formData.append('mimeType', file.type || 'video/mp4');
+
+      const res = await fetch('/api/autopilot/upload-chunk', {
+        method: 'POST',
+        body: formData,
+        signal: abortController.signal,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err: any = new Error(data.error || `Erreur serveur (${res.status}) sur le segment ${chunkIdx + 1}/${totalChunks}`);
+        err.status = res.status;
+        err.missingChunks = data.missingChunks;
+        throw err;
+      }
+      return data;
+    };
+
     try {
       setUploadProgress(2);
       setStatusMessage(totalChunks > 1 ? `Préparation (${totalChunks} segments)...` : 'Préparation du transfert...');
 
-      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-        if (abortController.signal.aborted) {
-          return;
-        }
+      // 1. Upload chunks 0 to totalChunks - 2
+      for (let i = 0; i < totalChunks - 1; i++) {
+        if (abortController.signal.aborted) return;
 
-        const start = chunkIndex * CHUNK_SIZE;
-        const end = Math.min(start + CHUNK_SIZE, file.size);
-        const chunkBlob = file.slice(start, end);
+        const currentPercent = Math.round((i / totalChunks) * 88) + 3;
+        setUploadProgress(currentPercent);
+        setStatusMessage(`Téléversement du segment ${i + 1}/${totalChunks}...`);
 
-        const isLastChunk = chunkIndex === totalChunks - 1;
-
-        if (isLastChunk) {
-          setStatusMessage("Indexation & Analyse multimodale par l'IA Google...");
-          setUploadProgress(92);
-        } else {
-          const currentPercent = Math.round(((chunkIndex) / totalChunks) * 88) + 3;
-          setUploadProgress(currentPercent);
-          setStatusMessage(`Téléversement du segment ${chunkIndex + 1}/${totalChunks}...`);
-        }
-
-        // Retry chunk up to 3 times in case of intermittent network drops
         let attempts = 0;
-        let responseData: any = null;
-
         while (attempts < 3) {
           try {
-            const formData = new FormData();
-            formData.append('chunk', chunkBlob, file.name);
-            formData.append('fileId', fileId);
-            formData.append('chunkIndex', chunkIndex.toString());
-            formData.append('totalChunks', totalChunks.toString());
-            formData.append('fileName', file.name);
-            formData.append('mimeType', file.type || 'video/mp4');
-
-            const res = await fetch('/api/autopilot/upload-chunk', {
-              method: 'POST',
-              body: formData,
-              signal: abortController.signal,
-            });
-
-            if (!res.ok) {
-              const errData = await res.json().catch(() => ({}));
-              throw new Error(errData.error || `Erreur serveur (${res.status}) sur le segment ${chunkIndex + 1}/${totalChunks}`);
-            }
-
-            responseData = await res.json();
-            break; // Chunk succeeded
+            await uploadSingleChunk(i);
+            break;
           } catch (e: any) {
             if (abortController.signal.aborted) return;
             attempts++;
@@ -117,21 +112,51 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
             await new Promise((r) => setTimeout(r, 1200));
           }
         }
+      }
 
-        // Final chunk check
-        if (isLastChunk) {
-          if (!responseData || !responseData.fileUri) {
-            throw new Error("Impossible d'obtenir l'URL du fichier Google AI après l'envoi.");
+      // 2. Upload final chunk (triggers assembly & Google AI indexing)
+      if (abortController.signal.aborted) return;
+      const lastIndex = totalChunks - 1;
+      setUploadProgress(90);
+      setStatusMessage("Indexation & Analyse multimodale par l'IA Google...");
+
+      let finalData: any = null;
+      let finalAttempts = 0;
+
+      while (finalAttempts < 3) {
+        try {
+          finalData = await uploadSingleChunk(lastIndex);
+          break;
+        } catch (err: any) {
+          if (abortController.signal.aborted) return;
+
+          // If server reports specific missing chunks, automatically heal by re-uploading them
+          if (err.missingChunks && Array.isArray(err.missingChunks) && err.missingChunks.length > 0) {
+            console.warn('[VideoDropzone] Renvoy des segments manquants:', err.missingChunks);
+            for (const missingIdx of err.missingChunks) {
+              if (missingIdx < lastIndex) {
+                setStatusMessage(`Re-synchronisation du segment ${missingIdx + 1}/${totalChunks}...`);
+                await uploadSingleChunk(missingIdx);
+              }
+            }
           }
 
-          setUploadProgress(100);
-          setStatusMessage("Vidéo analysée et prête pour l'IA !");
-          onVideoUploaded(responseData.fileUri, {
-            name: file.name,
-            size: file.size,
-          });
+          finalAttempts++;
+          if (finalAttempts >= 3) throw err;
+          await new Promise((r) => setTimeout(r, 1500));
         }
       }
+
+      if (!finalData || !finalData.fileUri) {
+        throw new Error("Impossible d'obtenir l'URL d'analyse du fichier vidéo.");
+      }
+
+      setUploadProgress(100);
+      setStatusMessage("Vidéo analysée et prête pour l'IA !");
+      onVideoUploaded(finalData.fileUri, {
+        name: file.name,
+        size: file.size,
+      });
     } catch (err: any) {
       if (abortController.signal.aborted) return;
       console.error('[VideoDropzone] Erreur:', err);
