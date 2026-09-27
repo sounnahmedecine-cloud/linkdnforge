@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Copy, Check, RefreshCw, ImageIcon, Download, ThumbsUp, MessageSquare, Repeat, Send, MoreHorizontal, Globe2, Sparkles, Film, Zap } from 'lucide-react';
+import { Copy, Check, RefreshCw, ImageIcon, Download, ThumbsUp, MessageSquare, Repeat, Send, MoreHorizontal, Globe2, Sparkles, Film, Zap, Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
@@ -330,6 +330,37 @@ export default function OnboardingPage() {
     a.download = `hero-screenshot-${Date.now()}.jpg`;
     a.target = '_blank';
     a.click();
+  };
+
+  const [isPublishingBuffer, setIsPublishingBuffer] = useState(false);
+  const [bufferStatusMessage, setBufferStatusMessage] = useState<string | null>(null);
+
+  const handlePublishBuffer = async (channel: 'tiktok' | 'instagram') => {
+    setIsPublishingBuffer(true);
+    setBufferStatusMessage(null);
+    try {
+      const res = await fetch('/api/autopilot/publish-buffer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel,
+          text: tiktokPost || generatedPost,
+          mediaUrl: autopilotVideoUrl || (activeVisualMode === 'screenshot' ? siteScreenshotUrl : siteOgImage) || undefined,
+          mediaType: autopilotVideoUrl ? 'video' : 'image',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la publication');
+
+      setBufferStatusMessage(`✓ Post envoyé avec succès sur ${channel === 'tiktok' ? 'TikTok (@abbi.muslim)' : 'Instagram (@aa.mina212)'} via Buffer !`);
+      setTimeout(() => setBufferStatusMessage(null), 6000);
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || 'Erreur lors de la publication Buffer.');
+    } finally {
+      setIsPublishingBuffer(false);
+    }
   };
 
   return (
@@ -805,6 +836,40 @@ export default function OnboardingPage() {
                       >
                         <span>📱</span> Partager sur TikTok
                       </button>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800 space-y-2.5">
+                      <div className="flex items-center justify-between text-xs text-slate-400">
+                        <span className="font-semibold text-slate-300">⚡ Publication Directe (Buffer MCP)</span>
+                        <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">
+                          ✓ Comptes Connectés
+                        </span>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handlePublishBuffer('tiktok')}
+                          disabled={isPublishingBuffer}
+                          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-black hover:bg-slate-900 text-white border border-slate-700 transition"
+                        >
+                          {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>🎵</span>}
+                          Publier sur TikTok (@abbi.muslim)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePublishBuffer('instagram')}
+                          disabled={isPublishingBuffer}
+                          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white transition shadow-md shadow-pink-500/10"
+                        >
+                          {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>📸</span>}
+                          Publier sur Insta (@aa.mina212)
+                        </button>
+                      </div>
+                      {bufferStatusMessage && (
+                        <p className="text-xs text-center font-semibold text-emerald-400 mt-1 animate-in fade-in">
+                          {bufferStatusMessage}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ) : (
