@@ -1,20 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { 
   Copy, 
   Check, 
-  CheckCircle2, 
-  Clock, 
-  ShieldCheck, 
-  ThumbsUp, 
-  MessageSquare, 
-  Repeat, 
-  Send, 
   Globe2, 
   Film, 
-  Sparkles
+  Sparkles,
+  ArrowRight,
+  UploadCloud,
+  X,
+  Loader2,
+  ShoppingBag,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import ForgeLoader from '@/components/ui/ForgeLoader';
@@ -28,9 +27,12 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const t = useTranslations('onboarding');
   const tLanding = useTranslations('landing');
   
-  const [activeMode, setActiveMode] = useState<'url' | 'video' | 'idea'>('url');
   const [inputText, setInputText] = useState('');
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [isDraggingVideo, setIsDraggingVideo] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingStepLabel, setGeneratingStepLabel] = useState<string>('');
+  
   const [generatedPost, setGeneratedPost] = useState('');
   const [tiktokPost, setTiktokPost] = useState('');
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
@@ -40,14 +42,100 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [isYearly, setIsYearly] = useState(true);
 
-  // Preset demo values
-  const PRESET_URL = 'https://linkedinforge.fr';
-  const PRESET_PRODUCT = 'https://dubainegoce.fr/parfum/eclair-lattafa-100ml';
-  const PRESET_IDEA = "Pourquoi la plupart des créateurs sur LinkedIn abandonnent après 3 semaines (et la méthode pour durer)";
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSelectPreset = (mode: 'url' | 'idea', value: string) => {
-    setActiveMode(mode);
-    setInputText(value);
+  // Intelligent Real-time Detection
+  const detection = useMemo(() => {
+    if (videoFile) {
+      return {
+        type: 'video' as const,
+        icon: '🎥',
+        badge: 'Vidéo détectée',
+        subtext: `${videoFile.name} (${(videoFile.size / (1024 * 1024)).toFixed(1)} Mo) — Analyse audio & visuelle prête`,
+        highlightColor: 'border-orange-500/50 bg-orange-950/30 text-orange-400',
+      };
+    }
+
+    const trimmed = inputText.trim();
+    if (!trimmed) return null;
+
+    const isUrl = /^https?:\/\//i.test(trimmed) || /^(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/i.test(trimmed);
+
+    if (isUrl) {
+      const lower = trimmed.toLowerCase();
+      if (
+        lower.includes('/product') ||
+        lower.includes('/produit') ||
+        lower.includes('/parfum') ||
+        lower.includes('/item') ||
+        lower.includes('/shop') ||
+        lower.includes('dubainegoce')
+      ) {
+        return {
+          type: 'url_product' as const,
+          icon: '🛍️',
+          badge: 'Page Produit détectée',
+          subtext: 'Extraction des notes, proposition de valeur & visuel Hero HD',
+          highlightColor: 'border-amber-500/50 bg-amber-950/30 text-amber-400',
+        };
+      }
+      if (lower.includes('/blog') || lower.includes('/article') || lower.includes('/news') || lower.includes('/post')) {
+        return {
+          type: 'url_article' as const,
+          icon: '📰',
+          badge: 'Article de fond détecté',
+          subtext: 'Synthèse des thèses clés, arguments & point de vue éditorial',
+          highlightColor: 'border-blue-500/50 bg-blue-950/30 text-blue-400',
+        };
+      }
+      return {
+        type: 'url_generic' as const,
+        icon: '🔗',
+        badge: 'Page Web détectée',
+        subtext: 'Scraping automatique de l’offre & visuel principal',
+        highlightColor: 'border-blue-500/50 bg-blue-950/30 text-blue-400',
+      };
+    }
+
+    return {
+      type: 'idea' as const,
+      icon: '✍️',
+      badge: 'Sujet ou Idée détecté',
+      subtext: 'Votre Ghostwriter structure l’accroche, le corps et le CTA',
+      highlightColor: 'border-purple-500/50 bg-purple-950/30 text-purple-400',
+    };
+  }, [videoFile, inputText]);
+
+  // Handle Drag & Drop of Video File
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingVideo(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingVideo(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingVideo(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('video/')) {
+        setVideoFile(file);
+      }
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.type.startsWith('video/')) {
+        setVideoFile(file);
+      }
+    }
   };
 
   const handleGenerate = async () => {
@@ -71,57 +159,68 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
     setGeneratedPost('');
     setTiktokPost('');
     setScreenshotUrl(null);
-    
+    setDetectedClassification(null);
+
     try {
-      const isUrl = activeMode === 'url' || inputText.startsWith('http');
+      let uploadedVideoUrl = '';
+
+      // 1. If video file attached, upload first
+      if (videoFile) {
+        setGeneratingStepLabel('Envoi et analyse audio/vision de la vidéo...');
+        const formData = new FormData();
+        formData.append('file', videoFile);
+
+        const uploadRes = await fetch('/api/autopilot/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error('Erreur lors du traitement de la vidéo.');
+        }
+
+        const uploadData = await uploadRes.json();
+        uploadedVideoUrl = uploadData.googleFileUri || uploadData.fileUrl || '';
+      }
+
+      setGeneratingStepLabel('Compréhension du contenu & Rédaction Ghostwriter...');
+
+      const trimmed = inputText.trim();
+      const isUrl = /^https?:\/\//i.test(trimmed) || /^(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/i.test(trimmed);
+
       const payload: any = {
         locale,
+        editorialStyle: 'auto',
         tone: 'expert',
-        themes: ['Innovation', 'Entrepreneuriat'],
+        videoUrl: uploadedVideoUrl || undefined,
+        videoMeta: videoFile ? { name: videoFile.name, size: videoFile.size } : undefined,
+        targetUrl: isUrl ? (trimmed.startsWith('http') ? trimmed : `https://${trimmed}`) : undefined,
+        postSubject: !isUrl && trimmed ? trimmed : undefined,
       };
-
-      if (isUrl) {
-        payload.targetUrl = inputText || PRESET_URL;
-      } else {
-        payload.postSubject = inputText || PRESET_IDEA;
-      }
 
       const response = await fetch('/api/autopilot/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        // Fallback to legacy forge-post
-        const fallbackRes = await fetch('/api/forge-post', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            targetUrl: isUrl ? (inputText || PRESET_URL) : undefined,
-            postSubject: !isUrl ? (inputText || PRESET_IDEA) : undefined,
-            tone: 'expert',
-            themes: ['Innovation', 'SaaS'],
-            locale,
-          })
-        });
-        if (!fallbackRes.ok) throw new Error('Erreur API');
-        const fallbackData = await fallbackRes.json();
-        setGeneratedPost(fallbackData.post);
-      } else {
-        const data = await response.json();
-        setGeneratedPost(data.post);
-        setTiktokPost(data.tiktokPost || '');
-        setDetectedClassification(data.classification || null);
-        setScreenshotUrl(data.screenshotUrl || null);
+        throw new Error('Erreur lors de la génération.');
       }
 
+      const data = await response.json();
+      setGeneratedPost(data.post);
+      setTiktokPost(data.tiktokPost || '');
+      setDetectedClassification(data.classification || null);
+      setScreenshotUrl(data.screenshotUrl || null);
+
       localStorage.setItem('linkdnforge_free_trials_count', (trialCount + 1).toString());
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setGeneratedPost(t('result.genericError'));
+      setGeneratedPost(error.message || t('result.genericError'));
     } finally {
       setIsGenerating(false);
+      setGeneratingStepLabel('');
     }
   };
 
@@ -205,151 +304,166 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
     );
   }
 
+  const hasInput = !!videoFile || inputText.trim().length > 0;
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 text-left">
-      {/* 1. VISUAL ARCHITECTURE SHOWCASE (The Core Loop: Video + URL + Idea -> AI -> Social Post) */}
-      <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl space-y-6">
-        <div className="text-center space-y-1">
-          <span className="text-[11px] font-mono uppercase tracking-widest text-orange-400 font-bold">
+      {/* 1. UNIVERSAL TRANSFORMATION ENGINE (Clean, focused, intelligent) */}
+      <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl space-y-6 relative overflow-hidden">
+        {/* Glow accent */}
+        <div className="absolute top-0 right-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Clean Header */}
+        <div className="text-center space-y-2 relative z-10">
+          <span className="text-[11px] font-mono uppercase tracking-widest text-orange-400 font-bold block">
             Le Moteur de Transformation
           </span>
-          <h3 className="font-display font-bold text-2xl sm:text-3xl text-white">
-            Une vidéo. Une URL. Une idée. Votre post est forgé.
-          </h3>
+          <h2 className="font-display font-bold text-2xl sm:text-4xl text-white tracking-tight">
+            Une vidéo. Une URL. Une idée. Votre contenu est forgé.
+          </h2>
         </div>
 
-        {/* 3 Source Tabs */}
-        <div className="grid md:grid-cols-3 gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveMode('video');
-              setInputText('');
-            }}
-            className={`p-4 rounded-2xl border text-left transition duration-200 ${
-              activeMode === 'video'
-                ? 'bg-slate-900 border-orange-500 shadow-lg shadow-orange-500/10'
-                : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center gap-2 text-orange-400 font-bold text-sm mb-1">
-              <Film className="w-4 h-4" /> 1. Vidéo Réelle
-            </div>
-            <p className="text-xs text-slate-400 leading-snug">
-              L'IA analyse l'image et la voix pour en extraire les messages clés.
-            </p>
-          </button>
+        {/* Hidden File Input for Video */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="video/mp4,video/quicktime,video/webm"
+          className="hidden"
+          onChange={handleFileChange}
+        />
 
-          <button
-            type="button"
-            onClick={() => {
-              setActiveMode('url');
-              setInputText(PRESET_URL);
-            }}
-            className={`p-4 rounded-2xl border text-left transition duration-200 ${
-              activeMode === 'url'
-                ? 'bg-slate-900 border-blue-500 shadow-lg shadow-blue-500/10'
-                : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center gap-2 text-blue-400 font-bold text-sm mb-1">
-              <Globe2 className="w-4 h-4" /> 2. URL de Page Web
+        {/* The Single Universal Smart Input Zone */}
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`relative rounded-2xl border-2 transition-all duration-200 bg-slate-900/90 p-4 sm:p-5 ${
+            isDraggingVideo
+              ? 'border-orange-500 bg-orange-950/20 shadow-lg shadow-orange-500/20'
+              : 'border-slate-700/80 hover:border-slate-600 focus-within:border-orange-500'
+          }`}
+        >
+          {/* If Video Attached */}
+          {videoFile ? (
+            <div className="flex items-center justify-between bg-slate-800/80 border border-slate-700 rounded-xl p-3.5 mb-3 animate-in fade-in">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0">
+                  <Film className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{videoFile.name}</p>
+                  <p className="text-xs text-slate-400">
+                    {(videoFile.size / (1024 * 1024)).toFixed(1)} Mo · Vidéo prête pour analyse
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVideoFile(null)}
+                className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition"
+                title="Supprimer la vidéo"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-xs text-slate-400 leading-snug">
-              Capture la section Hero HD et extrait la proposition de valeur.
-            </p>
-          </button>
+          ) : null}
 
-          <button
-            type="button"
-            onClick={() => {
-              setActiveMode('idea');
-              setInputText(PRESET_IDEA);
-            }}
-            className={`p-4 rounded-2xl border text-left transition duration-200 ${
-              activeMode === 'idea'
-                ? 'bg-slate-900 border-purple-500 shadow-lg shadow-purple-500/10'
-                : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center gap-2 text-purple-400 font-bold text-sm mb-1">
-              <Sparkles className="w-4 h-4" /> 3. Sujet ou Idée
+          {/* Universal Textarea / Input */}
+          <textarea
+            ref={textareaRef}
+            rows={videoFile ? 2 : 3}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={
+              videoFile
+                ? "Ajoutez une URL de produit ou une consigne optionnelle..."
+                : "Collez une URL, déposez une vidéo ou écrivez votre idée..."
+            }
+            className="w-full bg-transparent text-white placeholder-slate-500 focus:outline-none text-base sm:text-lg resize-none leading-relaxed"
+          />
+
+          {/* Bottom Bar inside the Input Container */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-800">
+            {/* Visual Repères (Not forced radio choices, just visual anchors & quick helpers) */}
+            <div className="flex items-center gap-4 text-xs font-semibold text-slate-400 select-none">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 hover:text-orange-400 transition"
+                title="Choisir un fichier vidéo"
+              >
+                <span>🎥</span>
+                <span>Vidéo</span>
+              </button>
+              <span className="text-slate-700">•</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!inputText) setInputText('https://dubainegoce.fr/parfum/eclair-lattafa-100ml');
+                  textareaRef.current?.focus();
+                }}
+                className="flex items-center gap-1.5 hover:text-blue-400 transition"
+                title="Exemple de lien"
+              >
+                <span>🔗</span>
+                <span>URL</span>
+              </button>
+              <span className="text-slate-700">•</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!inputText) setInputText("Pourquoi la plupart des créateurs sur LinkedIn abandonnent après 3 semaines...");
+                  textareaRef.current?.focus();
+                }}
+                className="flex items-center gap-1.5 hover:text-amber-400 transition"
+                title="Exemple d'idée"
+              >
+                <span>✍️</span>
+                <span>Idée</span>
+              </button>
             </div>
-            <p className="text-xs text-slate-400 leading-snug">
-              Structure votre pensée avec un hook fort et des arguments percutants.
-            </p>
-          </button>
+
+            {/* Action Button */}
+            <Button
+              onClick={handleGenerate}
+              disabled={isGenerating || !hasInput}
+              size="lg"
+              className="py-3 px-6 text-sm sm:text-base font-bold bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white rounded-xl shadow-lg shadow-orange-500/25 transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 shrink-0"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Forge en cours...</span>
+                </>
+              ) : (
+                <>
+                  <span>Forger mon contenu</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
-        {/* AI Multimodal Processing Bridge */}
-        <div className="flex items-center justify-center gap-2 text-xs font-mono text-orange-300 py-1.5 px-4 bg-orange-950/40 border border-orange-900/60 rounded-xl text-center">
-          <span className="text-orange-400">✦</span>
-          <span>ANALYSE MULTIMODALE & GHOSTWRITER ADAPTÉ À VOTRE VOIX</span>
-          <span className="text-orange-400">✦</span>
-        </div>
-
-        {/* Live Input Field according to active mode */}
-        {!generatedPost && !isGenerating && (
-          <div className="space-y-3 pt-2">
-            {activeMode === 'video' ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center space-y-3">
-                <p className="text-sm text-slate-300 font-medium">
-                  🎥 Déposez une vidéo (jusqu'à 2 Go) dans votre espace pour générer votre post en mode automatique.
-                </p>
-                <Button href="/onboarding" size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/25">
-                  Tester avec ma vidéo (Gratuit)
-                </Button>
+        {/* Dynamic Real-time Detection Banner (The Interface Transforms Upon Detection) */}
+        {detection && (
+          <div
+            className={`border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-in fade-in duration-200 ${detection.highlightColor}`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl shrink-0">{detection.icon}</span>
+              <div>
+                <span className="font-bold text-sm text-white block">
+                  {detection.badge}
+                </span>
+                <span className="text-slate-300 text-xs">
+                  {detection.subtext}
+                </span>
               </div>
-            ) : (
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder={
-                    activeMode === 'url'
-                      ? "Collez l'URL de votre site ou produit (ex: https://mon-saas.com)..."
-                      : "Entrez votre sujet ou idée (ex: Comment j'ai lancé mon projet)..."
-                  }
-                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm sm:text-base font-medium"
-                />
-                <Button
-                  onClick={handleGenerate}
-                  size="lg"
-                  className="px-7 py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-xl whitespace-nowrap shadow-lg shadow-orange-500/30 transition-transform hover:scale-[1.02]"
-                >
-                  Forger mon post
-                </Button>
-              </div>
-            )}
-
-            {/* Quick Demo Click Presets */}
-            {activeMode !== 'video' && (
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 pt-1">
-                <span className="font-semibold text-slate-500">Exemples rapides :</span>
-                <button
-                  type="button"
-                  onClick={() => handleSelectPreset('url', PRESET_URL)}
-                  className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
-                >
-                  🌐 URL SaaS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSelectPreset('url', PRESET_PRODUCT)}
-                  className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-amber-300 hover:text-white hover:border-amber-500/50 transition font-semibold"
-                >
-                  🛍️ Produit : Dubaï Négoce (Parfum)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSelectPreset('idea', PRESET_IDEA)}
-                  className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
-                >
-                  💡 Idée : Création de contenu
-                </button>
-              </div>
-            )}
+            </div>
+            <span className="font-mono text-[11px] font-bold px-3 py-1 rounded-full bg-white/10 text-white border border-white/10 shrink-0 self-start sm:self-auto">
+              ✓ Reconnaissance IA
+            </span>
           </div>
         )}
       </div>
@@ -359,7 +473,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
         <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl shadow-slate-200/50 border border-slate-200 animate-in zoom-in-95 fade-in duration-300 space-y-6">
           {isGenerating ? (
             <div className="py-12 space-y-8 text-center">
-              <ForgeLoader label="Compréhension du contenu & Rédaction Ghostwriter..." />
+              <ForgeLoader label={generatingStepLabel || "Compréhension du contenu & Rédaction Ghostwriter..."} />
               <div className="max-w-xl mx-auto space-y-3 pt-4">
                 <div className="h-4 bg-slate-100 rounded-md animate-pulse w-full" />
                 <div className="h-4 bg-slate-100 rounded-md animate-pulse w-5/6 mx-auto" />
@@ -498,11 +612,11 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                   {copied ? 'Copié dans le presse-papier !' : 'Copier le texte'}
                 </button>
                 <Button
-                  href="/onboarding"
+                  href="/dashboard"
                   size="lg"
                   className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25"
                 >
-                  <span>🚀</span> Continuer dans l'Atelier
+                  <span>🚀</span> Ouvrir dans le Studio
                 </Button>
               </div>
             </div>
