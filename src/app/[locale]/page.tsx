@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, PlayCircle } from 'lucide-react';
+import { ArrowRight, PlayCircle, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import Logo, { AnvilMark } from '@/components/ui/Logo';
@@ -176,6 +176,21 @@ export default function Home() {
                 </Button>
               </div>
             ))}
+          </div>
+
+          <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-10 mt-16 pt-10 border-t border-slate-200 text-slate-600 font-medium max-w-4xl mx-auto">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              <span>Satisfait ou remboursé</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-6 h-6 text-orange-500" />
+              <span>Essai gratuit de 14 jours</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-6 h-6 text-blue-500" />
+              <span>Annulable sans frais</span>
+            </div>
           </div>
         </div>
       </section>

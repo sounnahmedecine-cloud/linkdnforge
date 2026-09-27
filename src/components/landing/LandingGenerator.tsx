@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ChevronDown, ChevronUp, Copy, Check, RefreshCw, Zap } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, Check, RefreshCw, Zap, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import ForgeLoader from '@/components/ui/ForgeLoader';
 import {
@@ -179,6 +179,21 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                </Button>
              </div>
           ))}
+        </div>
+
+        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 mt-10 pt-8 border-t border-slate-100 text-sm text-slate-600 font-medium max-w-3xl mx-auto">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            <span>Satisfait ou remboursé</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-orange-500" />
+            <span>Essai gratuit de 14 jours</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-blue-500" />
+            <span>Annulable sans frais</span>
+          </div>
         </div>
       </div>
     );
