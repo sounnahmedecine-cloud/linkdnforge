@@ -26,6 +26,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const [generatedPost, setGeneratedPost] = useState('');
   const [copied, setCopied] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isYearly, setIsYearly] = useState(true);
   
   const [formData, setFormData] = useState({
     targetUrl: '',
@@ -123,13 +124,26 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
           Pour continuer à générer des posts viraux avec toutes les options avancées (Ton, Style, Visuels...), passez à la vitesse supérieure.
         </p>
         
-        <div className="grid sm:grid-cols-2 gap-6 mt-8 text-left">
-          {plans.map((plan, index) => (
+        <div className="flex justify-center items-center gap-4 mt-6">
+          <span className={`text-sm font-bold transition-colors ${!isYearly ? 'text-black' : 'text-slate-400'}`}>Mensuel</span>
+          <button 
+            onClick={() => setIsYearly(!isYearly)}
+            className="relative inline-flex h-8 w-16 items-center rounded-full bg-orange-500 transition-colors focus:outline-none shadow-inner"
+          >
+            <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-md ${isYearly ? 'translate-x-9' : 'translate-x-1'}`} />
+          </button>
+          <span className={`text-sm font-bold transition-colors ${isYearly ? 'text-black' : 'text-slate-400'} flex items-center gap-2`}>
+            Annuel <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-md shadow-sm">PROMO</span>
+          </span>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-8 mt-8 text-left max-w-3xl mx-auto">
+          {plans.filter(p => p.desc.includes('an') === isYearly).map((plan, index) => (
              <div
                key={plan.name + index}
-               className={`relative rounded-[1.5rem] p-6 border-2 transition-all duration-300 bg-white ${
+               className={`relative rounded-[1.5rem] p-8 border-2 transition-all duration-300 bg-white ${
                  plan.popular
-                   ? 'border-orange-500 shadow-xl shadow-orange-500/10'
+                   ? 'border-orange-500 shadow-xl shadow-orange-500/10 scale-105 z-10'
                    : 'border-slate-200 hover:border-orange-300'
                }`}
              >
@@ -138,13 +152,23 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                    {tLanding('pricingTeaser.popular')}
                  </div>
                )}
-               <h3 className="text-xl font-display font-bold mb-1 text-black">{plan.name}</h3>
-               <p className="font-mono text-3xl font-black mb-1">
+               <h3 className="text-2xl font-display font-bold mb-2 text-black text-center">{plan.name}</h3>
+               <p className="font-mono text-4xl sm:text-5xl font-black mb-1 text-center mt-4">
                  <span className={plan.popular ? 'text-orange-500' : 'text-black'}>{plan.price}</span>
                </p>
-               <p className="text-xs text-slate-500 mb-6 font-medium">/mois</p>
+               <p className="text-xs text-slate-500 mb-6 font-medium text-center">/mois</p>
+               
+               <ul className="space-y-4 mb-8">
+                 {plan.features.map((f: string) => (
+                   <li key={f} className="flex gap-3 text-sm text-slate-700 font-medium">
+                     <span className="text-orange-500 font-black flex items-center justify-center w-5">✓</span>
+                     <span>{f}</span>
+                   </li>
+                 ))}
+               </ul>
+
                <Button 
-                 href={`/api/stripe/checkout?plan=${plan.name.toLowerCase()}&billing=${plan.desc.includes('an') || plan.desc.includes('year') ? 'yearly' : 'monthly'}`} 
+                 href={`/api/stripe/checkout?plan=${plan.name.toLowerCase()}&billing=${isYearly ? 'yearly' : 'monthly'}`} 
                  className={`w-full py-3 text-sm font-bold rounded-xl transition-transform hover:scale-105 ${
                    plan.popular 
                      ? 'bg-orange-500 hover:bg-orange-600 text-white' 
