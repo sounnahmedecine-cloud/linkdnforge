@@ -5,8 +5,15 @@ import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
+const DEFAULT_POSTHOG_TOKEN = 'phc_tCtVFr38mF6zoRaDVaiQgGWWe6GhzoPbctxKdbNWDgbr';
+const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
+
 function getPostHogToken() {
-  return process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN || process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  return (
+    process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN ||
+    process.env.NEXT_PUBLIC_POSTHOG_KEY ||
+    DEFAULT_POSTHOG_TOKEN
+  );
 }
 
 function PostHogPageView() {
@@ -33,7 +40,7 @@ function PostHogPageView() {
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const posthogKey = getPostHogToken();
-    const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com';
+    const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || DEFAULT_POSTHOG_HOST;
 
     if (posthogKey && typeof window !== 'undefined' && !posthog.__loaded) {
       posthog.init(posthogKey, {
@@ -41,6 +48,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         person_profiles: 'identified_only',
         capture_pageview: false, // Captured manually via PostHogPageView for accurate SPA tracking
         capture_pageleave: true,
+        loaded: (ph) => {
+          ph.capture('$pageview');
+        },
       });
     }
   }, []);
