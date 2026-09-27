@@ -63,15 +63,19 @@ export default function SocialConnectionsView({
 
   const isBufferConfigured = !!formData.bufferToken || isAdmin;
 
-  // Test Publish Helpers (Opens native share dialogue with sample text)
+  // Test Publish Helpers (Opens native share dialogue with sample text copied)
   const testShareLinkedIn = () => {
-    const text = encodeURIComponent('🚀 Test de connexion réussi depuis mon Studio LinkedInForge ! Mes futurs posts seront forgés et diffusés en 1 clic.');
-    window.open(`https://www.linkedin.com/feed/?text=${text}`, '_blank');
+    const sampleText = '🚀 Test de connexion réussi depuis mon Studio LinkedInForge ! Mes futurs posts seront forgés et diffusés en 1 clic.';
+    navigator.clipboard.writeText(sampleText);
+    window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
+    alert('📋 Texte de test copié dans votre presse-papier ! Faites simplement "Ctrl + V" (Coller) dans la boîte LinkedIn qui vient de s\'ouvrir.');
   };
 
   const testShareFacebook = () => {
-    const text = encodeURIComponent('🚀 Test de connexion réussi depuis mon Studio LinkedInForge !');
-    window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, '_blank');
+    const sampleText = '🚀 Test de connexion réussi depuis mon Studio LinkedInForge !';
+    navigator.clipboard.writeText(sampleText);
+    window.open('https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flinkedinforge.fr', '_blank');
+    alert('📋 Texte de test copié ! Faites simplement "Ctrl + V" (Coller) dans la fenêtre Facebook.');
   };
 
   const testShareX = () => {
@@ -92,7 +96,7 @@ export default function SocialConnectionsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition"
+          className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour au Studio
@@ -108,21 +112,21 @@ export default function SocialConnectionsView({
           <span>🔗</span> Comptes & Réseaux Connectés
         </h2>
         <p className="text-sm text-slate-500">
-          Enregistrez vos comptes pour activer la diffusion 1-clic. Dès qu'un post est forgé dans votre Studio, vous pouvez le publier instantanément sans copier-coller manuel.
+          Enregistrez vos comptes pour activer la diffusion 1-clic. Dès qu'un post est forgé dans votre Studio, vous pouvez le diffuser instantanément sur tous vos canaux.
         </p>
       </div>
 
       {/* Explication claire sur le fonctionnement */}
       <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 sm:p-5 flex items-start gap-3 text-xs text-blue-900">
         <HelpCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <strong className="block font-bold text-blue-950 text-sm">Comment fonctionne la diffusion sur vos réseaux ?</strong>
-          <ul className="list-disc pl-4 space-y-1 text-blue-800 leading-relaxed">
+        <div className="space-y-2">
+          <strong className="block font-bold text-blue-950 text-sm">Comment fonctionne la multi-diffusion ?</strong>
+          <ul className="list-disc pl-4 space-y-1.5 text-blue-800 leading-relaxed">
             <li>
-              <strong>LinkedIn & Facebook :</strong> Dès que votre post est forgé dans le Studio, le bouton « Publier » ouvre directement la fenêtre officielle pré-remplie sur votre compte connecté.
+              <strong>Mode 1-Clic Assisté (Par défaut) :</strong> Dès qu'un post est forgé, le bouton « Diffuser » copie automatiquement l'intégralité du texte dans votre presse-papier et ouvre la boîte de publication LinkedIn ou Facebook. Il ne vous reste qu'à faire <strong>Ctrl + V</strong> (Coller) et cliquer sur Publier.
             </li>
             <li>
-              <strong>TikTok & Instagram :</strong> Si vous activez la passerelle Buffer ci-dessous, la publication est 100% automatique en arrière-plan sans ouvrir d'application.
+              <strong>Mode 100% Automatique API (Zéro action) :</strong> Si vous activez la passerelle Buffer ci-dessous (disponible pour TikTok, Instagram, LinkedIn, etc.), la publication est injectée directement sur vos comptes en tâche de fond sans même ouvrir d'onglet.
             </li>
           </ul>
         </div>

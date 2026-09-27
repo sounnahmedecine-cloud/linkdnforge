@@ -18,6 +18,8 @@ import {
   Loader2,
   Share2,
   CheckCircle2,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import ForgeLoader from '@/components/ui/ForgeLoader';
 
@@ -72,6 +74,7 @@ export default function StudioResult({
   ]);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [broadcastSuccessMessage, setBroadcastSuccessMessage] = useState<string | null>(null);
+  const [showPublishAssistant, setShowPublishAssistant] = useState(false);
 
   const handleToggleBroadcastNetwork = (netId: string) => {
     setSelectedBroadcastNetworks((prev) =>
@@ -89,7 +92,7 @@ export default function StudioResult({
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 3000);
     } catch (e) {
       console.warn('Clipboard write error', e);
     }
@@ -120,31 +123,29 @@ export default function StudioResult({
     }
 
     // 3. Web share native windows (LinkedIn, Facebook, X)
+    // Open LinkedIn with shareActive=true to open the post composer directly
     if (selectedBroadcastNetworks.includes('linkedin')) {
-      const text = encodeURIComponent(generatedPost);
-      window.open(`https://www.linkedin.com/feed/?text=${text}`, '_blank');
+      window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
       broadcastLog.push('LinkedIn');
-    }
-
-    if (selectedBroadcastNetworks.includes('facebook')) {
-      const text = encodeURIComponent(generatedPost);
-      window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, '_blank');
+    } else if (selectedBroadcastNetworks.includes('facebook')) {
+      const fbUrl = encodeURIComponent(targetUrl || 'https://linkedinforge.fr');
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${fbUrl}`, '_blank');
       broadcastLog.push('Facebook');
-    }
-
-    if (selectedBroadcastNetworks.includes('x')) {
+    } else if (selectedBroadcastNetworks.includes('x')) {
       const text = encodeURIComponent(generatedPost.slice(0, 280));
       window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
       broadcastLog.push('X');
     }
 
     setIsBroadcasting(false);
-    setBroadcastSuccessMessage(`🎉 Diffusion lancée sur ${broadcastLog.join(', ')} ! Le texte est copié.`);
+    setShowPublishAssistant(true);
+    setBroadcastSuccessMessage(`🎉 Post copié ! Collez (Ctrl+V) dans la boîte LinkedIn.`);
     setTimeout(() => setBroadcastSuccessMessage(null), 8000);
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(generatedPost);
+    const textToCopy = selectedNetworkView === 'tiktok' && tiktokPost ? tiktokPost : generatedPost;
+    navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -157,17 +158,22 @@ export default function StudioResult({
   };
 
   const handleShareLinkedIn = () => {
-    const text = encodeURIComponent(generatedPost);
-    window.open(`https://www.linkedin.com/feed/?text=${text}`, '_blank');
+    navigator.clipboard.writeText(generatedPost);
+    setCopied(true);
+    window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
+    setShowPublishAssistant(true);
   };
 
   const handleShareFacebook = () => {
-    const text = encodeURIComponent(generatedPost);
-    window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, '_blank');
+    navigator.clipboard.writeText(generatedPost);
+    setCopied(true);
+    const fbUrl = encodeURIComponent(targetUrl || 'https://linkedinforge.fr');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${fbUrl}`, '_blank');
+    setShowPublishAssistant(true);
   };
 
   const handleShareTwitter = () => {
-    const text = encodeURIComponent(generatedPost);
+    const text = encodeURIComponent(generatedPost.slice(0, 280));
     window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
   };
 
@@ -633,6 +639,136 @@ export default function StudioResult({
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Nouveau post</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Assistant de Publication 1-Clic Modal */}
+      {showPublishAssistant && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-lg w-full p-6 sm:p-7 text-white space-y-6 shadow-2xl relative">
+            {/* Header with checkmark */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/20 shrink-0">
+                  ✓
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold font-display text-white">
+                    Post Copié & Prêt à Publier !
+                  </h3>
+                  <p className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" /> Prêt dans votre presse-papier
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPublishAssistant(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Instruction Banner */}
+            <div className="bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-3">
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                <span>💡</span>
+                <span>Comment publier en 2 secondes :</span>
+              </div>
+              <div className="space-y-2.5 text-xs text-slate-200">
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p>Votre texte a été <strong>automatiquement copié</strong> dans votre presse-papier.</p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <p>Dans la boîte de publication (LinkedIn ou Facebook) qui vient de s'ouvrir, faites :</p>
+                </div>
+                <div className="ml-7 bg-slate-950/90 border border-amber-500/50 rounded-xl p-3 flex items-center justify-between text-xs">
+                  <span className="font-mono text-amber-300 font-bold text-sm">
+                    👉 Touche Ctrl + V (ou Coller)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg font-bold text-[11px] flex items-center gap-1 transition shadow-xs"
+                  >
+                    {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copied ? 'Recopié !' : 'Recopier'}
+                  </button>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p>Cliquez sur <strong>Publier</strong> sur le réseau social. Votre post est en ligne !</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct Open Buttons for selected channels */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Ouvrir directement vos fenêtres de publication :
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <a
+                  href="https://www.linkedin.com/feed/?shareActive=true"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-[#0A66C2] hover:bg-[#004182] text-white flex items-center justify-between text-xs font-bold transition shadow-xs"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded bg-white text-[#0A66C2] flex items-center justify-center font-bold text-xs">in</span>
+                    Boîte LinkedIn
+                  </span>
+                  <ExternalLink className="w-4 h-4 opacity-80" />
+                </a>
+
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(targetUrl || 'https://linkedinforge.fr')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-[#1877F2] hover:bg-[#0c5dc7] text-white flex items-center justify-between text-xs font-bold transition shadow-xs"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded bg-white text-[#1877F2] flex items-center justify-center font-bold text-xs">f</span>
+                    Boîte Facebook
+                  </span>
+                  <ExternalLink className="w-4 h-4 opacity-80" />
+                </a>
+
+                {selectedBroadcastNetworks.includes('x') && (
+                  <a
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(generatedPost.slice(0, 280))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded-xl bg-black border border-slate-700 hover:border-slate-500 text-white flex items-center justify-between text-xs font-bold transition shadow-xs"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-5 h-5 flex items-center justify-center font-bold text-xs">𝕏</span>
+                      Poster sur X
+                    </span>
+                    <ExternalLink className="w-4 h-4 opacity-80" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Note on Buffer API 100% automated */}
+            <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-400 flex items-center justify-between">
+              <span>⚡ Option 100% en tâche de fond (sans toucher au clavier) :</span>
+              <span className="font-bold text-orange-400">Passerelle Buffer disponible</span>
+            </div>
+
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowPublishAssistant(false)}
+              className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+            >
+              Fermer l'assistant
             </button>
           </div>
         </div>
