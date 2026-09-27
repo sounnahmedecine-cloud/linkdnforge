@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { ArrowRight, PlayCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -29,6 +30,8 @@ export default function Home() {
   const t = useTranslations('landing');
   const guideSteps = t.raw('guide.steps') as GuideStep[];
   const plans = t.raw('pricingTeaser.plans') as Plan[];
+
+  const [isYearly, setIsYearly] = useState(true);
 
   return (
     <div className="w-full bg-iron-950 text-smoke-100">
@@ -159,46 +162,65 @@ export default function Home() {
       </section>
 
       {/* Pricing teaser */}
-      <section className="py-28 bg-iron-900/30 border-y border-iron-800">
+      <section className="py-28 bg-white border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-4">
-            <SectionLabel className="justify-center">{t('pricingTeaser.label')}</SectionLabel>
-            <h2 className="font-display font-bold text-4xl sm:text-5xl">
+          <div className="text-center mb-10 space-y-4">
+            <SectionLabel className="justify-center bg-orange-100 text-orange-600 border-orange-200">{t('pricingTeaser.label')}</SectionLabel>
+            <h2 className="font-display font-bold text-4xl sm:text-5xl text-black">
               {t('pricingTeaser.title')}
             </h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan, index) => (
+
+          <div className="flex justify-center items-center gap-4 mb-12">
+            <span className={`text-sm font-bold transition-colors ${!isYearly ? 'text-black' : 'text-slate-400'}`}>Mensuel</span>
+            <button 
+              onClick={() => setIsYearly(!isYearly)}
+              className="relative inline-flex h-8 w-16 items-center rounded-full bg-orange-500 transition-colors focus:outline-none shadow-inner"
+            >
+              <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-md ${isYearly ? 'translate-x-9' : 'translate-x-1'}`} />
+            </button>
+            <span className={`text-sm font-bold transition-colors ${isYearly ? 'text-black' : 'text-slate-400'} flex items-center gap-2`}>
+              Annuel <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-md shadow-sm">PROMO</span>
+            </span>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {plans.filter(p => p.desc.includes('an') === isYearly).map((plan, index) => (
               <div
                 key={plan.name + index}
-                className={`rounded-xl p-8 border transition ${
+                className={`relative rounded-[2rem] p-8 sm:p-10 border-2 transition-all duration-300 bg-white ${
                   plan.popular
-                    ? 'bg-ember-500/[0.06] border-ember-500/50'
-                    : 'bg-iron-900/60 border-iron-800 hover:border-iron-700'
+                    ? 'border-orange-500 shadow-2xl shadow-orange-500/20 scale-100 sm:scale-105 z-10'
+                    : 'border-slate-200 shadow-lg shadow-slate-200/50 hover:border-orange-300'
                 }`}
               >
                 {plan.popular && (
-                  <Badge tone="ember" className="mb-4">
-                    {t('pricingTeaser.popular')}
-                  </Badge>
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <span className="bg-rose-500 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg shadow-rose-500/30 whitespace-nowrap">
+                      {t('pricingTeaser.popular')}
+                    </span>
+                  </div>
                 )}
-                <h3 className="text-2xl font-display font-bold mb-2">{plan.name}</h3>
-                <p className="font-mono text-4xl font-semibold mb-1 text-smoke-100">
-                  {plan.price}
+                <h3 className="text-2xl font-display font-bold mb-2 text-black text-center">{plan.name}</h3>
+                <p className="font-mono text-5xl sm:text-6xl font-black mb-1 text-center mt-6">
+                  <span className={plan.popular ? 'text-orange-500' : 'text-black'}>{plan.price}</span>
                 </p>
-                <p className="text-sm text-smoke-500 mb-8">{plan.desc}</p>
-                <ul className="space-y-3 mb-8">
+                <p className="text-sm text-slate-500 mb-8 text-center font-medium">/mois</p>
+                <ul className="space-y-4 mb-8">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex gap-3 text-sm text-smoke-300">
-                      <span className="text-ember-500 font-bold">+</span>
+                    <li key={f} className="flex gap-3 text-sm text-slate-700 font-medium">
+                      <span className="text-orange-500 font-black flex items-center justify-center w-5">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Button 
-                  href={`/api/stripe/checkout?plan=${plan.name.toLowerCase()}&billing=${plan.desc.includes('an') || plan.desc.includes('year') ? 'yearly' : 'monthly'}`} 
-                  variant={plan.popular ? 'primary' : 'outline'} 
-                  className="w-full"
+                  href={`/api/stripe/checkout?plan=${plan.name.toLowerCase()}&billing=${isYearly ? 'yearly' : 'monthly'}`} 
+                  className={`w-full py-4 text-base font-bold rounded-2xl transition-transform hover:scale-105 shadow-md ${
+                    plan.popular 
+                      ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30' 
+                      : 'bg-black hover:bg-slate-800 text-white shadow-slate-900/20'
+                  }`}
                 >
                   {t('pricingTeaser.cta')}
                 </Button>
