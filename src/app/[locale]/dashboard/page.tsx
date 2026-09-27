@@ -1373,62 +1373,6 @@ export default function OnboardingPage() {
                     )}
                   </div>
                 )}
-
-                {/* Visual generation */}
-                <div className="border-t border-slate-200 pt-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-700">{t('result.visualLabel')}</p>
-                    <span className="text-xs text-slate-500">
-                      {formData.visualType === 'quote'
-                        ? t('step3.visualTypes.quote')
-                        : formData.visualType === 'image'
-                          ? t('step3.visualTypes.image')
-                          : t('result.visualTypeUnselected')}
-                    </span>
-                  </div>
-
-                  {!generatedImage ? (
-                    <>
-                      <button
-                        onClick={handleGenerateVisual}
-                        disabled={isGeneratingImage || !formData.visualType}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-black hover:bg-quench-400 disabled:bg-slate-100 disabled:text-slate-500 text-iron-950"
-                      >
-                        <ImageIcon className="w-4 h-4" />
-                        {isGeneratingImage ? t('result.generatingVisualBtn') : t('result.generateVisualBtn')}
-                      </button>
-                      {imageError && (
-                        <p className="text-xs text-orange-500">{imageError}</p>
-                      )}
-                    </>
-                  ) : (
-                    <div className="space-y-3">
-                      <img
-                        src={generatedImage}
-                        alt={t('result.generatedImageAlt')}
-                        className="w-full rounded-lg border border-slate-300"
-                      />
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
-                          onClick={handleDownloadImage}
-                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm bg-black hover:bg-quench-400 text-iron-950 transition"
-                        >
-                          <Download className="w-4 h-4" />
-                          {t('result.downloadBtn')}
-                        </button>
-                        <button
-                          onClick={handleGenerateVisual}
-                          disabled={isGeneratingImage}
-                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-slate-300 text-slate-700 hover:border-slate-300 hover:text-slate-900 transition"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                          {t('result.newVisualBtn')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
                 </>)}
                 {/* Legal disclaimer */}
                 <p className="text-xs text-slate-500/70 leading-relaxed border-t border-slate-200/60 pt-4">
