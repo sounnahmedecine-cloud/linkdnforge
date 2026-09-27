@@ -1,7 +1,7 @@
 runConfig:
   concurrency: 100
-  cpu: 1
-  memoryMiB: 512
+  cpu: 2
+  memoryMiB: 2048
   minInstances: 0
   maxInstances: 2
 

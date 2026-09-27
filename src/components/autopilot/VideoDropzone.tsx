@@ -11,11 +11,14 @@ interface VideoDropzoneProps {
 export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: VideoDropzoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileSize, setFileSize] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Mo';
@@ -32,10 +35,10 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
       return;
     }
 
-    // Validate max size (e.g. 100MB)
+    // Validate max size (100MB)
     const MAX_SIZE = 100 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      setErrorMessage('Le fichier dépasse la limite recommandée de 100 Mo pour une analyse IA optimale.');
+      setErrorMessage('Le fichier dépasse la limite de 100 Mo pour une analyse IA optimale.');
       return;
     }
 
@@ -44,55 +47,95 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
     const localUrl = URL.createObjectURL(file);
     setPreviewUrl(localUrl);
 
-    // Upload via same-origin Next.js API (bypasses CORS completely)
+    // Prepare chunked upload to safely bypass Cloud Run 32MB request limits
+    const CHUNK_SIZE = 8 * 1024 * 1024; // 8 MB chunks
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const fileId = `vid_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    // Abort previous upload if any
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
-      setUploadProgress(0);
-      const formData = new FormData();
-      formData.append('file', file);
+      setUploadProgress(2);
+      setStatusMessage(totalChunks > 1 ? `Préparation (${totalChunks} segments)...` : 'Préparation du transfert...');
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/autopilot/upload', true);
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 95); // Reserve 95-100% for Google AI registration
-          setUploadProgress(percent);
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        if (abortController.signal.aborted) {
+          return;
         }
-      };
 
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            setUploadProgress(100);
-            onVideoUploaded(data.fileUri, {
-              name: file.name,
-              size: file.size,
-            });
-          } catch (e) {
-            setErrorMessage('Erreur lors de la lecture de la réponse du serveur.');
-            setUploadProgress(null);
-          }
+        const start = chunkIndex * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, file.size);
+        const chunkBlob = file.slice(start, end);
+
+        const isLastChunk = chunkIndex === totalChunks - 1;
+
+        if (isLastChunk) {
+          setStatusMessage("Indexation & Analyse multimodale par l'IA Google...");
+          setUploadProgress(92);
         } else {
-          try {
-            const errData = JSON.parse(xhr.responseText);
-            setErrorMessage(errData.error || `Erreur serveur (${xhr.status})`);
-          } catch {
-            setErrorMessage(`Erreur lors du transfert de la vidéo (${xhr.status}).`);
-          }
-          setUploadProgress(null);
+          const currentPercent = Math.round(((chunkIndex) / totalChunks) * 88) + 3;
+          setUploadProgress(currentPercent);
+          setStatusMessage(`Téléversement du segment ${chunkIndex + 1}/${totalChunks}...`);
         }
-      };
 
-      xhr.onerror = () => {
-        setErrorMessage('Erreur de connexion réseau lors du transfert de la vidéo.');
-        setUploadProgress(null);
-      };
+        // Retry chunk up to 3 times in case of intermittent network drops
+        let attempts = 0;
+        let responseData: any = null;
 
-      xhr.send(formData);
+        while (attempts < 3) {
+          try {
+            const formData = new FormData();
+            formData.append('chunk', chunkBlob, file.name);
+            formData.append('fileId', fileId);
+            formData.append('chunkIndex', chunkIndex.toString());
+            formData.append('totalChunks', totalChunks.toString());
+            formData.append('fileName', file.name);
+            formData.append('mimeType', file.type || 'video/mp4');
+
+            const res = await fetch('/api/autopilot/upload-chunk', {
+              method: 'POST',
+              body: formData,
+              signal: abortController.signal,
+            });
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Erreur serveur (${res.status}) sur le segment ${chunkIndex + 1}/${totalChunks}`);
+            }
+
+            responseData = await res.json();
+            break; // Chunk succeeded
+          } catch (e: any) {
+            if (abortController.signal.aborted) return;
+            attempts++;
+            if (attempts >= 3) throw e;
+            await new Promise((r) => setTimeout(r, 1200));
+          }
+        }
+
+        // Final chunk check
+        if (isLastChunk) {
+          if (!responseData || !responseData.fileUri) {
+            throw new Error("Impossible d'obtenir l'URL du fichier Google AI après l'envoi.");
+          }
+
+          setUploadProgress(100);
+          setStatusMessage("Vidéo analysée et prête pour l'IA !");
+          onVideoUploaded(responseData.fileUri, {
+            name: file.name,
+            size: file.size,
+          });
+        }
+      }
     } catch (err: any) {
-      console.error(err);
-      setErrorMessage(err.message || 'Erreur inconnue.');
+      if (abortController.signal.aborted) return;
+      console.error('[VideoDropzone] Erreur:', err);
+      setErrorMessage(err.message || 'Erreur lors du transfert de la vidéo.');
       setUploadProgress(null);
     }
   };
@@ -121,6 +164,10 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
   };
 
   const handleRemove = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -128,6 +175,7 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
     setFileName(null);
     setFileSize(null);
     setUploadProgress(null);
+    setStatusMessage('');
     setErrorMessage(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -204,16 +252,16 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
                   {uploadProgress < 100 ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500" />
-                      Téléversement vers le Cloud sécurisé...
+                      <span>{statusMessage || 'Téléversement en cours...'}</span>
                     </>
                   ) : (
                     <>
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                      Vidéo prête pour l'analyse IA
+                      <span>{statusMessage || "Vidéo prête pour l'analyse IA"}</span>
                     </>
                   )}
                 </span>
-                <span className="text-slate-500">{uploadProgress}%</span>
+                <span className="text-slate-500 font-mono">{uploadProgress}%</span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                 <div
