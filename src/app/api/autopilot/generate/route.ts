@@ -36,7 +36,10 @@ export async function POST(request: NextRequest) {
 
     // 1. Scrape target URL if provided and not yet scraped
     let targetUrlContent = providedContent || '';
-    if (targetUrl && !targetUrlContent) {
+    let screenshotUrl = targetUrl ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`)}?w=1200&h=675` : null;
+    let ogImage: string | null = null;
+
+    if (targetUrl) {
       try {
         const scrapeRes = await fetch(`${request.nextUrl.origin}/api/scrape-url`, {
           method: 'POST',
@@ -45,7 +48,15 @@ export async function POST(request: NextRequest) {
         });
         if (scrapeRes.ok) {
           const scrapeData = await scrapeRes.json();
-          targetUrlContent = scrapeData.data || '';
+          if (!targetUrlContent) {
+            targetUrlContent = scrapeData.data || '';
+          }
+          if (scrapeData.screenshotUrl) {
+            screenshotUrl = scrapeData.screenshotUrl;
+          }
+          if (scrapeData.ogImage) {
+            ogImage = scrapeData.ogImage;
+          }
         }
       } catch (err) {
         console.warn('Scraping URL automatique non concluant:', err);
@@ -158,6 +169,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    let tiktokPost = '';
+    if (rawText.includes('[TIKTOK_START]') && rawText.includes('[TIKTOK_END]')) {
+      const tiktokMatch = rawText.match(/\[TIKTOK_START\]([\s\S]*?)\[TIKTOK_END\]/);
+      if (tiktokMatch) {
+        tiktokPost = tiktokMatch[1].trim();
+      }
+    }
+
     if (rawText.includes('[EXPLANATION_START]') && rawText.includes('[EXPLANATION_END]')) {
       const expMatch = rawText.match(/\[EXPLANATION_START\]([\s\S]*?)\[EXPLANATION_END\]/);
       if (expMatch) {
@@ -172,10 +191,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       post,
+      tiktokPost: tiktokPost || null,
       explanation,
       hasVideo: !!videoUrl,
       videoUrl: videoUrl || null,
       targetUrl: targetUrl || null,
+      screenshotUrl,
+      ogImage,
     });
   } catch (error: any) {
     console.error('Erreur Autopilot API:', error);

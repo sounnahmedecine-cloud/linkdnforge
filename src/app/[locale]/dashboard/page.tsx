@@ -41,10 +41,15 @@ export default function OnboardingPage() {
   const [imageError, setImageError] = useState('');
   const [user, setUser] = useState<User | null>(null);
 
-  // Autopilot Video state
+  // Autopilot Video & Visual state
   const [autopilotVideoUrl, setAutopilotVideoUrl] = useState<string>('');
   const [autopilotVideoMeta, setAutopilotVideoMeta] = useState<{ name: string; size: number } | null>(null);
   const [postExplanation, setPostExplanation] = useState<any>(null);
+  const [tiktokPost, setTiktokPost] = useState<string>('');
+  const [selectedNetworkView, setSelectedNetworkView] = useState<'linkedin' | 'tiktok'>('linkedin');
+  const [siteScreenshotUrl, setSiteScreenshotUrl] = useState<string | null>(null);
+  const [siteOgImage, setSiteOgImage] = useState<string | null>(null);
+  const [activeVisualMode, setActiveVisualMode] = useState<'screenshot' | 'og'>('screenshot');
 
   const [formData, setFormData] = useState({
     linkedinUrl: '',
@@ -191,7 +196,10 @@ export default function OnboardingPage() {
 
         const data = await response.json();
         setGeneratedPost(data.post);
+        setTiktokPost(data.tiktokPost || '');
         setPostExplanation(data.explanation || null);
+        setSiteScreenshotUrl(data.screenshotUrl || null);
+        setSiteOgImage(data.ogImage || null);
         return;
       }
 
@@ -288,6 +296,40 @@ export default function OnboardingPage() {
   const handleShareReddit = () => {
     const text = encodeURIComponent(generatedPost);
     window.open(`https://www.reddit.com/submit?title=Mon%20Post&text=${text}`, '_blank');
+  };
+
+  const [copiedTikTok, setCopiedTikTok] = useState(false);
+  const handleCopyTikTok = () => {
+    navigator.clipboard.writeText(tiktokPost);
+    setCopiedTikTok(true);
+    setTimeout(() => setCopiedTikTok(false), 2000);
+  };
+
+  const handleShareTikTokMobile = async () => {
+    if (typeof navigator !== 'undefined' && (navigator as any).share) {
+      try {
+        await (navigator as any).share({
+          title: 'Mon Post TikTok / Reels',
+          text: tiktokPost,
+          url: formData.targetUrl || undefined,
+        });
+        return;
+      } catch (e) {
+        // Fallback to desktop web
+      }
+    }
+    navigator.clipboard.writeText(tiktokPost);
+    window.open('https://www.tiktok.com/upload', '_blank');
+  };
+
+  const handleDownloadScreenshot = () => {
+    const url = activeVisualMode === 'screenshot' && siteScreenshotUrl ? siteScreenshotUrl : (siteOgImage || siteScreenshotUrl);
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `hero-screenshot-${Date.now()}.jpg`;
+    a.target = '_blank';
+    a.click();
   };
 
   return (
@@ -681,7 +723,36 @@ export default function OnboardingPage() {
           {(generatedPost || isGenerating) && (
             <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:rounded-2xl">
               <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl p-8 space-y-6">
-                <h2 className="font-display font-bold text-2xl">{t('result.title')}</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <h2 className="font-display font-bold text-2xl">{t('result.title')}</h2>
+
+                  {tiktokPost && (
+                    <div className="flex bg-slate-200/80 p-1 rounded-xl text-xs font-bold self-start sm:self-auto">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedNetworkView('linkedin')}
+                        className={`px-3 py-1.5 rounded-lg transition ${
+                          selectedNetworkView === 'linkedin'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        💼 LinkedIn & FB
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedNetworkView('tiktok')}
+                        className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
+                          selectedNetworkView === 'tiktok'
+                            ? 'bg-black text-white shadow-sm'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>🎵</span> TikTok / Reels
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {isGenerating ? (
                   <div className="bg-slate-100/50 rounded-lg p-6 border border-slate-300 space-y-4">
@@ -695,7 +766,49 @@ export default function OnboardingPage() {
                       <div className="h-3 bg-slate-200 rounded animate-pulse w-5/6" />
                     </div>
                   </div>
+                ) : selectedNetworkView === 'tiktok' && tiktokPost ? (
+                  /* Dedicated TikTok & Reels View */
+                  <div className="bg-slate-950 text-white rounded-2xl p-6 my-6 shadow-2xl border border-slate-800 space-y-4 font-sans animate-in fade-in duration-300">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                        <span className="font-bold text-sm tracking-wide">Format Vidéo Court (TikTok & Reels)</span>
+                      </div>
+                      <span className="text-[11px] text-slate-300 bg-slate-800 px-2 py-0.5 rounded font-mono">Accroche 3s</span>
+                    </div>
+
+                    {autopilotVideoUrl && (
+                      <div className="rounded-xl overflow-hidden bg-black aspect-[9/16] max-h-80 mx-auto flex items-center justify-center border border-slate-800 shadow-inner">
+                        <video src={autopilotVideoUrl} controls className="w-full h-full object-contain" />
+                      </div>
+                    )}
+
+                    <div className="bg-slate-900/90 rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap font-medium border border-slate-800/80">
+                      {tiktokPost}
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-3 pt-2">
+                      <button
+                        onClick={handleCopyTikTok}
+                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition ${
+                          copiedTikTok
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-white text-slate-950 hover:bg-slate-200'
+                        }`}
+                      >
+                        {copiedTikTok ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        {copiedTikTok ? 'Légende copiée !' : 'Copier la légende'}
+                      </button>
+                      <button
+                        onClick={handleShareTikTokMobile}
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition bg-gradient-to-r from-rose-500 via-purple-600 to-indigo-600 hover:opacity-90 text-white shadow-lg shadow-rose-500/25"
+                      >
+                        <span>📱</span> Partager sur TikTok
+                      </button>
+                    </div>
+                  </div>
                 ) : (
+                /* LinkedIn & Facebook Mockup */
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden font-sans shadow-sm my-6">
                   {/* Header */}
                   <div className="flex items-center gap-3 p-4">
@@ -727,6 +840,57 @@ export default function OnboardingPage() {
                   {autopilotVideoUrl && (
                     <div className="mx-4 mb-3 rounded-xl overflow-hidden bg-black aspect-video max-h-72 border border-slate-200 shadow-inner flex items-center justify-center">
                       <video src={autopilotVideoUrl} controls className="w-full h-full object-contain" />
+                    </div>
+                  )}
+
+                  {/* Website Hero Screenshot or OG Image in Mockup */}
+                  {!autopilotVideoUrl && (siteScreenshotUrl || siteOgImage) && (
+                    <div className="mx-4 mb-3 space-y-2">
+                      <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 aspect-video max-h-72 group">
+                        <img
+                          src={activeVisualMode === 'screenshot' && siteScreenshotUrl ? siteScreenshotUrl : (siteOgImage || siteScreenshotUrl || '')}
+                          alt="Capture d'écran du site web"
+                          className="w-full h-full object-cover object-top transition duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md">
+                          <span>📸 Capture Hero du site</span>
+                        </div>
+                        <button
+                          onClick={handleDownloadScreenshot}
+                          className="absolute bottom-2.5 right-2.5 bg-white/90 hover:bg-white text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 transition"
+                          title="Télécharger l'image pour votre post"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Télécharger l'image
+                        </button>
+                      </div>
+                      {siteScreenshotUrl && siteOgImage && (
+                        <div className="flex justify-end gap-2 text-xs">
+                          <button
+                            type="button"
+                            onClick={() => setActiveVisualMode('screenshot')}
+                            className={`px-2.5 py-1 rounded-md font-medium transition ${
+                              activeVisualMode === 'screenshot'
+                                ? 'bg-orange-100 text-orange-700 font-bold'
+                                : 'text-slate-500 hover:text-slate-800'
+                            }`}
+                          >
+                            Capture Hero
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActiveVisualMode('og')}
+                            className={`px-2.5 py-1 rounded-md font-medium transition ${
+                              activeVisualMode === 'og'
+                                ? 'bg-orange-100 text-orange-700 font-bold'
+                                : 'text-slate-500 hover:text-slate-800'
+                            }`}
+                          >
+                            Image Officielle (OG)
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                   

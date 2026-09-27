@@ -94,8 +94,16 @@ FORMAT DE RÉPONSE OBLIGATOIRE :
 Réponds strictement selon ce format structuré avec ces balises :
 
 [POST_START]
-(Ici, écris directement le post prêt à être copié et publié sur LinkedIn/Facebook, sans fioritures)
+(Ici, écris directement le post expert prêt à être copié et publié sur LinkedIn/Facebook, avec aération, hook percutant, bullet points et hashtags pro)
 [POST_END]
+
+[TIKTOK_START]
+(Ici, écris la légende courte et ultra-dynamique spécialement calibrée pour TikTok & Instagram Reels :
+- 1ère ligne : Accroche choc en majuscules / émoji pour retenir l'attention dans les 3 premières secondes
+- 2e partie : 2 à 3 phrases ultra-rythmées qui donnent envie d'enregistrer la vidéo
+- 3e partie : Appel à l'action court ("Lien en bio" ou "Commente X pour recevoir...")
+- Hashtags viraux : 5 à 7 hashtags percutants ex: #fyp #pourtoi #viral #[thematique])
+[TIKTOK_END]
 
 [EXPLANATION_START]
 {

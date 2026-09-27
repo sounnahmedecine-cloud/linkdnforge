@@ -10,6 +10,8 @@ export async function POST(request: NextRequest) {
 
     const finalUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
 
+    const screenshotUrl = `https://s0.wp.com/mshots/v1/${encodeURIComponent(finalUrl)}?w=1200&h=675`;
+
     // Strategy 1: Jina Reader API (clean markdown extraction)
     try {
       const controller = new AbortController();
@@ -24,7 +26,11 @@ export async function POST(request: NextRequest) {
       if (jinaResponse.ok) {
         const text = await jinaResponse.text();
         if (text && text.trim().length > 50) {
-          return NextResponse.json({ data: text.slice(0, 10000), source: 'jina' });
+          return NextResponse.json({
+            data: text.slice(0, 10000),
+            screenshotUrl,
+            source: 'jina'
+          });
         }
       }
     } catch (jinaErr) {
@@ -48,14 +54,16 @@ export async function POST(request: NextRequest) {
       if (directRes.ok) {
         const html = await directRes.text();
 
-        // Extract title, og:title, og:description, meta description
+        // Extract title, og:title, og:description, og:image, meta description
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
         const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i);
         const ogDescMatch = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i);
+        const ogImageMatch = html.match(/<meta[^>]*property=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["']/i);
         const metaDescMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i);
 
         const title = ogTitleMatch?.[1] || titleMatch?.[1] || '';
         const description = ogDescMatch?.[1] || metaDescMatch?.[1] || '';
+        const ogImage = ogImageMatch?.[1] || '';
 
         // Extract clean text snippets from headings and paragraphs
         const cleanText = html
@@ -72,7 +80,12 @@ export async function POST(request: NextRequest) {
           cleanText ? `Contenu: ${cleanText}` : ''
         ].filter(Boolean).join('\n\n');
 
-        return NextResponse.json({ data: extractedSummary, source: 'direct-html' });
+        return NextResponse.json({
+          data: extractedSummary,
+          screenshotUrl,
+          ogImage: ogImage || null,
+          source: 'direct-html'
+        });
       }
     } catch (directErr) {
       console.warn('Direct fetch non concluant:', directErr);
@@ -81,6 +94,7 @@ export async function POST(request: NextRequest) {
     // Strategy 3: Graceful fallback so the generator never crashes
     return NextResponse.json({
       data: `Site web : ${finalUrl}`,
+      screenshotUrl,
       warning: 'Le contenu de la page n’a pas pu être extrait automatiquement, génération basée sur le lien et les thématiques.',
       source: 'fallback'
     });
