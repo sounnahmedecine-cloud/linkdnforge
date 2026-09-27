@@ -98,49 +98,80 @@ export default function StudioResult({
     }
 
     const broadcastLog: string[] = [];
-
-    // 2. Buffer Direct Publishing (if token configured or admin)
     const canUseBuffer = isAdmin || !!customBufferToken;
+    let anyBufferPublished = false;
+    let needsWebAssistance = false;
 
+    // 1. TikTok
     if (selectedBroadcastNetworks.includes('tiktok')) {
       if (canUseBuffer) {
-        handlePublishBuffer('tiktok');
-        broadcastLog.push('TikTok (via Buffer)');
+        await handlePublishBuffer('tiktok');
+        broadcastLog.push('TikTok (Buffer)');
+        anyBufferPublished = true;
       } else {
         window.open('https://www.tiktok.com/upload', '_blank');
         broadcastLog.push('TikTok');
+        needsWebAssistance = true;
       }
     }
 
+    // 2. Instagram
     if (selectedBroadcastNetworks.includes('instagram')) {
       if (canUseBuffer) {
-        handlePublishBuffer('instagram');
-        broadcastLog.push('Instagram (via Buffer)');
+        await handlePublishBuffer('instagram');
+        broadcastLog.push('Instagram (Buffer)');
+        anyBufferPublished = true;
       } else {
         window.open('https://www.instagram.com/', '_blank');
         broadcastLog.push('Instagram');
+        needsWebAssistance = true;
       }
     }
 
-    // 3. Web share native windows (LinkedIn, Facebook, X)
-    // Open LinkedIn with shareActive=true to open the post composer directly
+    // 3. LinkedIn
     if (selectedBroadcastNetworks.includes('linkedin')) {
-      window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
-      broadcastLog.push('LinkedIn');
-    } else if (selectedBroadcastNetworks.includes('facebook')) {
-      const fbUrl = encodeURIComponent(targetUrl || 'https://linkedinforge.fr');
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${fbUrl}`, '_blank');
-      broadcastLog.push('Facebook');
-    } else if (selectedBroadcastNetworks.includes('x')) {
+      if (canUseBuffer) {
+        await handlePublishBuffer('linkedin');
+        broadcastLog.push('LinkedIn (Buffer)');
+        anyBufferPublished = true;
+      } else {
+        window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
+        broadcastLog.push('LinkedIn');
+        needsWebAssistance = true;
+      }
+    }
+
+    // 4. Facebook
+    if (selectedBroadcastNetworks.includes('facebook')) {
+      if (canUseBuffer) {
+        await handlePublishBuffer('facebook');
+        broadcastLog.push('Facebook (Buffer)');
+        anyBufferPublished = true;
+      } else {
+        const fbUrl = encodeURIComponent(targetUrl || 'https://linkedinforge.fr');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${fbUrl}`, '_blank');
+        broadcastLog.push('Facebook');
+        needsWebAssistance = true;
+      }
+    }
+
+    // 5. X (Twitter)
+    if (selectedBroadcastNetworks.includes('x')) {
       const text = encodeURIComponent(generatedPost.slice(0, 280));
       window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
       broadcastLog.push('X');
+      needsWebAssistance = true;
     }
 
     setIsBroadcasting(false);
-    setShowPublishAssistant(true);
-    setBroadcastSuccessMessage(`🎉 Post copié ! Collez (Ctrl+V) dans la boîte LinkedIn.`);
-    setTimeout(() => setBroadcastSuccessMessage(null), 8000);
+
+    if (needsWebAssistance) {
+      setShowPublishAssistant(true);
+      setBroadcastSuccessMessage(`🎉 Post copié ! Assistant de diffusion ouvert (${broadcastLog.join(', ')}).`);
+    } else {
+      setBroadcastSuccessMessage(`🚀 Succès total ! Post propulsé sur ${broadcastLog.join(', ')} via Buffer.`);
+    }
+    setTimeout(() => setBroadcastSuccessMessage(null), 10000);
   };
 
   const handleCopy = () => {
@@ -220,16 +251,17 @@ export default function StudioResult({
     document.body.removeChild(a);
   };
 
-  const handlePublishBuffer = async (channel: 'tiktok' | 'instagram') => {
+  const handlePublishBuffer = async (channel: 'tiktok' | 'instagram' | 'linkedin' | 'facebook' | 'x') => {
     setIsPublishingBuffer(true);
     setBufferStatusMessage(null);
     try {
+      const textToSend = channel === 'tiktok' && tiktokPost ? tiktokPost : generatedPost;
       const res = await fetch('/api/autopilot/publish-buffer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel,
-          text: tiktokPost || generatedPost,
+          text: textToSend,
           mediaUrl: autopilotVideoUrl || (activeVisualMode === 'screenshot' ? siteScreenshotUrl : siteOgImage) || undefined,
           mediaType: autopilotVideoUrl ? 'video' : 'image',
           customBufferToken,
@@ -239,11 +271,21 @@ export default function StudioResult({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la publication');
 
-      setBufferStatusMessage(`✓ Post envoyé avec succès sur ${channel === 'tiktok' ? 'TikTok (@abbi.muslim)' : 'Instagram (@aa.mina212)'} via Buffer !`);
-      setTimeout(() => setBufferStatusMessage(null), 6000);
+      const labels: Record<string, string> = {
+        linkedin: 'LinkedIn',
+        facebook: 'Facebook',
+        tiktok: 'TikTok',
+        instagram: 'Instagram',
+        x: 'X (Twitter)',
+      };
+
+      setBufferStatusMessage(`✓ Post propulsé sur ${labels[channel] || channel} via Buffer !`);
+      setTimeout(() => setBufferStatusMessage(null), 8000);
+      return true;
     } catch (e: any) {
       console.error(e);
       alert(e.message || 'Erreur lors de la publication Buffer.');
+      return false;
     } finally {
       setIsPublishingBuffer(false);
     }

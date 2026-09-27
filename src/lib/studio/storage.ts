@@ -18,6 +18,7 @@ export const DEFAULT_SOCIAL_CONNECTIONS: SocialConnections = {
   bufferToken: '',
   bufferProfileIdTiktok: '',
   bufferProfileIdInstagram: '',
+  bufferChannels: [],
   linkedinConnected: false,
   linkedinProfileName: '',
   tiktokAccountName: '',

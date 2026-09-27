@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { SocialConnections } from '@/lib/studio/types';
+import { useState, useEffect } from 'react';
+import { SocialConnections, BufferChannelInfo } from '@/lib/studio/types';
 import { saveSocialConnections } from '@/lib/studio/storage';
 import {
   ArrowLeft,
@@ -17,6 +17,9 @@ import {
   Share2,
   Send,
   HelpCircle,
+  Loader2,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -36,6 +39,46 @@ export default function SocialConnectionsView({
   const [formData, setFormData] = useState<SocialConnections>(connections);
   const [showToken, setShowToken] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isCheckingBuffer, setIsCheckingBuffer] = useState(false);
+  const [bufferChannels, setBufferChannels] = useState<BufferChannelInfo[]>(connections.bufferChannels || []);
+  const [bufferError, setBufferError] = useState<string | null>(null);
+
+  const syncBufferChannels = async (tokenToUse?: string) => {
+    const token = tokenToUse !== undefined ? tokenToUse : formData.bufferToken;
+    if (!token && !isAdmin) return;
+    setIsCheckingBuffer(true);
+    setBufferError(null);
+    try {
+      const res = await fetch('/api/autopilot/buffer-channels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customBufferToken: token }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erreur de connexion Buffer.');
+      }
+      const channels: BufferChannelInfo[] = data.channels || [];
+      setBufferChannels(channels);
+      setFormData((prev) => {
+        const next = { ...prev, bufferChannels: channels };
+        saveSocialConnections(next);
+        onUpdateConnections(next);
+        return next;
+      });
+    } catch (e: any) {
+      console.warn('Sync Buffer channels error:', e);
+      setBufferError(e.message || 'Impossible de synchroniser avec Buffer.');
+    } finally {
+      setIsCheckingBuffer(false);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.bufferToken || isAdmin) {
+      syncBufferChannels();
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -58,8 +101,17 @@ export default function SocialConnectionsView({
     saveSocialConnections(cleaned);
     onUpdateConnections(cleaned);
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 4000);
+    setTimeout(() => setSavedSuccess(false), 5000);
+
+    if (cleaned.bufferToken || isAdmin) {
+      syncBufferChannels(cleaned.bufferToken);
+    }
   };
+
+  const detectedLinkedIn = bufferChannels.find((c) => c.service === 'linkedin');
+  const detectedFacebook = bufferChannels.find((c) => c.service === 'facebook');
+  const detectedTikTok = bufferChannels.find((c) => c.service === 'tiktok');
+  const detectedInstagram = bufferChannels.find((c) => c.service === 'instagram');
 
   const isBufferConfigured = !!formData.bufferToken || isAdmin;
 
@@ -155,7 +207,11 @@ export default function SocialConnectionsView({
                   </div>
                 </div>
 
-                {formData.linkedinProfileName ? (
+                {detectedLinkedIn ? (
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                    <Sparkles className="w-3 h-3 text-emerald-600" /> Buffer API : {detectedLinkedIn.displayName || detectedLinkedIn.name}
+                  </span>
+                ) : formData.linkedinProfileName ? (
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                     <Check className="w-3 h-3 text-emerald-600" /> Profil Relié
                   </span>
@@ -204,7 +260,7 @@ export default function SocialConnectionsView({
 
             {/* Facebook */}
             <div className={`border rounded-2xl p-5 space-y-3 transition shadow-2xs ${
-              formData.facebookPageName ? 'bg-blue-50/20 border-blue-300' : 'bg-slate-50/50 border-slate-200'
+              formData.facebookPageName || detectedFacebook ? 'bg-blue-50/20 border-blue-300' : 'bg-slate-50/50 border-slate-200'
             }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -217,7 +273,11 @@ export default function SocialConnectionsView({
                   </div>
                 </div>
 
-                {formData.facebookPageName ? (
+                {detectedFacebook ? (
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                    <Sparkles className="w-3 h-3 text-emerald-600" /> Buffer API : {detectedFacebook.displayName || detectedFacebook.name}
+                  </span>
+                ) : formData.facebookPageName ? (
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                     <Check className="w-3 h-3 text-emerald-600" /> Profil Relié
                   </span>
@@ -509,6 +569,90 @@ export default function SocialConnectionsView({
                 Votre token reste chiffré localement et n'est utilisé que pour diffuser vos propres publications.
               </p>
             </div>
+
+            {/* Test & Sync Button */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => syncBufferChannels()}
+                disabled={isCheckingBuffer || (!formData.bufferToken && !isAdmin)}
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition shadow-md shadow-orange-500/20 cursor-pointer"
+              >
+                {isCheckingBuffer ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-3.5 h-3.5" />
+                )}
+                <span>
+                  {isCheckingBuffer
+                    ? 'Vérification en cours...'
+                    : 'Tester & Synchroniser avec Buffer'}
+                </span>
+              </button>
+
+              {bufferChannels.length > 0 && (
+                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/30 px-3 py-1 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  {bufferChannels.length} canal(aux) connectés & prêts
+                </span>
+              )}
+            </div>
+
+            {/* Error Message */}
+            {bufferError && (
+              <div className="bg-rose-950/80 border border-rose-500/50 text-rose-300 text-xs p-3 rounded-xl flex items-center gap-2">
+                <span>⚠️ {bufferError}</span>
+              </div>
+            )}
+
+            {/* Connected Channels List */}
+            {bufferChannels.length > 0 && (
+              <div className="bg-slate-950/80 border border-slate-700/80 rounded-2xl p-4 sm:p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                    Réseaux détectés et prêts pour la publication 1-clic :
+                  </span>
+                  <span className="text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">
+                    Zéro Clic Requis
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {bufferChannels.map((ch) => (
+                    <div
+                      key={ch.id}
+                      className="flex items-center gap-3 p-3 bg-slate-900 rounded-xl border border-slate-800 hover:border-slate-700 transition"
+                    >
+                      {ch.avatar ? (
+                        <img
+                          src={ch.avatar}
+                          alt=""
+                          className="w-8 h-8 rounded-full object-cover border border-slate-700 shrink-0"
+                        />
+                      ) : (
+                        <span className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-orange-400 border border-slate-700 shrink-0">
+                          {ch.service[0].toUpperCase()}
+                        </span>
+                      )}
+                      <div className="truncate flex-1 min-w-0">
+                        <div className="font-bold text-xs text-white truncate">
+                          {ch.displayName || ch.name}
+                        </div>
+                        <div className="text-[10px] text-slate-400 capitalize flex items-center gap-1.5 font-mono">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                          <span>{ch.service}</span>
+                          <span className="text-slate-500">({ch.type})</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-500/30 px-2 py-0.5 rounded-md shrink-0">
+                        ✓ Actif
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -517,16 +661,16 @@ export default function SocialConnectionsView({
           <Button
             type="submit"
             size="lg"
-            className="w-full sm:w-auto py-3 px-6 text-sm font-bold bg-slate-900 hover:bg-black text-white rounded-xl flex items-center justify-center gap-2 shadow-sm"
+            className="w-full sm:w-auto py-3 px-6 text-sm font-bold bg-slate-900 hover:bg-black text-white rounded-xl flex items-center justify-center gap-2 shadow-sm cursor-pointer"
           >
             <Save className="w-4 h-4" />
             Enregistrer mes connexions réseaux
           </Button>
 
           {savedSuccess && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Vos comptes sont enregistrés et reliés à votre Studio !</span>
+            <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>✓ Vos comptes et votre clé Buffer sont bien enregistrés et reliés au Studio !</span>
             </div>
           )}
         </div>

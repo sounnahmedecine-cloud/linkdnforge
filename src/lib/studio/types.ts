@@ -37,10 +37,21 @@ export interface GhostwriterProfile {
   themes?: string[];
 }
 
+export interface BufferChannelInfo {
+  id: string;
+  name: string;
+  displayName: string;
+  service: string; // 'linkedin' | 'facebook' | 'tiktok' | 'instagram' | 'twitter' etc.
+  type: string;
+  avatar?: string;
+  isDisconnected?: boolean;
+}
+
 export interface SocialConnections {
   bufferToken?: string;
   bufferProfileIdTiktok?: string;
   bufferProfileIdInstagram?: string;
+  bufferChannels?: BufferChannelInfo[];
   linkedinConnected?: boolean;
   linkedinProfileName?: string;
   tiktokAccountName?: string;
