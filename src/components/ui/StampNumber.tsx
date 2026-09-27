@@ -12,11 +12,12 @@ export default function StampNumber({
     <div
       className={`shrink-0 ${dims} rounded-lg border flex items-center justify-center font-mono font-semibold transition ${
         active
-          ? 'bg-ember-500/10 border-ember-500/50 text-ember-400'
-          : 'bg-iron-900 border-iron-700 text-smoke-500'
+          ? 'bg-orange-500/10 border-orange-500/50 text-orange-500'
+          : 'bg-slate-50 border-slate-300 text-slate-500'
       }`}
     >
       {typeof n === 'number' ? String(n).padStart(2, '0') : n}
     </div>
   );
 }
+

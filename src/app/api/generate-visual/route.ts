@@ -112,3 +112,4 @@ Generate a modern, visually striking, and relevant image that perfectly captures
 Style: Minimalist 3D or flat vector, sleek corporate aesthetic, soft cinematic lighting, professional color palette (slate, deep blue, clean white, subtle warm accents).
 Important: Do NOT include any text, letters, or words in the image. No generic geometric shapes unless they directly represent the post's subject. The image must look like a high-end editorial illustration for a B2B SaaS or professional audience. Landscape 1200x627 format.`;
 }
+

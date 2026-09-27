@@ -51,11 +51,11 @@ export default function Header({
           {user?.role === 'admin' && <Badge tone="spark">👑 Admin</Badge>}
         </div>
         <div className="flex items-center gap-4">
-          {user?.email && <span className="text-sm text-smoke-500">{user.email}</span>}
+          {user?.email && <span className="text-sm text-slate-500">{user.email}</span>}
           <LanguageSwitcher />
           <button
             onClick={onLogout}
-            className="px-4 py-2 border border-iron-700 text-smoke-300 hover:text-smoke-100 rounded-lg hover:border-iron-600 transition text-sm"
+            className="px-4 py-2 border border-slate-300 text-slate-700 hover:text-slate-900 rounded-lg hover:border-slate-300 transition text-sm"
           >
             {logoutLabel}
           </button>
@@ -65,12 +65,12 @@ export default function Header({
   }
 
   return (
-    <nav className="sticky top-0 z-50 bg-iron-950/90 backdrop-blur-md border-b border-iron-800">
+    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Logo />
         <div className="flex items-center gap-6">
           {showPricingLink && (
-            <Link href="/pricing" className="text-sm text-smoke-500 hover:text-smoke-100 transition font-medium">
+            <Link href="/pricing" className="text-sm text-slate-500 hover:text-slate-900 transition font-medium">
               {pricingLabel}
             </Link>
           )}
@@ -83,3 +83,4 @@ export default function Header({
     </nav>
   );
 }
+

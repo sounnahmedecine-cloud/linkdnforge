@@ -114,3 +114,4 @@ async function generateWithGemini(content: string, apiKey: string, locale: Promp
     return mockVariants(content);
   }
 }
+

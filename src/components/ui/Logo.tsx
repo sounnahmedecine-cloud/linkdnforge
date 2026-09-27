@@ -21,14 +21,15 @@ export default function Logo({ href = '/', className = '', showBeta = true }: Lo
   return (
     <Link href={href} className={`flex items-center gap-2.5 hover:opacity-85 transition ${className}`}>
       <AnvilMark />
-      <span className="font-display font-bold text-xl tracking-tight text-smoke-100">
+      <span className="font-display font-bold text-xl tracking-tight text-slate-900">
         LinkedInForge
       </span>
       {showBeta && (
-        <span className="font-mono text-[10px] uppercase tracking-widest bg-iron-800 text-spark border border-iron-700 px-2 py-1 rounded">
+        <span className="font-mono text-[10px] uppercase tracking-widest bg-slate-100 text-rose-500 border border-slate-300 px-2 py-1 rounded">
           Beta
         </span>
       )}
     </Link>
   );
 }
+

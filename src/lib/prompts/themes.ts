@@ -19,3 +19,4 @@ export function localizeThemes(themeSlugs: string[] | undefined, locale: PromptL
 export function resolveLocale(locale: unknown): PromptLocale {
   return locale === 'en' || locale === 'es' ? locale : 'fr';
 }
+

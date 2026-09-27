@@ -3,10 +3,10 @@ import type { ReactNode } from 'react';
 type Tone = 'ember' | 'spark' | 'quench' | 'neutral';
 
 const tones: Record<Tone, string> = {
-  ember: 'bg-ember-500/15 text-ember-300 border-ember-500/40',
-  spark: 'bg-spark/15 text-spark border-spark/40',
-  quench: 'bg-quench-500/15 text-quench-400 border-quench-500/40',
-  neutral: 'bg-iron-800 text-smoke-300 border-iron-700',
+  ember: 'bg-orange-500/15 text-orange-600 border-orange-500/40',
+  spark: 'bg-rose-500/15 text-rose-500 border-spark/40',
+  quench: 'bg-black/15 text-black border-quench-500/40',
+  neutral: 'bg-slate-100 text-slate-700 border-slate-300',
 };
 
 export default function Badge({
@@ -26,3 +26,4 @@ export default function Badge({
     </span>
   );
 }
+

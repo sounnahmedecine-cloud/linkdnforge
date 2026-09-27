@@ -29,3 +29,4 @@ export const adminDb = adminApp ? getFirestore(adminApp) : null;
 export const adminAppInstance = adminApp;
 
 export default adminApp;
+

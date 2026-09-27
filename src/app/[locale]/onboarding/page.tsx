@@ -228,7 +228,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-iron-950 text-smoke-100 p-4">
+    <div className="min-h-screen bg-white text-slate-900 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <Header variant="app" user={user} onLogout={handleLogout} logoutLabel={tNav('logout')} />
@@ -250,7 +250,7 @@ export default function OnboardingPage() {
                   {num < 3 && (
                     <div
                       className={`h-px flex-1 mx-2 transition ${
-                        step > num ? 'bg-ember-500' : 'bg-iron-800'
+                        step > num ? 'bg-orange-500' : 'bg-slate-100'
                       }`}
                     />
                   )}
@@ -259,7 +259,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* Content */}
-            <div className="bg-iron-900/50 border border-iron-800 rounded-2xl p-8 mb-8">
+            <div className="bg-slate-50/50 border border-slate-200 rounded-2xl p-8 mb-8">
               {/* STEP 1 */}
               {step === 1 && (
                 <div className="space-y-8">
@@ -267,13 +267,13 @@ export default function OnboardingPage() {
                     <h2 className="font-display font-bold text-3xl mb-2">
                       {t('step1.title')}
                     </h2>
-                    <p className="text-smoke-500">{t('step1.subtitle')}</p>
+                    <p className="text-slate-500">{t('step1.subtitle')}</p>
                   </div>
 
                   <div className="space-y-6">
                     {/* LinkedIn URL + auto-scrape */}
                     <div>
-                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
+                      <label className="block text-sm font-semibold mb-2 text-slate-700">
                         {t('step1.linkedinUrlLabel')}
                       </label>
                       <div className="flex gap-2">
@@ -283,26 +283,26 @@ export default function OnboardingPage() {
                           value={formData.linkedinUrl}
                           onChange={handleInputChange}
                           placeholder="https://www.linkedin.com/in/..."
-                          className="flex-1 min-w-0 bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500"
+                          className="flex-1 min-w-0 bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500"
                         />
                         <button
                           type="button"
                           onClick={() => scrapeProfile(formData.linkedinUrl, 'linkedin')}
                           disabled={scraping.linkedin || !formData.linkedinUrl}
-                          className="px-4 py-3 bg-quench-500 hover:bg-quench-400 disabled:bg-iron-700 disabled:text-smoke-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
+                          className="px-4 py-3 bg-black hover:bg-quench-400 disabled:bg-slate-200 disabled:text-slate-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
                         >
                           {scraping.linkedin ? t('step1.extractingBtn') : t('step1.extractBtn')}
                         </button>
                       </div>
                       {scrapeStatus.linkedin && (
-                        <p className={`text-xs mt-1 ${scrapeStatus.linkedin.startsWith('✓') ? 'text-emerald-400' : 'text-spark'}`}>
+                        <p className={`text-xs mt-1 ${scrapeStatus.linkedin.startsWith('✓') ? 'text-emerald-400' : 'text-rose-500'}`}>
                           {scrapeStatus.linkedin}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
+                      <label className="block text-sm font-semibold mb-2 text-slate-700">
                         {t('step1.linkedinContentLabel')}
                       </label>
                       <textarea
@@ -310,13 +310,13 @@ export default function OnboardingPage() {
                         value={formData.linkedinProfile}
                         onChange={handleInputChange}
                         placeholder={t('step1.linkedinContentPlaceholder')}
-                        className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-28 resize-none"
+                        className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 h-28 resize-none"
                       />
                     </div>
 
                     {/* Facebook URL + auto-scrape */}
                     <div>
-                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
+                      <label className="block text-sm font-semibold mb-2 text-slate-700">
                         {t('step1.facebookUrlLabel')}
                       </label>
                       <div className="flex gap-2">
@@ -326,26 +326,26 @@ export default function OnboardingPage() {
                           value={formData.facebookUrl}
                           onChange={handleInputChange}
                           placeholder="https://www.facebook.com/..."
-                          className="flex-1 min-w-0 bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500"
+                          className="flex-1 min-w-0 bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500"
                         />
                         <button
                           type="button"
                           onClick={() => scrapeProfile(formData.facebookUrl, 'facebook')}
                           disabled={scraping.facebook || !formData.facebookUrl}
-                          className="px-4 py-3 bg-quench-500 hover:bg-quench-400 disabled:bg-iron-700 disabled:text-smoke-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
+                          className="px-4 py-3 bg-black hover:bg-quench-400 disabled:bg-slate-200 disabled:text-slate-500 text-iron-950 rounded-lg font-semibold text-sm transition whitespace-nowrap"
                         >
                           {scraping.facebook ? t('step1.extractingBtn') : t('step1.extractBtn')}
                         </button>
                       </div>
                       {scrapeStatus.facebook && (
-                        <p className={`text-xs mt-1 ${scrapeStatus.facebook.startsWith('✓') ? 'text-emerald-400' : 'text-spark'}`}>
+                        <p className={`text-xs mt-1 ${scrapeStatus.facebook.startsWith('✓') ? 'text-emerald-400' : 'text-rose-500'}`}>
                           {scrapeStatus.facebook}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold mb-2 text-smoke-300">
+                      <label className="block text-sm font-semibold mb-2 text-slate-700">
                         {t('step1.facebookContentLabel')}
                       </label>
                       <textarea
@@ -353,22 +353,22 @@ export default function OnboardingPage() {
                         value={formData.facebookProfile}
                         onChange={handleInputChange}
                         placeholder={t('step1.facebookContentPlaceholder')}
-                        className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-20 resize-none"
+                        className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 h-20 resize-none"
                       />
                     </div>
 
                     {/* Personal examples */}
                     <div>
-                      <label className="block text-sm font-semibold mb-1 text-smoke-300">
-                        {t('step1.personalExamplesLabel')} <span className="text-ember-400">{t('step1.personalExamplesBadge')}</span>
+                      <label className="block text-sm font-semibold mb-1 text-slate-700">
+                        {t('step1.personalExamplesLabel')} <span className="text-orange-500">{t('step1.personalExamplesBadge')}</span>
                       </label>
-                      <p className="text-xs text-smoke-500 mb-2">{t('step1.personalExamplesHint')}</p>
+                      <p className="text-xs text-slate-500 mb-2">{t('step1.personalExamplesHint')}</p>
                       <textarea
                         name="personalExamples"
                         value={formData.personalExamples}
                         onChange={handleInputChange}
                         placeholder={t('step1.personalExamplesPlaceholder')}
-                        className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-36 resize-none"
+                        className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 h-36 resize-none"
                       />
                     </div>
                   </div>
@@ -393,8 +393,8 @@ export default function OnboardingPage() {
                           onClick={() => handleMultiSelect('themes', theme.value)}
                           className={`px-4 py-2 rounded-lg border transition font-medium text-sm ${
                             formData.themes.includes(theme.value)
-                              ? 'bg-ember-500 border-ember-500 text-iron-950'
-                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
+                              ? 'bg-orange-500 border-orange-500 text-iron-950'
+                              : 'border-slate-300 text-slate-700 hover:border-slate-300'
                           }`}
                         >
                           {theme.label}
@@ -412,8 +412,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('tone', tone.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.tone === tone.value
-                              ? 'bg-ember-500 border-ember-500 text-iron-950'
-                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
+                              ? 'bg-orange-500 border-orange-500 text-iron-950'
+                              : 'border-slate-300 text-slate-700 hover:border-slate-300'
                           }`}
                         >
                           {tone.label}
@@ -431,8 +431,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('frequency', freq.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.frequency === freq.value
-                              ? 'bg-ember-500 border-ember-500 text-iron-950'
-                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
+                              ? 'bg-orange-500 border-orange-500 text-iron-950'
+                              : 'border-slate-300 text-slate-700 hover:border-slate-300'
                           }`}
                         >
                           {freq.label}
@@ -450,7 +450,7 @@ export default function OnboardingPage() {
                     <h2 className="font-display font-bold text-3xl mb-2">
                       {t('step3.title')}
                     </h2>
-                    <p className="text-smoke-500">{t('step3.subtitle')}</p>
+                    <p className="text-slate-500">{t('step3.subtitle')}</p>
                   </div>
 
                   <div>
@@ -462,8 +462,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('postObjective', obj.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.postObjective === obj.value
-                              ? 'bg-ember-500 border-ember-500 text-iron-950'
-                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
+                              ? 'bg-orange-500 border-orange-500 text-iron-950'
+                              : 'border-slate-300 text-slate-700 hover:border-slate-300'
                           }`}
                         >
                           {obj.label}
@@ -481,8 +481,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('postType', type.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.postType === type.value
-                              ? 'bg-ember-500 border-ember-500 text-iron-950'
-                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
+                              ? 'bg-orange-500 border-orange-500 text-iron-950'
+                              : 'border-slate-300 text-slate-700 hover:border-slate-300'
                           }`}
                         >
                           {type.label}
@@ -492,22 +492,22 @@ export default function OnboardingPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-smoke-300">
+                    <label className="block text-sm font-semibold mb-2 text-slate-700">
                       URL du site ou article à promouvoir (Optionnel)
                     </label>
-                    <p className="text-xs text-smoke-500 mb-2">Collez un lien (SaaS, blog) que l'IA va lire pour générer votre post.</p>
+                    <p className="text-xs text-slate-500 mb-2">Collez un lien (SaaS, blog) que l'IA va lire pour générer votre post.</p>
                     <input
                       type="text"
                       name="targetUrl"
                       value={formData.targetUrl}
                       onChange={handleInputChange}
                       placeholder="https://..."
-                      className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 mb-6"
+                      className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 mb-6"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-smoke-300">
+                    <label className="block text-sm font-semibold mb-2 text-slate-700">
                       {t('step3.subjectLabel')}
                     </label>
                     <textarea
@@ -515,7 +515,7 @@ export default function OnboardingPage() {
                       value={formData.postSubject}
                       onChange={handleInputChange}
                       placeholder={t('step3.subjectPlaceholder')}
-                      className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 h-20 resize-none"
+                      className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 h-20 resize-none"
                     />
                   </div>
 
@@ -528,8 +528,8 @@ export default function OnboardingPage() {
                           onClick={() => handleSingleSelect('visualType', visual.value)}
                           className={`px-4 py-3 rounded-lg border transition font-medium text-center text-sm ${
                             formData.visualType === visual.value
-                              ? 'bg-ember-500 border-ember-500 text-iron-950'
-                              : 'border-iron-700 text-smoke-300 hover:border-iron-600'
+                              ? 'bg-orange-500 border-orange-500 text-iron-950'
+                              : 'border-slate-300 text-slate-700 hover:border-slate-300'
                           }`}
                         >
                           {visual.label}
@@ -558,7 +558,7 @@ export default function OnboardingPage() {
                 </Button>
                 {step < 3 ? <Button onClick={handleNext}>{t('next')}</Button> : <span />}
               </div>
-              <p className="text-center font-mono text-smoke-500 text-xs uppercase tracking-widest">
+              <p className="text-center font-mono text-slate-500 text-xs uppercase tracking-widest">
                 {t('stepLabel', { step })}
               </p>
             </div>
@@ -567,23 +567,23 @@ export default function OnboardingPage() {
           {/* Right: Generated Post */}
           {(generatedPost || isGenerating) && (
             <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:rounded-2xl">
-              <div className="bg-iron-900/50 backdrop-blur border border-iron-800 rounded-2xl p-8 space-y-6">
+              <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl p-8 space-y-6">
                 <h2 className="font-display font-bold text-2xl">{t('result.title')}</h2>
 
                 {isGenerating ? (
-                  <div className="bg-iron-800/50 rounded-lg p-6 border border-iron-700 space-y-4">
+                  <div className="bg-slate-100/50 rounded-lg p-6 border border-slate-300 space-y-4">
                     <ForgeLoader label={t('result.generatingLabel')} />
                     <div className="space-y-3 pt-2">
-                      <div className="h-3 bg-iron-700 rounded animate-pulse w-full" />
-                      <div className="h-3 bg-iron-700 rounded animate-pulse w-5/6" />
-                      <div className="h-3 bg-iron-700 rounded animate-pulse w-4/6" />
-                      <div className="h-3 bg-iron-700 rounded animate-pulse w-full mt-4" />
-                      <div className="h-3 bg-iron-700 rounded animate-pulse w-3/4" />
-                      <div className="h-3 bg-iron-700 rounded animate-pulse w-5/6" />
+                      <div className="h-3 bg-slate-200 rounded animate-pulse w-full" />
+                      <div className="h-3 bg-slate-200 rounded animate-pulse w-5/6" />
+                      <div className="h-3 bg-slate-200 rounded animate-pulse w-4/6" />
+                      <div className="h-3 bg-slate-200 rounded animate-pulse w-full mt-4" />
+                      <div className="h-3 bg-slate-200 rounded animate-pulse w-3/4" />
+                      <div className="h-3 bg-slate-200 rounded animate-pulse w-5/6" />
                     </div>
                   </div>
                 ) : (
-                <div className="bg-iron-800/50 rounded-lg p-6 border border-iron-700">
+                <div className="bg-slate-100/50 rounded-lg p-6 border border-slate-300">
                   <p className="text-lg leading-relaxed whitespace-pre-wrap">{generatedPost}</p>
                 </div>
                 )}
@@ -612,7 +612,7 @@ export default function OnboardingPage() {
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition border ${
                       copied
                         ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
-                        : 'border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100'
+                        : 'border-slate-300 text-slate-700 hover:border-slate-300 hover:text-slate-900'
                     }`}
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -620,7 +620,7 @@ export default function OnboardingPage() {
                   </button>
                   <button
                     onClick={() => { setGeneratedPost(''); setGeneratedImage(''); setStep(3); }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100 transition"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-slate-300 text-slate-700 hover:border-slate-300 hover:text-slate-900 transition"
                   >
                     <RefreshCw className="w-4 h-4" />
                     {t('result.regenerateBtn')}
@@ -628,10 +628,10 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Visual generation */}
-                <div className="border-t border-iron-800 pt-5 space-y-4">
+                <div className="border-t border-slate-200 pt-5 space-y-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-smoke-300">{t('result.visualLabel')}</p>
-                    <span className="text-xs text-smoke-500">
+                    <p className="text-sm font-semibold text-slate-700">{t('result.visualLabel')}</p>
+                    <span className="text-xs text-slate-500">
                       {formData.visualType === 'quote'
                         ? t('step3.visualTypes.quote')
                         : formData.visualType === 'image'
@@ -645,13 +645,13 @@ export default function OnboardingPage() {
                       <button
                         onClick={handleGenerateVisual}
                         disabled={isGeneratingImage || !formData.visualType}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-quench-500 hover:bg-quench-400 disabled:bg-iron-800 disabled:text-smoke-500 text-iron-950"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition bg-black hover:bg-quench-400 disabled:bg-slate-100 disabled:text-slate-500 text-iron-950"
                       >
                         <ImageIcon className="w-4 h-4" />
                         {isGeneratingImage ? t('result.generatingVisualBtn') : t('result.generateVisualBtn')}
                       </button>
                       {imageError && (
-                        <p className="text-xs text-ember-400">{imageError}</p>
+                        <p className="text-xs text-orange-500">{imageError}</p>
                       )}
                     </>
                   ) : (
@@ -659,12 +659,12 @@ export default function OnboardingPage() {
                       <img
                         src={generatedImage}
                         alt={t('result.generatedImageAlt')}
-                        className="w-full rounded-lg border border-iron-700"
+                        className="w-full rounded-lg border border-slate-300"
                       />
                       <div className="grid grid-cols-2 gap-3">
                         <button
                           onClick={handleDownloadImage}
-                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm bg-quench-500 hover:bg-quench-400 text-iron-950 transition"
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm bg-black hover:bg-quench-400 text-iron-950 transition"
                         >
                           <Download className="w-4 h-4" />
                           {t('result.downloadBtn')}
@@ -672,7 +672,7 @@ export default function OnboardingPage() {
                         <button
                           onClick={handleGenerateVisual}
                           disabled={isGeneratingImage}
-                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-iron-700 text-smoke-300 hover:border-iron-600 hover:text-smoke-100 transition"
+                          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm border border-slate-300 text-slate-700 hover:border-slate-300 hover:text-slate-900 transition"
                         >
                           <RefreshCw className="w-4 h-4" />
                           {t('result.newVisualBtn')}
@@ -684,7 +684,7 @@ export default function OnboardingPage() {
 
                 </>)}
                 {/* Legal disclaimer */}
-                <p className="text-xs text-smoke-500/70 leading-relaxed border-t border-iron-800/60 pt-4">
+                <p className="text-xs text-slate-500/70 leading-relaxed border-t border-slate-200/60 pt-4">
                   {t('result.disclaimer')}
                 </p>
               </div>

@@ -5,3 +5,4 @@ export async function POST(request: NextRequest) {
   response.cookies.set('auth_token', '', { maxAge: 0 });
   return response;
 }
+

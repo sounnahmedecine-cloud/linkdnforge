@@ -92,3 +92,4 @@ async function generateWithGemini(formData: any, apiKey: string): Promise<string
   const data = await response.json();
   return data.candidates[0].content.parts[0].text.trim();
 }
+

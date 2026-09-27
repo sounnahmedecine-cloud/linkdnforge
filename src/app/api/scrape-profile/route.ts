@@ -62,3 +62,4 @@ function decodeHTML(str: string) {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ');
 }
+

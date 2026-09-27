@@ -41,7 +41,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-iron-950 text-smoke-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white text-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-10">
@@ -49,16 +49,16 @@ export default function LoginPage() {
           <h1 className="font-display font-bold text-4xl mb-2">
             {isSignUp ? t('signUpTitle') : t('signInTitle')}
           </h1>
-          <p className="text-smoke-500">
+          <p className="text-slate-500">
             {isSignUp ? t('signUpSubtitle') : t('signInSubtitle')}
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-iron-900/60 border border-iron-800 rounded-2xl p-8 space-y-6">
+        <div className="bg-slate-50/60 border border-slate-200 rounded-2xl p-8 space-y-6">
           {/* Error */}
           {error && (
-            <div className="bg-ember-500/10 border border-ember-500/40 text-ember-300 p-4 rounded-lg text-sm">
+            <div className="bg-orange-500/10 border border-orange-500/40 text-orange-600 p-4 rounded-lg text-sm">
               {error}
             </div>
           )}
@@ -66,25 +66,25 @@ export default function LoginPage() {
           {/* Email Form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold mb-2 text-smoke-300">{t('emailLabel')}</label>
+              <label className="block text-sm font-semibold mb-2 text-slate-700">{t('emailLabel')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('emailPlaceholder')}
-                className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 transition"
+                className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 transition"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2 text-smoke-300">{t('passwordLabel')}</label>
+              <label className="block text-sm font-semibold mb-2 text-slate-700">{t('passwordLabel')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={isSignUp ? t('passwordPlaceholder') : ''}
-                className="w-full bg-iron-800/60 border border-iron-700 rounded-lg px-4 py-3 text-smoke-100 placeholder-smoke-500/60 focus:outline-none focus:border-ember-500 transition"
+                className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 transition"
                 required
                 minLength={8}
               />
@@ -96,7 +96,7 @@ export default function LoginPage() {
           </form>
 
           {/* Toggle */}
-          <div className="text-center text-sm text-smoke-500">
+          <div className="text-center text-sm text-slate-500">
             {isSignUp ? (
               <>
                 {t('haveAccount')}{' '}
@@ -105,7 +105,7 @@ export default function LoginPage() {
                     setIsSignUp(false);
                     setError('');
                   }}
-                  className="text-quench-400 hover:text-quench-400/80 transition"
+                  className="text-black hover:text-black/80 transition"
                 >
                   {t('switchToSignIn')}
                 </button>
@@ -118,7 +118,7 @@ export default function LoginPage() {
                     setIsSignUp(true);
                     setError('');
                   }}
-                  className="text-quench-400 hover:text-quench-400/80 transition"
+                  className="text-black hover:text-black/80 transition"
                 >
                   {t('switchToSignUp')}
                 </button>
@@ -128,9 +128,9 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-smoke-500/70 text-xs mt-8">
+        <p className="text-center text-slate-500/70 text-xs mt-8">
           {t('termsPrefix')}{' '}
-          <a href="#" className="hover:text-smoke-300 transition">
+          <a href="#" className="hover:text-slate-700 transition">
             {t('termsLink')}
           </a>
         </p>

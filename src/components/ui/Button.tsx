@@ -10,10 +10,10 @@ const base =
   'inline-flex items-center justify-center gap-2 font-semibold transition rounded-lg disabled:opacity-50 disabled:cursor-not-allowed';
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-ember-500 hover:bg-ember-400 text-iron-950',
-  secondary: 'bg-quench-500 hover:bg-quench-400 text-iron-950',
-  outline: 'border border-iron-600 text-smoke-100 hover:border-smoke-500 hover:bg-iron-900',
-  ghost: 'text-quench-400 hover:text-quench-400/80',
+  primary: 'bg-orange-500 hover:bg-ember-400 text-iron-950',
+  secondary: 'bg-black hover:bg-quench-400 text-iron-950',
+  outline: 'border border-slate-300 text-slate-900 hover:border-smoke-500 hover:bg-slate-50',
+  ghost: 'text-black hover:text-black/80',
 };
 
 const sizes: Record<Size, string> = {
@@ -74,3 +74,4 @@ export function Button(props: LinkButtonProps | NativeButtonProps) {
     </button>
   );
 }
+

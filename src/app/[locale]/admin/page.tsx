@@ -24,11 +24,11 @@ export default async function AdminDashboard({ params: { locale } }: { params: {
 
   if (!ADMIN_EMAILS.includes(user.email)) {
     return (
-      <div className="min-h-screen bg-iron-950 text-smoke-100 flex flex-col">
+      <div className="min-h-screen bg-white text-slate-900 flex flex-col">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-display font-bold text-ember-500">Accès Refusé</h1>
-            <p className="text-smoke-500">Cette page est strictement réservée aux administrateurs de LinkdnForge.</p>
+            <p className="text-slate-500">Cette page est strictement réservée aux administrateurs de LinkdnForge.</p>
           </div>
         </div>
       </div>
@@ -53,42 +53,42 @@ export default async function AdminDashboard({ params: { locale } }: { params: {
   const activeSubs = users.filter(u => u.subscriptionStatus === 'active').length;
 
   return (
-    <div className="min-h-screen bg-iron-950 text-smoke-100 flex flex-col">
-      <header className="border-b border-iron-800 bg-iron-900/50 p-6 flex justify-between items-center">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col">
+      <header className="border-b border-slate-200 bg-slate-50/50 p-6 flex justify-between items-center">
         <h1 className="font-display font-bold text-2xl text-ember-500">LinkdnForge Admin</h1>
-        <div className="text-sm text-smoke-500">Connecté en tant que {user.email}</div>
+        <div className="text-sm text-slate-500">Connecté en tant que {user.email}</div>
       </header>
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 space-y-12">
         
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="bg-iron-900/40 border border-iron-800 rounded-xl p-6">
-            <p className="text-smoke-500 text-sm font-mono uppercase tracking-widest mb-2">Utilisateurs</p>
-            <p className="text-4xl font-display font-bold text-smoke-100">{totalUsers}</p>
+          <div className="bg-slate-50/40 border border-slate-200 rounded-xl p-6">
+            <p className="text-slate-500 text-sm font-mono uppercase tracking-widest mb-2">Utilisateurs</p>
+            <p className="text-4xl font-display font-bold text-slate-900">{totalUsers}</p>
           </div>
-          <div className="bg-iron-900/40 border border-ember-500/30 rounded-xl p-6">
+          <div className="bg-slate-50/40 border border-orange-500/30 rounded-xl p-6">
             <p className="text-ember-500 text-sm font-mono uppercase tracking-widest mb-2">Abonnés Actifs</p>
-            <p className="text-4xl font-display font-bold text-smoke-100">{activeSubs}</p>
+            <p className="text-4xl font-display font-bold text-slate-900">{activeSubs}</p>
           </div>
-          <div className="bg-iron-900/40 border border-iron-800 rounded-xl p-6">
-            <p className="text-smoke-500 text-sm font-mono uppercase tracking-widest mb-2">Plan Pro</p>
-            <p className="text-4xl font-display font-bold text-smoke-100">{proUsers}</p>
+          <div className="bg-slate-50/40 border border-slate-200 rounded-xl p-6">
+            <p className="text-slate-500 text-sm font-mono uppercase tracking-widest mb-2">Plan Pro</p>
+            <p className="text-4xl font-display font-bold text-slate-900">{proUsers}</p>
           </div>
-          <div className="bg-iron-900/40 border border-iron-800 rounded-xl p-6">
-            <p className="text-smoke-500 text-sm font-mono uppercase tracking-widest mb-2">Plan Starter</p>
-            <p className="text-4xl font-display font-bold text-smoke-100">{starterUsers}</p>
+          <div className="bg-slate-50/40 border border-slate-200 rounded-xl p-6">
+            <p className="text-slate-500 text-sm font-mono uppercase tracking-widest mb-2">Plan Starter</p>
+            <p className="text-4xl font-display font-bold text-slate-900">{starterUsers}</p>
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-iron-900/30 border border-iron-800 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-iron-800 bg-iron-900/50">
+        <div className="bg-slate-50/30 border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-slate-200 bg-slate-50/50">
             <h2 className="font-display font-bold text-xl">Derniers Inscrits</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-iron-900/30 text-smoke-500 font-mono text-xs uppercase tracking-wider">
+              <thead className="bg-slate-50/30 text-slate-500 font-mono text-xs uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-4 font-medium">Email</th>
                   <th className="px-6 py-4 font-medium">Plan</th>
@@ -99,13 +99,13 @@ export default async function AdminDashboard({ params: { locale } }: { params: {
               </thead>
               <tbody className="divide-y divide-iron-800/60">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-iron-800/20 transition">
-                    <td className="px-6 py-4 text-smoke-100 font-medium">{u.email}</td>
+                  <tr key={u.id} className="hover:bg-slate-100/20 transition">
+                    <td className="px-6 py-4 text-slate-900 font-medium">{u.email}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider
-                        ${u.plan === 'pro' ? 'bg-ember-500/20 text-ember-400 border border-ember-500/30' : 
-                          u.plan === 'starter' ? 'bg-quench-500/20 text-quench-400 border border-quench-500/30' : 
-                          'bg-iron-800 text-smoke-300'}`}
+                        ${u.plan === 'pro' ? 'bg-orange-500/20 text-orange-500 border border-orange-500/30' : 
+                          u.plan === 'starter' ? 'bg-black/20 text-black border border-quench-500/30' : 
+                          'bg-slate-100 text-slate-700'}`}
                       >
                         {u.plan || 'Gratuit'}
                       </span>
@@ -116,15 +116,15 @@ export default async function AdminDashboard({ params: { locale } }: { params: {
                       ) : u.subscriptionStatus === 'canceled' ? (
                         <span className="text-rose-400 text-xs font-mono uppercase tracking-widest bg-rose-400/10 px-2 py-1 rounded">Annulé</span>
                       ) : (
-                        <span className="text-smoke-500 text-xs font-mono uppercase tracking-widest">-</span>
+                        <span className="text-slate-500 text-xs font-mono uppercase tracking-widest">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-smoke-400">
+                    <td className="px-6 py-4 text-slate-600">
                       {u.createdAt ? new Date(u.createdAt._seconds ? u.createdAt._seconds * 1000 : u.createdAt).toLocaleDateString('fr-FR') : '-'}
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-smoke-500">
+                    <td className="px-6 py-4 font-mono text-xs text-slate-500">
                       {u.stripeCustomerId ? (
-                        <a href={`https://dashboard.stripe.com/customers/${u.stripeCustomerId}`} target="_blank" rel="noreferrer" className="hover:text-ember-400 transition">
+                        <a href={`https://dashboard.stripe.com/customers/${u.stripeCustomerId}`} target="_blank" rel="noreferrer" className="hover:text-orange-500 transition">
                           {u.stripeCustomerId.substring(0, 12)}...
                         </a>
                       ) : '-'}
@@ -133,7 +133,7 @@ export default async function AdminDashboard({ params: { locale } }: { params: {
                 ))}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-smoke-500">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                       Aucun utilisateur trouvé dans la base de données.
                     </td>
                   </tr>

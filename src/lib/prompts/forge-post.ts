@@ -361,3 +361,4 @@ Focus heavily on the product details and value proposition. Do not invent a fake
   const builders = isGhostwriter ? GHOSTWRITER_BUILDERS : STANDARD_BUILDERS;
   return builders[locale](formData, themeLabels);
 }
+
