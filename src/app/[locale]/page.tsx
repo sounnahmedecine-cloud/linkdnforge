@@ -70,7 +70,7 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
-            <Button href="/onboarding" size="lg" className="w-full sm:w-auto px-8 py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition-transform hover:scale-[1.02]">
+            <Button href="#demo" size="lg" className="w-full sm:w-auto px-8 py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition-transform hover:scale-[1.02]">
               {t('ctaPrimary')}
             </Button>
             <a
@@ -87,7 +87,7 @@ export default function Home() {
         </div>
 
         {/* Interactive Showcase / Hero Demo Component */}
-        <div className="mt-14">
+        <div id="demo" className="mt-14 scroll-mt-24">
           <LandingGenerator plans={plans} />
         </div>
       </section>
@@ -245,7 +245,7 @@ export default function Home() {
           </p>
           <div className="pt-4">
             <Button
-              href="/onboarding"
+              href="/dashboard"
               size="lg"
               className="px-10 py-5 text-lg font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition-transform hover:scale-105"
             >
@@ -346,7 +346,7 @@ export default function Home() {
             {t('finalCta.title')}
           </h2>
           <p className="text-lg text-slate-700">{t('finalCta.body')}</p>
-          <Button href="/onboarding" size="lg" className="px-10 py-5 text-lg font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25">
+          <Button href="/dashboard" size="lg" className="px-10 py-5 text-lg font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25">
             {t('finalCta.cta')}
           </Button>
           <p className="text-slate-500 text-sm">{t('finalCta.note')}</p>

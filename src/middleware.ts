@@ -30,9 +30,17 @@ export default function middleware(request: NextRequest) {
     return intlResponse;
   }
 
-  const onboardingMatch = pathname.match(/^\/(fr|en|es)\/onboarding(\/|$)/);
-  if (onboardingMatch && !hasValidSession(request)) {
-    const locale = onboardingMatch[1];
+  // Redirect legacy /onboarding to /dashboard
+  const legacyOnboarding = pathname.match(/^\/(fr|en|es)\/onboarding(\/|$)/);
+  if (legacyOnboarding) {
+    const locale = legacyOnboarding[1];
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+  }
+
+  // Protect app routes requiring authentication
+  const protectedMatch = pathname.match(/^\/(fr|en|es)\/(dashboard|setup|admin)(\/|$)/);
+  if (protectedMatch && !hasValidSession(request)) {
+    const locale = protectedMatch[1];
     return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 

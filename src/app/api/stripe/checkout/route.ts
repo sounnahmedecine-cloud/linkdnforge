@@ -46,24 +46,30 @@ export async function GET(request: Request) {
       };
     }
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: priceData,
-          quantity: 1,
+      const origin =
+        request.headers.get('origin') ||
+        (request.headers.get('host') ? `https://${request.headers.get('host')}` : null) ||
+        process.env.NEXTAUTH_URL ||
+        'https://linkedinforge.woosenteur.fr';
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: priceData,
+            quantity: 1,
+          },
+        ],
+        mode,
+        subscription_data: {
+          trial_period_days: 7,
         },
-      ],
-      mode,
-      subscription_data: {
-        trial_period_days: 7,
-      },
-      metadata: {
-        plan: plan || 'starter',
-      },
-      success_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/setup?success=true`,
-      cancel_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/fr/pricing?canceled=true`,
-    });
+        metadata: {
+          plan: plan || 'starter',
+        },
+        success_url: `${origin}/fr/setup?success=true`,
+        cancel_url: `${origin}/fr/pricing?canceled=true`,
+      });
 
     return NextResponse.redirect(session.url as string, 303);
   } catch (err: any) {

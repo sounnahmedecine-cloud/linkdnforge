@@ -32,7 +32,7 @@ export default function LoginPage() {
         throw new Error(data.error || t('genericError'));
       }
 
-      router.push('/onboarding');
+      router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : t('genericErrorFallback'));
     } finally {
