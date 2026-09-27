@@ -53,6 +53,9 @@ export async function generateMetadata({
       locale: locale === 'fr' ? 'fr_FR' : locale === 'es' ? 'es_ES' : 'en_US',
       type: 'website',
     },
+    verification: {
+      google: 'google1e98238ff099f085',
+    },
   };
 }
 
