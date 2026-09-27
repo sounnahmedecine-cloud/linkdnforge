@@ -17,7 +17,7 @@ export function AnvilMark({ className = 'w-7 h-[21px]' }: { className?: string }
   );
 }
 
-export default function Logo({ href = '/', className = '', showBeta = true }: LogoProps) {
+export default function Logo({ href = '/', className = '', showBeta = false }: LogoProps) {
   return (
     <Link href={href} className={`flex items-center gap-2.5 hover:opacity-85 transition ${className}`}>
       <AnvilMark />
