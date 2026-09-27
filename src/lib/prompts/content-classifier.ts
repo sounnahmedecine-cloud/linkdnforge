@@ -1,5 +1,6 @@
 export type EditorialFamily =
   | 'PRODUCT'
+  | 'GAME_OR_CREATIVE'
   | 'EXPERT_OPINION'
   | 'EDITORIAL'
   | 'ANNOUNCEMENT'
@@ -59,7 +60,7 @@ ${userRequestedStyle && userRequestedStyle !== 'auto' ? `NOTE PRIORITAIRE : L'ut
 
 SOURCES FOURNIES :
 ${targetUrl ? `- URL du site ou produit : ${targetUrl}` : ''}
-${targetUrlContent ? `- Contenu extrait de la page / produit :\n${targetUrlContent.slice(0, 3000)}` : ''}
+${targetUrlContent ? `- Contenu extrait de la page / produit :\n${targetUrlContent.slice(0, 3500)}` : ''}
 ${videoFileName ? `- Vidéo jointe : ${videoFileName}` : ''}
 ${videoDescription ? `- Notes / transcription vidéo : ${videoDescription}` : ''}
 ${postSubject ? `- Sujet ou angle précisé : ${postSubject}` : ''}
@@ -67,41 +68,45 @@ ${postObjective ? `- Objectif utilisateur : ${postObjective}` : ''}
 - Réseau cible : ${targetNetwork}
 
 CONSIGNES STRICTES :
-1. Détermine le contentType parmi les 8 familles :
-   - "PRODUCT" : Fiche produit, parfum, cosmétique, vêtement, matériel, livre, application e-commerce. Objectif : présenter le produit, donner envie, susciter le désir, orienter vers l'achat/découverte.
-   - "EXPERT_OPINION" : Analyse de consultant, conviction professionnelle forte, retour d'expérience B2B, point de vue tranché sur le marché.
+1. Détermine le contentType parmi les 9 familles :
+   - "GAME_OR_CREATIVE" : Jeu vidéo (RPG, serious game, mobile, pixel art), projet interactif, bande dessinée, contenu jeunesse, projet artistique ou culturel. Objectif : faire découvrir l'univers, émerveiller, donner envie de tester en 1 clic.
+   - "PRODUCT" : Fiche produit e-commerce, parfum, cosmétique, vêtement, matériel, livre, accessoire. Objectif : présenter le produit, donner envie, susciter le désir, orienter vers l'achat/découverte.
+   - "EXPERT_OPINION" : Analyse de consultant B2B, conviction professionnelle forte, retour d'expérience sur un marché pro.
    - "EDITORIAL" : Article de fond, réflexion stratégique, décryptage complet.
-   - "ANNOUNCEMENT" : Nouveauté, lancement, disponibilité, événement, refonte.
-   - "EDUCATIONAL" : Tutoriel, guide pratique, 3 à 5 conseils actionnables, erreurs à éviter.
-   - "STORY" : Histoire vécue, coulisses de création, anecdote entrepreneuriale sincère, leçon de vie.
-   - "NEWS" : Actualité factuelle, fait marquant, tendance récente (zéro invention de faits).
+   - "ANNOUNCEMENT" : Nouveauté majeure, lancement officiel, disponibilité immédiate, événement.
+   - "EDUCATIONAL" : Tutoriel, guide pratique, 3 à 5 conseils actionnables, enseignement de valeurs ou compétences.
+   - "STORY" : Histoire vécue, coulisses de création de projet, anecdote entrepreneuriale sincère, leçon de vie.
+   - "NEWS" : Actualité factuelle, fait marquant, tendance récente.
    - "TESTIMONIAL" : Avis client, cas concret, avant/après, preuve sociale.
 
-2. Ne choisis JAMAIS "EXPERT_OPINION" par défaut si le contenu décrit un produit commercial (ex: parfum, boutique e-commerce, article en vente). Un produit e-commerce doit être classé en "PRODUCT", même s'il sera publié sur LinkedIn.
+2. RÈGLE CRITIQUE ANTI-DÉFORMATION :
+   - Ne transforme JAMAIS un jeu vidéo, une initiative pour enfants ou un projet culturel en logiciel SaaS de productivité B2B d'entreprise !
+   - Pas de jargon d'entreprise hors-sujet (ex: "perte de temps opérationnelle", "outils disparates", "logiciels complexes", "optimiser vos flux de travail", "dispersion des tâches") si le sujet est un jeu, un loisir ou un produit culturel.
+   - Si le contenu traite d'un jeu vidéo ou d'une expérience (comme NOUR RPG), classe OBLIGATOIREMENT en "GAME_OR_CREATIVE".
 
 3. Fournis une analyse détaillée au format JSON strict.
 
 RÉPONDS UNIQUEMENT AVEC UN JSON STRICT respectant cette forme exacte, sans texte avant ni après :
 {
-  "contentType": "PRODUCT",
-  "primaryIntent": "SELL",
-  "audience": "Description concise du public ciblé",
-  "commercialIntent": 0.85,
-  "emotionalAngle": "Désir, élégance et découverte sensorielle",
-  "detectedLabel": "🛍️ Produit / E-commerce",
-  "detectedReason": "Explication claire en français de pourquoi ce format correspond au contenu",
+  "contentType": "GAME_OR_CREATIVE",
+  "primaryIntent": "INSPIRE",
+  "audience": "Parents, éducateurs, communauté, joueurs et passionnés",
+  "commercialIntent": 0.4,
+  "emotionalAngle": "Émerveillement, bienveillance et innovation ludique",
+  "detectedLabel": "🎮 Jeu Vidéo / Projet Créatif",
+  "detectedReason": "Explication claire en français de la détection",
   "recommendedStructure": [
-    "Hook produit irrésistible",
-    "Bénéfices sensoriels & univers",
-    "Notes & caractéristiques clés vérifiées",
-    "Pour quelle occasion / pour qui",
-    "Appel à l'action clair"
+    "Hook paradoxe ou constat percutant",
+    "Présentation de l'univers et de l'initiative",
+    "Mécaniques concrètes et gameplay",
+    "Pour qui et accessibilité",
+    "Appel à tester avec lien direct"
   ],
   "confidence": 0.95,
   "keyEntities": {
-    "productName": "Nom du produit ou service s'il y en a un",
-    "brand": "Marque ou boutique",
-    "priceOrOffer": "Prix ou offre mentionnée si présente",
+    "productName": "Nom exact du projet ou jeu",
+    "brand": "Créateur ou studio",
+    "priceOrOffer": "Gratuit, Démo, Bêta ou Prix",
     "mainFeatures": ["Caractéristique 1", "Caractéristique 2"]
   }
 }`;
@@ -110,6 +115,44 @@ RÉPONDS UNIQUEMENT AVEC UN JSON STRICT respectant cette forme exacte, sans text
 export function fallbackClassification(input: ClassifierInput): ClassificationResult {
   const urlLower = (input.targetUrl || '').toLowerCase();
   const textLower = (input.targetUrlContent || '').toLowerCase();
+  const subjectLower = (input.postSubject || '').toLowerCase();
+  const allText = `${urlLower} ${textLower} ${subjectLower}`;
+
+  const isGaming =
+    allText.includes('rpg') ||
+    allText.includes('jeu') ||
+    allText.includes('game') ||
+    allText.includes('nour') ||
+    allText.includes('playnour') ||
+    allText.includes('pixel-art') ||
+    allText.includes('pixel art') ||
+    allText.includes('adab') ||
+    allText.includes('waswas');
+
+  if (isGaming) {
+    return {
+      contentType: 'GAME_OR_CREATIVE',
+      primaryIntent: 'INSPIRE',
+      audience: 'Parents, enfants, éducateurs et amateurs d’expériences ludiques éthiques',
+      commercialIntent: 0.3,
+      emotionalAngle: 'Sens, transmission et émerveillement ludique',
+      detectedLabel: '🎮 Jeu Vidéo / Expérience Ludique',
+      detectedReason: 'Votre contenu concerne un jeu vidéo ou une aventure interactive narrative.',
+      recommendedStructure: [
+        'Accroche sur la conciliation jeu & transmission de valeurs',
+        'Présentation du concept du jeu sans violence',
+        'Mécaniques de progression et originalité',
+        'Accessibilité immédiate (navigateur, gratuit)',
+        'Appel à tester le jeu en famille'
+      ],
+      confidence: 0.95,
+      keyEntities: {
+        productName: 'NOUR RPG',
+        priceOrOffer: 'Gratuit / Bêta ouverte',
+        mainFeatures: ['Sans violence', 'Quiz de sagesse', 'Directement dans le navigateur']
+      }
+    };
+  }
 
   const isProduct =
     urlLower.includes('/parfum') ||

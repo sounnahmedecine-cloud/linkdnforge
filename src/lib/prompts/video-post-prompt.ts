@@ -74,6 +74,18 @@ ${contentType === 'PRODUCT' ? `🛍️ RÈGLES SPÉCIFIQUES FICHE PRODUIT / E-CO
   4. Pour qui : À quelle personne ou quelle occasion ce produit convient à merveille.
   5. Appel à l'action direct : Inviter à commander ou découvrir sur la boutique avec le lien : ${targetUrl || 'le lien en commentaire'}.` : ''}
 
+${contentType === 'GAME_OR_CREATIVE' ? `🎮 RÈGLES SPÉCIFIQUES JEU VIDÉO / EXPÉRIENCE LUDIQUE & CULTURELLE :
+- Ce post met en valeur un jeu vidéo, une création narrative, éducative ou culturelle (ex: NOUR RPG).
+- INTERDICTION FORMELLE : Ne parle JAMAIS d'outils SaaS de bureau, de productivité en entreprise, de logiciels disparates, de gain de temps opérationnel ou de dispersion des tâches !
+- Angle recommandé : Comment le jeu vidéo réconcilie le plaisir ludique et la transmission de valeurs nobles, sans violence, avec des choix éthiques et des quiz de sagesse.
+- Inclus les détails concrets tirés des sources : univers en pixel-art, duels d'esprit/sagesse, hadiths/adab, gratuité, jouable directement dans le navigateur, accessible dès 8 ans et en famille.
+- Structure recommandée :
+  1. Hook puissant : Le dilemme du temps d'écran ou la quête de jeux porteurs de sens.
+  2. Le concept novateur : Le jeu narratif qui brise les codes (zéro violence, aventure du cœur).
+  3. Le gameplay concret : Les mécaniques réelles (quiz de sagesse, XP éthique, choix moraux).
+  4. Accessibilité : Gratuit, sans inscription, sur PC et mobile en 1 clic.
+  5. Appel à l'action chaleureux : Inviter à tester le chapitre 1 avec le lien exact : ${targetUrl || 'le lien en commentaire'}.` : ''}
+
 ${contentType === 'EXPERT_OPINION' ? `💼 RÈGLES SPÉCIFIQUES EXPERTISE / THOUGHT LEADERSHIP :
 - Observation de terrain → Problème ou paradoxe → Analyse sans concession → Conviction forte → Enseignements concrets → Question ouverte de débat & CTA.` : ''}
 

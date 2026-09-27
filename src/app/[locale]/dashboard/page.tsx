@@ -150,6 +150,7 @@ export default function DashboardPage() {
     videoUrl?: string;
     videoMeta?: { name: string; size: number } | null;
     targetUrl?: string;
+    targetUrlContent?: string;
     postSubject?: string;
     editorialStyle?: string;
     tone?: string;
@@ -172,6 +173,7 @@ export default function DashboardPage() {
         body: JSON.stringify({
           videoUrl: params.videoUrl || '',
           targetUrl: params.targetUrl || '',
+          targetUrlContent: params.targetUrlContent || '',
           videoMeta: params.videoMeta || null,
           postSubject: params.postSubject || '',
           editorialStyle: params.editorialStyle || ghostwriterProfile.editorialStyle || 'auto',
@@ -293,6 +295,7 @@ export default function DashboardPage() {
                       await handleGenerate({
                         sourceType: 'url',
                         targetUrl: data.targetUrl,
+                        targetUrlContent: data.targetUrlContent,
                         postSubject: data.postSubject,
                         editorialStyle: data.editorialStyle,
                         tone: data.tone,

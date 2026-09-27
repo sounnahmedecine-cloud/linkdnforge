@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Globe2, Sparkles, ChevronDown, ChevronUp, ArrowLeft, Loader2, Search, CheckCircle2 } from 'lucide-react';
+import { Globe2, Sparkles, ChevronDown, ChevronUp, ArrowLeft, Loader2, Search, CheckCircle2, Gamepad2, ShoppingBag, BookOpen, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface UrlForgeProps {
   onBack: () => void;
   onGenerate: (data: {
     targetUrl: string;
+    targetUrlContent?: string;
     postSubject?: string;
     editorialStyle?: string;
     tone?: string;
@@ -15,6 +16,16 @@ interface UrlForgeProps {
   }) => Promise<void>;
   isGenerating: boolean;
   defaultTone?: string;
+}
+
+interface ScrapedPreview {
+  title: string;
+  description: string;
+  content: string;
+  ogImage: string | null;
+  screenshotUrl: string | null;
+  detectedCategory: string;
+  source?: string;
 }
 
 export default function UrlForge({
@@ -30,10 +41,21 @@ export default function UrlForge({
   const [postObjective, setPostObjective] = useState('leads');
   const [tone, setTone] = useState(defaultTone);
 
+  // Live URL inspection state
+  const [isScraping, setIsScraping] = useState(false);
+  const [scrapedPreview, setScrapedPreview] = useState<ScrapedPreview | null>(null);
+  const [scrapeError, setScrapeError] = useState<string | null>(null);
+
   // Quick detection helper based on common URL patterns (informative UI hints)
   const getUrlHint = (url: string) => {
     if (!url) return null;
     const lower = url.toLowerCase();
+    if (lower.includes('nour') || lower.includes('rpg') || lower.includes('play') || lower.includes('game')) {
+      return {
+        label: '🎮 Détection : Jeu Vidéo / Expérience Ludique & Éducative',
+        desc: 'L\'IA extrait l\'univers, les mécaniques sans violence et la transmission de valeurs pour un post axé émerveillement & découverte.',
+      };
+    }
     if (lower.includes('/product') || lower.includes('/produit') || lower.includes('/parfum') || lower.includes('/item') || lower.includes('/shop')) {
       return {
         label: '🛍️ Détection : Fiche Produit / E-commerce',
@@ -54,11 +76,84 @@ export default function UrlForge({
 
   const hint = getUrlHint(targetUrl);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleAnalyzeUrl = async (overrideUrl?: string) => {
+    const urlToTest = (overrideUrl || targetUrl).trim();
+    if (!urlToTest) return;
+
+    setIsScraping(true);
+    setScrapeError(null);
+
+    try {
+      const res = await fetch('/api/scrape-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlToTest }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Erreur lors de la lecture de la page.');
+      }
+
+      const data = await res.json();
+      if (data.data) {
+        setScrapedPreview({
+          title: data.title || '',
+          description: data.description || '',
+          content: data.data || '',
+          ogImage: data.ogImage || null,
+          screenshotUrl: data.screenshotUrl || null,
+          detectedCategory: data.detectedCategory || 'general',
+          source: data.source,
+        });
+
+        // Auto-adapt style if category is gaming
+        if (data.detectedCategory === 'gaming') {
+          setEditorialStyle('game');
+        } else if (data.detectedCategory === 'ecommerce') {
+          setEditorialStyle('product');
+        }
+      } else {
+        setScrapeError(data.warning || 'Impossible de lire le contenu de la page.');
+      }
+    } catch (err: any) {
+      setScrapeError(err.message || 'Impossible d’accéder à l’URL.');
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!targetUrl.trim()) return;
-    onGenerate({
-      targetUrl: targetUrl.trim(),
+    const cleanUrl = targetUrl.trim();
+    if (!cleanUrl) return;
+
+    let contentToSend = scrapedPreview?.content;
+
+    // If not scraped yet, perform quick scrape first to ensure rich context
+    if (!contentToSend) {
+      try {
+        setIsScraping(true);
+        const res = await fetch('/api/scrape-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: cleanUrl }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.data) {
+            contentToSend = data.data;
+          }
+        }
+      } catch {
+        // Fallback to server scraping
+      } finally {
+        setIsScraping(false);
+      }
+    }
+
+    await onGenerate({
+      targetUrl: cleanUrl,
+      targetUrlContent: contentToSend,
       postSubject: postSubject.trim() || undefined,
       editorialStyle,
       tone,
@@ -89,29 +184,109 @@ export default function UrlForge({
           <span>🔗</span> Transformez une page web ou un produit
         </h2>
         <p className="text-sm text-slate-500">
-          Collez simplement l'adresse de votre page (boutique en ligne, SaaS, article de blog). LinkedInForge analyse le contenu, récupère le visuel HD et rédige le post parfait.
+          Collez simplement l'adresse de votre page (boutique en ligne, jeu, SaaS, article de blog). LinkedInForge analyse le contenu, récupère le visuel HD et rédige le post parfait.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Main URL Input */}
+        {/* Main URL Input with Action Button */}
         <div className="space-y-2">
           <label className="block text-sm font-bold text-slate-800">
             Adresse URL de la page ou du produit
           </label>
-          <div className="relative">
-            <input
-              type="url"
-              required
-              value={targetUrl}
-              onChange={(e) => setTargetUrl(e.target.value)}
-              placeholder="https://dubainegoce.fr/parfum/eclair-lattafa... ou https://monsite.com"
-              className="w-full bg-slate-50 border-2 border-slate-300 rounded-2xl px-4 py-4 pl-11 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white text-base shadow-xs"
-            />
-            <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="url"
+                required
+                value={targetUrl}
+                onChange={(e) => {
+                  setTargetUrl(e.target.value);
+                  setScrapedPreview(null);
+                  setScrapeError(null);
+                }}
+                onBlur={() => {
+                  if (targetUrl.trim() && !scrapedPreview && !isScraping) {
+                    handleAnalyzeUrl();
+                  }
+                }}
+                placeholder="https://playnour.online ou https://dubainegoce.fr/parfum/..."
+                className="w-full bg-slate-50 border-2 border-slate-300 rounded-2xl px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white text-base shadow-xs"
+              />
+              <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!targetUrl.trim() || isScraping}
+              onClick={() => handleAnalyzeUrl()}
+              className="px-4 py-3.5 rounded-2xl border-slate-300 text-slate-700 font-bold hover:bg-slate-50 shrink-0 flex items-center gap-1.5"
+            >
+              {isScraping ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  <span className="text-xs">Lecture...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 text-slate-500" />
+                  <span className="text-xs">Analyser</span>
+                </>
+              )}
+            </Button>
           </div>
 
-          {hint && (
+          {/* Scrape Error Message */}
+          {scrapeError && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-xs text-amber-800">
+              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+              <span>{scrapeError} Vous pouvez quand même forger ou préciser l'angle ci-dessous.</span>
+            </div>
+          )}
+
+          {/* Rich Preview Card once Scraped */}
+          {scrapedPreview && (
+            <div className="bg-gradient-to-br from-emerald-50/70 to-teal-50/50 border border-emerald-200 rounded-2xl p-4 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-800 flex items-center gap-1.5 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Contenu extrait avec succès
+                </span>
+                <span className="text-xs font-semibold text-slate-500 bg-white/80 px-2 py-0.5 rounded-md border border-slate-200">
+                  {scrapedPreview.detectedCategory === 'gaming' && '🎮 Jeu / RPG'}
+                  {scrapedPreview.detectedCategory === 'ecommerce' && '🛍️ E-commerce'}
+                  {scrapedPreview.detectedCategory === 'education' && '🎓 Éducation'}
+                  {scrapedPreview.detectedCategory === 'saas' && '💻 SaaS'}
+                  {scrapedPreview.detectedCategory === 'general' && '🌐 Page Web'}
+                </span>
+              </div>
+
+              <div className="flex gap-3 items-start">
+                {scrapedPreview.ogImage && (
+                  <img
+                    src={scrapedPreview.ogImage}
+                    alt="Aperçu"
+                    className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0 bg-slate-100"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="space-y-1 min-w-0">
+                  <h4 className="text-xs font-bold text-slate-900 line-clamp-1">
+                    {scrapedPreview.title || 'Page analysée'}
+                  </h4>
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                    {scrapedPreview.description || scrapedPreview.content.slice(0, 150) + '...'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Helpful Hint if no preview yet */}
+          {!scrapedPreview && hint && (
             <div className="bg-blue-50/70 border border-blue-200/80 rounded-xl p-3.5 flex items-start gap-2.5 animate-in fade-in duration-200">
               <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
               <div>
@@ -131,7 +306,7 @@ export default function UrlForge({
             value={postSubject}
             onChange={(e) => setPostSubject(e.target.value)}
             rows={2}
-            placeholder="Ex: Mettre l'accent sur les notes de tête et proposer un code promo, ou insister sur le gain de productivité..."
+            placeholder="Ex: Insister sur le plaisir sans violence et le Chapitre 1 gratuit, ou mettre l'accent sur les quiz de sagesse..."
             className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none"
           />
         </div>
@@ -148,7 +323,7 @@ export default function UrlForge({
               Options avancées (Style forcé & Objectif)
             </span>
             <div className="flex items-center gap-2 text-slate-400">
-              <span>{showAdvanced ? 'Masquer' : 'Style : ✨ Automatique'}</span>
+              <span>{showAdvanced ? 'Masquer' : `Style : ${editorialStyle === 'game' ? '🎮 Jeu Vidéo' : editorialStyle === 'product' ? '🛍️ Produit' : '✨ Automatique'}`}</span>
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </button>
@@ -164,7 +339,8 @@ export default function UrlForge({
                   onChange={(e) => setEditorialStyle(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500"
                 >
-                  <option value="auto">✨ Automatique (Recommandé - Détecte Produit / Article / SaaS)</option>
+                  <option value="auto">✨ Automatique (Recommandé - Détecte Jeu, Produit, Article, SaaS)</option>
+                  <option value="game">🎮 Jeu Vidéo & Projet Ludique (RPG, Serious Game, Univers narratif)</option>
                   <option value="product">🛍️ Produit / E-commerce (Vente & Notes sensorielles)</option>
                   <option value="editorial">📰 Éditorial / Analyse de fond</option>
                   <option value="expert">💼 Expertise & Thèse de fond</option>
@@ -179,10 +355,10 @@ export default function UrlForge({
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { id: 'leads', label: '🛍️ Ventes & Conversion' },
+                    { id: 'leads', label: '🛍️ Découverte & Clics' },
                     { id: 'traffic', label: '🚀 Clics vers le site' },
-                    { id: 'authority', label: '💡 Crédibilité & Expertise' },
-                    { id: 'engagement', label: '💬 Débat & Commentaires' },
+                    { id: 'authority', label: '💡 Crédibilité & Impact' },
+                    { id: 'engagement', label: '💬 Débat & Partage' },
                   ].map((o) => (
                     <button
                       key={o.id}
@@ -206,14 +382,19 @@ export default function UrlForge({
         {/* CTA */}
         <Button
           type="submit"
-          disabled={!targetUrl.trim() || isGenerating}
+          disabled={!targetUrl.trim() || isGenerating || isScraping}
           size="lg"
           className="w-full py-4 text-base font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.01]"
         >
           {isGenerating ? (
             <span className="flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" />
-              Scraping de la page & Rédaction du post...
+              Rédaction du post avec l'IA...
+            </span>
+          ) : isScraping ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Analyse du contenu en cours...
             </span>
           ) : (
             '🚀 Analyser l’URL & Forger le Contenu'

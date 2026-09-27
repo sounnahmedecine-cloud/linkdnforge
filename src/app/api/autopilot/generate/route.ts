@@ -7,6 +7,7 @@ import {
   fallbackClassification,
   ClassificationResult,
 } from '@/lib/prompts/content-classifier';
+import { scrapeUrlContent } from '@/lib/services/url-scraper';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Scrape target URL if provided and not yet scraped
+    // 1. Scrape target URL directly in-process (zero loopback HTTP dependency)
     let targetUrlContent = providedContent || '';
     let screenshotUrl = targetUrl
       ? `https://image.thum.io/get/width/1200/crop/675/${targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`}`
@@ -49,25 +50,18 @@ export async function POST(request: NextRequest) {
 
     if (targetUrl) {
       try {
-        const scrapeRes = await fetch(`${request.nextUrl.origin}/api/scrape-url`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: targetUrl }),
-        });
-        if (scrapeRes.ok) {
-          const scrapeData = await scrapeRes.json();
-          if (!targetUrlContent) {
-            targetUrlContent = scrapeData.data || '';
-          }
-          if (scrapeData.screenshotUrl) {
-            screenshotUrl = scrapeData.screenshotUrl;
-          }
-          if (scrapeData.ogImage) {
-            ogImage = scrapeData.ogImage;
-          }
+        const scrapeData = await scrapeUrlContent(targetUrl);
+        if (scrapeData.content && !targetUrlContent) {
+          targetUrlContent = scrapeData.content;
+        }
+        if (scrapeData.screenshotUrl) {
+          screenshotUrl = scrapeData.screenshotUrl;
+        }
+        if (scrapeData.ogImage) {
+          ogImage = scrapeData.ogImage;
         }
       } catch (err) {
-        console.warn('Scraping URL automatique non concluant:', err);
+        console.warn('Scraping URL in-process non concluant:', err);
       }
     }
 
