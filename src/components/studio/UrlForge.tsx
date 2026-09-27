@@ -50,16 +50,10 @@ export default function UrlForge({
   const getUrlHint = (url: string) => {
     if (!url) return null;
     const lower = url.toLowerCase();
-    if (lower.includes('nour') || lower.includes('rpg') || lower.includes('play') || lower.includes('game')) {
-      return {
-        label: '🎮 Détection : Jeu Vidéo / Expérience Ludique & Éducative',
-        desc: 'L\'IA extrait l\'univers, les mécaniques sans violence et la transmission de valeurs pour un post axé émerveillement & découverte.',
-      };
-    }
-    if (lower.includes('/product') || lower.includes('/produit') || lower.includes('/parfum') || lower.includes('/item') || lower.includes('/shop')) {
+    if (lower.includes('/product') || lower.includes('/produit') || lower.includes('/item') || lower.includes('/shop') || lower.includes('/boutique')) {
       return {
         label: '🛍️ Détection : Fiche Produit / E-commerce',
-        desc: 'L\'IA va extraire les notes, bénéfices et offre commerciale pour rédiger un post axé désir & découverte.',
+        desc: 'L\'IA extrait les caractéristiques, bénéfices et offre commerciale pour un post orienté désir & découverte.',
       };
     }
     if (lower.includes('/blog') || lower.includes('/article') || lower.includes('/news') || lower.includes('/post/')) {
@@ -69,8 +63,8 @@ export default function UrlForge({
       };
     }
     return {
-      label: '✨ Détection Intelligente Active',
-      desc: 'L\'IA lit la page complète (balises OpenGraph, hero, offre) et applique la classification idéale.',
+      label: '✨ Analyse Universelle Intelligente',
+      desc: 'L\'IA extrait le contenu réel de la page (titres, présentation, offre) et s’adapte rigoureusement à votre univers.',
     };
   };
 
@@ -210,7 +204,7 @@ export default function UrlForge({
                     handleAnalyzeUrl();
                   }
                 }}
-                placeholder="https://playnour.online ou https://dubainegoce.fr/parfum/..."
+                placeholder="https://monsite.com/produit, https://mon-application.com ou https://mon-article..."
                 className="w-full bg-slate-50 border-2 border-slate-300 rounded-2xl px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white text-base shadow-xs"
               />
               <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -306,7 +300,7 @@ export default function UrlForge({
             value={postSubject}
             onChange={(e) => setPostSubject(e.target.value)}
             rows={2}
-            placeholder="Ex: Insister sur le plaisir sans violence et le Chapitre 1 gratuit, ou mettre l'accent sur les quiz de sagesse..."
+            placeholder="Ex: Mettre l'accent sur les nouveautés, une offre spéciale ou les points forts..."
             className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none"
           />
         </div>
@@ -323,7 +317,7 @@ export default function UrlForge({
               Options avancées (Style forcé & Objectif)
             </span>
             <div className="flex items-center gap-2 text-slate-400">
-              <span>{showAdvanced ? 'Masquer' : `Style : ${editorialStyle === 'game' ? '🎮 Jeu Vidéo' : editorialStyle === 'product' ? '🛍️ Produit' : '✨ Automatique'}`}</span>
+              <span>{showAdvanced ? 'Masquer' : `Style : ${editorialStyle === 'app' ? '🚀 Application' : editorialStyle === 'product' ? '🛍️ Produit' : '✨ Automatique'}`}</span>
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </button>
@@ -339,13 +333,13 @@ export default function UrlForge({
                   onChange={(e) => setEditorialStyle(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500"
                 >
-                  <option value="auto">✨ Automatique (Recommandé - Détecte Jeu, Produit, Article, SaaS)</option>
-                  <option value="game">🎮 Jeu Vidéo & Projet Ludique (RPG, Serious Game, Univers narratif)</option>
-                  <option value="product">🛍️ Produit / E-commerce (Vente & Notes sensorielles)</option>
+                  <option value="auto">✨ Automatique (Recommandé - Détecte fidèlement le sujet réel)</option>
+                  <option value="app">🚀 Application / Expérience web (Jeu, SaaS, Outil en ligne)</option>
+                  <option value="product">🛍️ Produit / E-commerce (Vente & Bénéfices réels)</option>
                   <option value="editorial">📰 Éditorial / Analyse de fond</option>
                   <option value="expert">💼 Expertise & Thèse de fond</option>
                   <option value="announcement">📢 Annonce / Lancement officiel</option>
-                  <option value="educational">🎓 Éducatif / How-to</option>
+                  <option value="educational">🎓 Éducatif / Guide & Méthode</option>
                 </select>
               </div>
 

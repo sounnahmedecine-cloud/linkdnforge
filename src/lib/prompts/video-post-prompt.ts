@@ -63,28 +63,27 @@ ${recommendedStructure.map((step, idx) => `  ${idx + 1}. ${step}`).join('\n')}
 RÈGLES ÉDITORIALES PAR FAMILLE :
 
 ${contentType === 'PRODUCT' ? `🛍️ RÈGLES SPÉCIFIQUES FICHE PRODUIT / E-COMMERCE :
-- Ce post a pour but de PRÉSENTER, DONNER ENVIE et VENDRE un produit précis.
-- NE TRANSFORME PAS ce produit en article d'opinion abstrait sur l'industrie.
-- Mets en valeur l'expérience concrète : sensorialité, notes (tête/cœur/fond pour un parfum), tenue, design du flacon, émotion procurée.
-- Inclus les faits réels extraits du produit (nom exact, marque, contenance, et prix si mentionné).
+- Ce post a pour but de PRÉSENTER, DONNER ENVIE et VALORISER un produit extrait de la page (physique ou digital).
+- Mets en valeur l'expérience concrète : bénéfices réels, univers de la marque, caractéristiques vérifiées, émotion procurée.
+- Inclus les faits réels extraits du produit (nom exact, marque, spécificités, et offre/prix si mentionné).
 - Structure recommandée :
-  1. Hook produit : Stopper le scroll avec une question sensorielle, un paradoxe séduisant ou une accroche irrésistible.
-  2. Expérience & bénéfices : Décrire ce que l'on ressent en le portant/l'utilisant.
-  3. Caractéristiques vérifiées : Les notes olfactives et détails réels du produit.
-  4. Pour qui : À quelle personne ou quelle occasion ce produit convient à merveille.
-  5. Appel à l'action direct : Inviter à commander ou découvrir sur la boutique avec le lien : ${targetUrl || 'le lien en commentaire'}.` : ''}
+  1. Hook produit : Stopper le scroll avec une question accrocheuse ou un constat engageant.
+  2. Expérience & bénéfices : Ce que l'on ressent ou ce que le produit apporte concrètement.
+  3. Caractéristiques vérifiées : Les détails réels et distinctifs du produit.
+  4. Pour qui : À qui ce produit s'adresse idéalement.
+  5. Appel à l'action direct : Inviter à commander ou découvrir avec le lien : ${targetUrl || 'le lien en commentaire'}.` : ''}
 
-${contentType === 'GAME_OR_CREATIVE' ? `🎮 RÈGLES SPÉCIFIQUES JEU VIDÉO / EXPÉRIENCE LUDIQUE & CULTURELLE :
-- Ce post met en valeur un jeu vidéo, une création narrative, éducative ou culturelle (ex: NOUR RPG).
-- INTERDICTION FORMELLE : Ne parle JAMAIS d'outils SaaS de bureau, de productivité en entreprise, de logiciels disparates, de gain de temps opérationnel ou de dispersion des tâches !
-- Angle recommandé : Comment le jeu vidéo réconcilie le plaisir ludique et la transmission de valeurs nobles, sans violence, avec des choix éthiques et des quiz de sagesse.
-- Inclus les détails concrets tirés des sources : univers en pixel-art, duels d'esprit/sagesse, hadiths/adab, gratuité, jouable directement dans le navigateur, accessible dès 8 ans et en famille.
+${(contentType as string) === 'APPLICATION_OR_MEDIA' || (contentType as string) === 'GAME_OR_CREATIVE' ? `🚀 RÈGLES SPÉCIFIQUES APPLICATION, JEU & CRÉATION DIGITALE :
+- Ce post met en valeur une expérience en ligne, une application web ou mobile, un jeu ou un projet interactif.
+- RÈGLE ABSOLUE : Reste rigoureusement fidèle à la nature du projet. Ne plaque aucun cliché corporatif B2B (réduction des coûts, flux de travail, etc.) si le site ne concerne pas des logiciels de gestion d'entreprise.
+- Mets en lumière la promesse originale, l'expérience offerte à l'utilisateur et ce qui rend cette initiative unique.
+- Inclus les détails pratiques extraits du site : accessibilité (sur navigateur, mobile, inscription ou gratuité), points forts et univers.
 - Structure recommandée :
-  1. Hook puissant : Le dilemme du temps d'écran ou la quête de jeux porteurs de sens.
-  2. Le concept novateur : Le jeu narratif qui brise les codes (zéro violence, aventure du cœur).
-  3. Le gameplay concret : Les mécaniques réelles (quiz de sagesse, XP éthique, choix moraux).
-  4. Accessibilité : Gratuit, sans inscription, sur PC et mobile en 1 clic.
-  5. Appel à l'action chaleureux : Inviter à tester le chapitre 1 avec le lien exact : ${targetUrl || 'le lien en commentaire'}.` : ''}
+  1. Hook captivant : Une ouverture intrigante sur le besoin, le plaisir ou la curiosité.
+  2. La proposition originale : Ce que l'application ou le jeu propose de rafraîchissant.
+  3. L'expérience concrète : Comment ça fonctionne et les bénéfices pour l'utilisateur.
+  4. Accessibilité : Comment y accéder facilement.
+  5. Appel à l'action enthousiaste vers le lien : ${targetUrl || 'le lien en commentaire'}.` : ''}
 
 ${contentType === 'EXPERT_OPINION' ? `💼 RÈGLES SPÉCIFIQUES EXPERTISE / THOUGHT LEADERSHIP :
 - Observation de terrain → Problème ou paradoxe → Analyse sans concession → Conviction forte → Enseignements concrets → Question ouverte de débat & CTA.` : ''}

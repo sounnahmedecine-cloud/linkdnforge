@@ -341,9 +341,9 @@ ${formData.personalExamples ? `- Style à imiter : ${formData.personalExamples}`
 CONSIGNES DE RÉDACTION :
 - Ton : ${getToneDescription(formData.tone, 'fr')}
 - Le post DOIT être centré sur le PRODUIT/SITE, avec des détails précis tirés du texte. Ne sois pas générique.
-- Si le contenu décrit un jeu vidéo, une création artistique ou un projet pour enfants/famille (ex: RPG, jeu narrative, quiz de sagesse), NE LE TRANSFORME JAMAIS en logiciel de productivité B2B d'entreprise. Adopte un angle chaleureux de découverte ludique et de transmission de valeurs.
-- Va droit au but dès la première ligne sur la valeur ou l'émerveillement que le produit apporte. Ne raconte aucune réflexion introspective ni d'anecdotes sur ton passé.
-- Utilise un vocabulaire simple, clair et terre-à-terre. Bannis totalement le jargon de startup et les anglicismes à la mode.
+- RÈGLE DE FIDÉLITÉ ABSOLUE : Reste rigoureusement fidèle au sujet réel extrait du site (qu'il s'agisse d'un produit e-commerce, d'une application, d'un jeu, d'un service ou d'un projet créatif). Ne plaque JAMAIS de jargon corporatif B2B (logiciels disparates, flux de travail, productivité d'équipe) si la page ne concerne pas explicitement des logiciels de productivité d'entreprise.
+- Va droit au but dès la première ligne sur la valeur, l'utilité ou l'expérience que le site apporte. Ne raconte aucune réflexion introspective ni d'anecdotes sur ton passé.
+- Utilise un vocabulaire simple, clair et terre-à-terre. Bannis totalement le jargon creux et les formules toutes faites.
 - Explique concrètement le concept et l'expérience offerte.
 - Ajoute obligatoirement un appel à l'action (Call-to-Action) à la toute fin du post en incluant ce lien précis : ${formData.targetUrl}
 - Va à l'essentiel (moins de 250 mots). Formule ça comme un post naturel, pas comme un communiqué de presse.`;

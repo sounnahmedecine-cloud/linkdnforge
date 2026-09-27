@@ -1,6 +1,7 @@
 export type EditorialFamily =
   | 'PRODUCT'
-  | 'GAME_OR_CREATIVE'
+  | 'APPLICATION_OR_MEDIA'
+  | 'SERVICE_OR_CONSULTING'
   | 'EXPERT_OPINION'
   | 'EDITORIAL'
   | 'ANNOUNCEMENT'
@@ -52,9 +53,8 @@ export function buildClassifierPrompt(input: ClassifierInput): string {
     locale = 'fr',
   } = input;
 
-  return `Tu es le moteur de classification éditoriale de LinkedInForge.
-Ta mission n'est PAS d'écrire le post.
-Tu dois d'abord comprendre la nature réelle du contenu fourni afin de déterminer quelle structure rédactionnelle est la plus pertinente.
+  return `Tu es le moteur d'analyse éditoriale de LinkedInForge.
+Ta mission n'est PAS d'écrire le post mais de classifier fidèlement la nature réelle de la ressource fournie.
 
 ${userRequestedStyle && userRequestedStyle !== 'auto' ? `NOTE PRIORITAIRE : L'utilisateur a explicitement demandé le style : "${userRequestedStyle}". Respecte ce choix tout en analysant le fond.` : ''}
 
@@ -68,46 +68,48 @@ ${postObjective ? `- Objectif utilisateur : ${postObjective}` : ''}
 - Réseau cible : ${targetNetwork}
 
 CONSIGNES STRICTES :
-1. Détermine le contentType parmi les 9 familles :
-   - "GAME_OR_CREATIVE" : Jeu vidéo (RPG, serious game, mobile, pixel art), projet interactif, bande dessinée, contenu jeunesse, projet artistique ou culturel. Objectif : faire découvrir l'univers, émerveiller, donner envie de tester en 1 clic.
-   - "PRODUCT" : Fiche produit e-commerce, parfum, cosmétique, vêtement, matériel, livre, accessoire. Objectif : présenter le produit, donner envie, susciter le désir, orienter vers l'achat/découverte.
-   - "EXPERT_OPINION" : Analyse de consultant B2B, conviction professionnelle forte, retour d'expérience sur un marché pro.
-   - "EDITORIAL" : Article de fond, réflexion stratégique, décryptage complet.
-   - "ANNOUNCEMENT" : Nouveauté majeure, lancement officiel, disponibilité immédiate, événement.
-   - "EDUCATIONAL" : Tutoriel, guide pratique, 3 à 5 conseils actionnables, enseignement de valeurs ou compétences.
-   - "STORY" : Histoire vécue, coulisses de création de projet, anecdote entrepreneuriale sincère, leçon de vie.
-   - "NEWS" : Actualité factuelle, fait marquant, tendance récente.
-   - "TESTIMONIAL" : Avis client, cas concret, avant/après, preuve sociale.
+1. Détermine le contentType parmi les familles universelles :
+   - "APPLICATION_OR_MEDIA" : Application web/mobile, jeu, plateforme interactive, création numérique, contenu jeunesse ou média. Objectif : faire découvrir l'univers, donner envie d'explorer et d'essayer.
+   - "PRODUCT" : Fiche produit e-commerce, article en vente (physique ou digital), équipement, livre, création artisanale. Objectif : susciter le désir, présenter les caractéristiques clés et orienter vers l'achat/découverte.
+   - "SERVICE_OR_CONSULTING" : Prestation de service, agence, freelance, coaching, accompagnement métier.
+   - "EXPERT_OPINION" : Analyse professionnelle, conviction métier forte, retour d'expérience terrain sur un marché.
+   - "EDITORIAL" : Article de fond, réflexion stratégique ou décryptage thématique.
+   - "ANNOUNCEMENT" : Lancement d'un nouveau projet, sortie officielle, événement ou nouveauté majeure.
+   - "EDUCATIONAL" : Guide pratique, conseils, tutoriel, transmission de savoirs ou méthodes.
+   - "STORY" : Histoire vécue, coulisses d'un projet, anecdote authentique ou leçon de parcours.
+   - "NEWS" : Actualité factuelle, tendance récente ou fait marquant.
+   - "TESTIMONIAL" : Retour d'expérience utilisateur, cas client ou preuve sociale.
 
-2. RÈGLE CRITIQUE ANTI-DÉFORMATION :
-   - Ne transforme JAMAIS un jeu vidéo, une initiative pour enfants ou un projet culturel en logiciel SaaS de productivité B2B d'entreprise !
-   - Pas de jargon d'entreprise hors-sujet (ex: "perte de temps opérationnelle", "outils disparates", "logiciels complexes", "optimiser vos flux de travail", "dispersion des tâches") si le sujet est un jeu, un loisir ou un produit culturel.
-   - Si le contenu traite d'un jeu vidéo ou d'une expérience (comme NOUR RPG), classe OBLIGATOIREMENT en "GAME_OR_CREATIVE".
+2. RÈGLE D'OR D'AUTHENTICITÉ (ZÉRO HALLUCINATION) :
+   - Reste STRICTEMENT aligné avec ce que présente la page web.
+   - N'invente AUCUN modèle économique ou cas d'usage imaginaire.
+   - Ne plaque JAMAIS de stéréotype B2B corporate (ex: "perte de temps opérationnelle", "outils disparates", "logiciels complexes", "optimiser vos flux de travail", "dispersion des tâches") si la page web ne vend pas explicitement un logiciel de gestion pour entreprises !
+   - Si la page est grand public, ludique, artisanale, éducative ou créative, adopte fidèlement son univers.
 
 3. Fournis une analyse détaillée au format JSON strict.
 
 RÉPONDS UNIQUEMENT AVEC UN JSON STRICT respectant cette forme exacte, sans texte avant ni après :
 {
-  "contentType": "GAME_OR_CREATIVE",
+  "contentType": "APPLICATION_OR_MEDIA",
   "primaryIntent": "INSPIRE",
-  "audience": "Parents, éducateurs, communauté, joueurs et passionnés",
+  "audience": "Description concise du public ciblé réel",
   "commercialIntent": 0.4,
-  "emotionalAngle": "Émerveillement, bienveillance et innovation ludique",
-  "detectedLabel": "🎮 Jeu Vidéo / Projet Créatif",
+  "emotionalAngle": "Émotion naturelle de l'offre (ex: Découverte, Curiosité, Désir, Confiance)",
+  "detectedLabel": "🚀 Application / Expérience en ligne",
   "detectedReason": "Explication claire en français de la détection",
   "recommendedStructure": [
-    "Hook paradoxe ou constat percutant",
-    "Présentation de l'univers et de l'initiative",
-    "Mécaniques concrètes et gameplay",
-    "Pour qui et accessibilité",
-    "Appel à tester avec lien direct"
+    "Accroche percutante et captivante",
+    "Proposition de valeur centrale",
+    "Points forts et détails concrets vérifiés",
+    "Pour qui et bénéfices réels",
+    "Appel à l'action direct vers le lien"
   ],
   "confidence": 0.95,
   "keyEntities": {
-    "productName": "Nom exact du projet ou jeu",
-    "brand": "Créateur ou studio",
-    "priceOrOffer": "Gratuit, Démo, Bêta ou Prix",
-    "mainFeatures": ["Caractéristique 1", "Caractéristique 2"]
+    "productName": "Nom exact de l'offre ou du site",
+    "brand": "Nom du créateur, marque ou éditeur",
+    "priceOrOffer": "Offre, tarif ou gratuité si mentionné",
+    "mainFeatures": ["Point fort 1", "Point fort 2"]
   }
 }`;
 }
@@ -118,51 +120,49 @@ export function fallbackClassification(input: ClassifierInput): ClassificationRe
   const subjectLower = (input.postSubject || '').toLowerCase();
   const allText = `${urlLower} ${textLower} ${subjectLower}`;
 
-  const isGaming =
-    allText.includes('rpg') ||
-    allText.includes('jeu') ||
+  // 1. Detect interactive apps, tools, games, online media
+  const isAppOrMedia =
+    allText.includes('app') ||
+    allText.includes('play') ||
     allText.includes('game') ||
-    allText.includes('nour') ||
-    allText.includes('playnour') ||
-    allText.includes('pixel-art') ||
-    allText.includes('pixel art') ||
-    allText.includes('adab') ||
-    allText.includes('waswas');
+    allText.includes('jeu') ||
+    allText.includes('interactive') ||
+    allText.includes('plateforme') ||
+    allText.includes('online tool') ||
+    allText.includes('navigateur');
 
-  if (isGaming) {
+  if (isAppOrMedia) {
     return {
-      contentType: 'GAME_OR_CREATIVE',
+      contentType: 'APPLICATION_OR_MEDIA',
       primaryIntent: 'INSPIRE',
-      audience: 'Parents, enfants, éducateurs et amateurs d’expériences ludiques éthiques',
+      audience: 'Utilisateurs, passionnés et curieux à la recherche d’une expérience en ligne originale',
       commercialIntent: 0.3,
-      emotionalAngle: 'Sens, transmission et émerveillement ludique',
-      detectedLabel: '🎮 Jeu Vidéo / Expérience Ludique',
-      detectedReason: 'Votre contenu concerne un jeu vidéo ou une aventure interactive narrative.',
+      emotionalAngle: 'Découverte, curiosité et accessibilité',
+      detectedLabel: '🎮 Application & Expérience Web',
+      detectedReason: 'Votre page présente une application, un jeu ou un service interactif accessible en ligne.',
       recommendedStructure: [
-        'Accroche sur la conciliation jeu & transmission de valeurs',
-        'Présentation du concept du jeu sans violence',
-        'Mécaniques de progression et originalité',
-        'Accessibilité immédiate (navigateur, gratuit)',
-        'Appel à tester le jeu en famille'
+        'Accroche captivante sur le concept ou le besoin auquel il répond',
+        'Présentation de l’univers et de la proposition originale',
+        'Fonctionnalités et expérience concrète pour l’utilisateur',
+        'Accessibilité (facilité d’accès, disponibilité)',
+        'Appel à l’action chaleureux pour tester et découvrir'
       ],
-      confidence: 0.95,
-      keyEntities: {
-        productName: 'NOUR RPG',
-        priceOrOffer: 'Gratuit / Bêta ouverte',
-        mainFeatures: ['Sans violence', 'Quiz de sagesse', 'Directement dans le navigateur']
-      }
+      confidence: 0.9,
     };
   }
 
+  // 2. Detect e-commerce, shopping and physical/digital products
   const isProduct =
-    urlLower.includes('/parfum') ||
     urlLower.includes('/produit') ||
     urlLower.includes('/product') ||
     urlLower.includes('/shop') ||
-    textLower.includes('ajouter au panier') ||
-    textLower.includes('eau de parfum') ||
-    textLower.includes('prix :') ||
-    textLower.includes('livraison');
+    urlLower.includes('/boutique') ||
+    allText.includes('panier') ||
+    allText.includes('commander') ||
+    allText.includes('livraison') ||
+    allText.includes('ajouter au panier') ||
+    allText.includes('prix :') ||
+    allText.includes('store');
 
   if (isProduct) {
     return {
@@ -184,20 +184,49 @@ export function fallbackClassification(input: ClassifierInput): ClassificationRe
     };
   }
 
+  // 3. Detect educational content, tutorials, courses
+  const isEducation =
+    allText.includes('cours') ||
+    allText.includes('formation') ||
+    allText.includes('apprendre') ||
+    allText.includes('tutoriel') ||
+    allText.includes('guide pratique');
+
+  if (isEducation) {
+    return {
+      contentType: 'EDUCATIONAL',
+      primaryIntent: 'EDUCATE',
+      audience: 'Personnes souhaitant progresser et acquérir de nouvelles compétences',
+      commercialIntent: 0.4,
+      emotionalAngle: 'Pédagogie, clarté et bienveillance',
+      detectedLabel: '🎓 Éducatif / Guide & Apprentissage',
+      detectedReason: 'Votre contenu transmet des connaissances ou des méthodes pratiques.',
+      recommendedStructure: [
+        'Accroche sur un défi ou apprentissage clé',
+        'Les étapes ou enseignements majeurs',
+        'Les erreurs courantes à éviter',
+        'Synthèse et mise en pratique',
+        'Appel à l’action pour approfondir'
+      ],
+      confidence: 0.85,
+    };
+  }
+
+  // 4. Default: Announcement or thought leadership based strictly on content
   return {
-    contentType: 'EXPERT_OPINION',
+    contentType: 'ANNOUNCEMENT',
     primaryIntent: 'INFORM',
-    audience: 'Professionnels, entrepreneurs et créateurs',
+    audience: 'Audience intéressée par votre domaine et vos actualités',
     commercialIntent: 0.4,
-    emotionalAngle: 'Clarté, impact et valeur partagée',
-    detectedLabel: '💼 Expertise / Thought Leadership',
-    detectedReason: 'Votre contenu apporte un retour d’expérience et une vision stratégique sur votre domaine.',
+    emotionalAngle: 'Clarté, intérêt et valeur partagée',
+    detectedLabel: '📢 Découverte & Nouveauté',
+    detectedReason: 'Votre contenu présente un projet, un service ou une initiative à faire découvrir.',
     recommendedStructure: [
-      'Hook constat ou paradoxe',
-      'Problème sous-jacent',
-      'Analyse & conviction forte',
-      'Enseignements concrets',
-      'Question ouverte & CTA'
+      'Accroche directe et engageante',
+      'Ce que propose concrètement cette page',
+      'Ce qui la rend remarquable',
+      'Pour qui elle est pensée',
+      'Appel à l’action vers le site'
     ],
     confidence: 0.8,
   };

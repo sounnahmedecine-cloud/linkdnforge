@@ -171,40 +171,38 @@ export async function scrapeUrlContent(rawUrl: string): Promise<ScrapedPageData>
 
   if (
     combinedLower.includes('rpg') ||
-    combinedLower.includes('jeu') ||
+    combinedLower.includes('jeu ') ||
+    combinedLower.includes('jeux') ||
     combinedLower.includes('game') ||
-    combinedLower.includes('pixel-art') ||
-    combinedLower.includes('pixel art') ||
-    combinedLower.includes('nour') ||
     combinedLower.includes('gaming') ||
-    combinedLower.includes('gameplay')
+    combinedLower.includes('gameplay') ||
+    combinedLower.includes('pixel-art')
   ) {
     detectedCategory = 'gaming';
   } else if (
-    combinedLower.includes('parfum') ||
-    combinedLower.includes('produit') ||
     combinedLower.includes('panier') ||
     combinedLower.includes('boutique') ||
     combinedLower.includes('livraison') ||
     combinedLower.includes('shop') ||
-    combinedLower.includes('prix')
+    combinedLower.includes('store') ||
+    combinedLower.includes('cart') ||
+    combinedLower.includes('commander') ||
+    combinedLower.includes('prix :')
   ) {
     detectedCategory = 'ecommerce';
   } else if (
     combinedLower.includes('cours') ||
     combinedLower.includes('formation') ||
     combinedLower.includes('apprendre') ||
-    combinedLower.includes('enfant') ||
-    combinedLower.includes('école') ||
-    combinedLower.includes('adab') ||
-    combinedLower.includes('sagesse')
+    combinedLower.includes('tutoriel') ||
+    combinedLower.includes('academy') ||
+    combinedLower.includes('guide')
   ) {
     detectedCategory = 'education';
   } else if (
     combinedLower.includes('saas') ||
     combinedLower.includes('logiciel') ||
     combinedLower.includes('crm') ||
-    combinedLower.includes('workflow') ||
     combinedLower.includes('b2b')
   ) {
     detectedCategory = 'saas';
