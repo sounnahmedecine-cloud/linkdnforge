@@ -1,15 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ChevronDown, ChevronUp, Copy, Check, RefreshCw, Zap, CheckCircle2, Clock, ShieldCheck, ThumbsUp, MessageSquare, Repeat, Send, MoreHorizontal, Globe2 } from 'lucide-react';
+import { 
+  Copy, 
+  Check, 
+  CheckCircle2, 
+  Clock, 
+  ShieldCheck, 
+  ThumbsUp, 
+  MessageSquare, 
+  Repeat, 
+  Send, 
+  Globe2, 
+  Film, 
+  Sparkles
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import ForgeLoader from '@/components/ui/ForgeLoader';
-import {
-  THEME_SLUGS,
-  TONE_VALUES,
-  VISUAL_TYPE_VALUES,
-} from '@/lib/onboardingOptions';
 
 interface LandingGeneratorProps {
   plans: any[];
@@ -20,41 +28,24 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const t = useTranslations('onboarding');
   const tLanding = useTranslations('landing');
   
-  const [url, setUrl] = useState('');
-  const [showOptions, setShowOptions] = useState(false);
+  const [activeMode, setActiveMode] = useState<'url' | 'video' | 'idea'>('url');
+  const [inputText, setInputText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPost, setGeneratedPost] = useState('');
+  const [tiktokPost, setTiktokPost] = useState('');
+  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
+  const [selectedNetworkView, setSelectedNetworkView] = useState<'linkedin' | 'tiktok'>('linkedin');
   const [copied, setCopied] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isYearly, setIsYearly] = useState(true);
-  
-  const [formData, setFormData] = useState({
-    targetUrl: '',
-    tone: '',
-    themes: [] as string[],
-    visualType: '',
-    postObjective: '',
-    postType: '',
-  });
 
-  useEffect(() => {
-    setFormData(prev => ({ ...prev, targetUrl: url }));
-  }, [url]);
+  // Preset demo values
+  const PRESET_URL = 'https://linkedinforge.woosenteur.fr';
+  const PRESET_IDEA = "Pourquoi la plupart des créateurs sur LinkedIn abandonnent après 3 semaines (et la méthode pour durer)";
 
-  const handleMultiSelect = (field: string, value: string) => {
-    setFormData(prev => {
-      const current = prev[field as keyof typeof prev] as string[];
-      return {
-        ...prev,
-        [field]: current.includes(value)
-          ? current.filter(item => item !== value)
-          : [...current, value]
-      };
-    });
-  };
-
-  const handleSingleSelect = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleSelectPreset = (mode: 'url' | 'idea', value: string) => {
+    setActiveMode(mode);
+    setInputText(value);
   };
 
   const handleGenerate = async () => {
@@ -76,35 +67,52 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
 
     setIsGenerating(true);
     setGeneratedPost('');
+    setTiktokPost('');
+    setScreenshotUrl(null);
     
     try {
-      let targetUrlContent = undefined;
-      if (formData.targetUrl) {
-        try {
-          const scrapeRes = await fetch('/api/scrape-url', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: formData.targetUrl })
-          });
-          if (scrapeRes.ok) {
-            const data = await scrapeRes.json();
-            targetUrlContent = data.data;
-          }
-        } catch (e) {
-          console.error('Erreur scraping URL:', e);
-        }
+      const isUrl = activeMode === 'url' || inputText.startsWith('http');
+      const payload: any = {
+        locale,
+        tone: 'expert',
+        themes: ['Innovation', 'Entrepreneuriat'],
+      };
+
+      if (isUrl) {
+        payload.targetUrl = inputText || PRESET_URL;
+      } else {
+        payload.postSubject = inputText || PRESET_IDEA;
       }
 
-      const response = await fetch('/api/forge-post', {
+      const response = await fetch('/api/autopilot/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, locale, targetUrlContent })
+        body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error('Erreur API');
-      const data = await response.json();
-      
-      setGeneratedPost(data.post);
+      if (!response.ok) {
+        // Fallback to legacy forge-post
+        const fallbackRes = await fetch('/api/forge-post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            targetUrl: isUrl ? (inputText || PRESET_URL) : undefined,
+            postSubject: !isUrl ? (inputText || PRESET_IDEA) : undefined,
+            tone: 'expert',
+            themes: ['Innovation', 'SaaS'],
+            locale,
+          })
+        });
+        if (!fallbackRes.ok) throw new Error('Erreur API');
+        const fallbackData = await fallbackRes.json();
+        setGeneratedPost(fallbackData.post);
+      } else {
+        const data = await response.json();
+        setGeneratedPost(data.post);
+        setTiktokPost(data.tiktokPost || '');
+        setScreenshotUrl(data.screenshotUrl || null);
+      }
+
       localStorage.setItem('linkdnforge_free_trials_count', (trialCount + 1).toString());
     } catch (error) {
       console.error(error);
@@ -115,42 +123,23 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(generatedPost);
+    const textToCopy = selectedNetworkView === 'tiktok' && tiktokPost ? tiktokPost : generatedPost;
+    navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleShareLinkedIn = () => {
-    const text = encodeURIComponent(generatedPost);
-    window.open(`https://www.linkedin.com/feed/?text=${text}`, '_blank');
-  };
-
-  const handleShareFacebook = () => {
-    const text = encodeURIComponent(generatedPost);
-    window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, '_blank');
-  };
-
-  const handleShareTwitter = () => {
-    const text = encodeURIComponent(generatedPost);
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
-  };
-
-  const handleShareReddit = () => {
-    const text = encodeURIComponent(generatedPost);
-    window.open(`https://www.reddit.com/submit?title=Mon%20Post&text=${text}`, '_blank');
   };
 
   if (showPaywall) {
     return (
       <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-2xl shadow-slate-200/50 max-w-4xl mx-auto text-center space-y-8 animate-in fade-in zoom-in duration-300">
-        <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Zap className="w-8 h-8 fill-current" />
-        </div>
+        <span className="bg-orange-100 text-orange-600 text-sm font-bold px-4 py-1.5 rounded-full inline-block">
+          Vos 5 générations gratuites sont prêtes
+        </span>
         <h2 className="font-display font-bold text-3xl sm:text-4xl text-black">
-          Vous avez épuisé votre essai gratuit !
+          Passez à la vitesse supérieure avec l'offre Pro
         </h2>
-        <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-          Pour continuer à générer des posts viraux avec toutes les options avancées (Ton, Style, Visuels...), passez à la vitesse supérieure.
+        <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto">
+          Débloquez les posts illimités, le pilote vidéo multimodal, la capture Hero HD automatique et les scripts TikTok & Reels.
         </p>
         
         <div className="flex justify-center items-center gap-4 mt-6">
@@ -162,7 +151,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
             <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-md ${isYearly ? 'translate-x-9' : 'translate-x-1'}`} />
           </button>
           <span className={`text-sm font-bold transition-colors ${isYearly ? 'text-black' : 'text-slate-400'} flex items-center gap-2`}>
-            Annuel <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-md shadow-sm">PROMO</span>
+            Annuel <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-md shadow-sm">PROMO -45%</span>
           </span>
         </div>
 
@@ -197,10 +186,10 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                </ul>
 
                <Button 
-                 href={`/api/stripe/checkout?plan=${plan.name.toLowerCase()}&billing=${isYearly ? 'yearly' : 'monthly'}`} 
+                 href={`/api/stripe/checkout?plan=${plan.name.toLowerCase().includes('pro') ? 'pro' : 'starter'}&billing=${isYearly ? 'yearly' : 'monthly'}`} 
                  className={`w-full py-3 text-sm font-bold rounded-xl transition-transform hover:scale-105 ${
                    plan.popular 
-                     ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                     ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25' 
                      : 'bg-black hover:bg-slate-800 text-white'
                  }`}
                >
@@ -209,241 +198,282 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
              </div>
           ))}
         </div>
-
-        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 mt-10 pt-8 border-t border-slate-100 text-sm text-slate-600 font-medium max-w-3xl mx-auto">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            <span>Satisfait ou remboursé</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-orange-500" />
-            <span>Essai gratuit de 14 jours</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-blue-500" />
-            <span>Annulable sans frais</span>
-          </div>
-        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-12 space-y-6">
-      {!generatedPost && !isGenerating && (
-        <div className="bg-white rounded-[2rem] p-4 sm:p-6 shadow-2xl shadow-slate-200/50 border border-slate-100 flex flex-col sm:flex-row gap-4 items-center">
-          <input
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Collez l'URL de votre site ou article ici..."
-            className="flex-1 w-full bg-slate-50 border-none rounded-xl px-6 py-5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-medium"
-          />
-          <Button onClick={handleGenerate} size="lg" className="w-full sm:w-auto px-8 py-5 text-lg font-bold bg-orange-500 hover:bg-orange-600 rounded-xl whitespace-nowrap shadow-lg shadow-orange-500/30">
-            Essayer gratuitement
-          </Button>
+    <div className="w-full max-w-4xl mx-auto space-y-6 text-left">
+      {/* 1. VISUAL ARCHITECTURE SHOWCASE (The Core Loop: Video + URL + Idea -> AI -> Social Post) */}
+      <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl space-y-6">
+        <div className="text-center space-y-1">
+          <span className="text-[11px] font-mono uppercase tracking-widest text-orange-400 font-bold">
+            Le Moteur de Transformation
+          </span>
+          <h3 className="font-display font-bold text-2xl sm:text-3xl text-white">
+            Une vidéo. Une URL. Une idée. Votre post est forgé.
+          </h3>
         </div>
-      )}
 
-      {!generatedPost && !isGenerating && (
-        <div className="text-center">
-          <button 
-            onClick={() => setShowOptions(!showOptions)}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium transition-colors bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm"
+        {/* 3 Source Tabs */}
+        <div className="grid md:grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMode('video');
+              setInputText('');
+            }}
+            className={`p-4 rounded-2xl border text-left transition duration-200 ${
+              activeMode === 'video'
+                ? 'bg-slate-900 border-orange-500 shadow-lg shadow-orange-500/10'
+                : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
+            }`}
           >
-            Affiner votre post (Options)
-            {showOptions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <div className="flex items-center gap-2 text-orange-400 font-bold text-sm mb-1">
+              <Film className="w-4 h-4" /> 1. Vidéo Réelle
+            </div>
+            <p className="text-xs text-slate-400 leading-snug">
+              L'IA analyse l'image et la voix pour en extraire les messages clés.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMode('url');
+              setInputText(PRESET_URL);
+            }}
+            className={`p-4 rounded-2xl border text-left transition duration-200 ${
+              activeMode === 'url'
+                ? 'bg-slate-900 border-blue-500 shadow-lg shadow-blue-500/10'
+                : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center gap-2 text-blue-400 font-bold text-sm mb-1">
+              <Globe2 className="w-4 h-4" /> 2. URL de Page Web
+            </div>
+            <p className="text-xs text-slate-400 leading-snug">
+              Capture la section Hero HD et extrait la proposition de valeur.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMode('idea');
+              setInputText(PRESET_IDEA);
+            }}
+            className={`p-4 rounded-2xl border text-left transition duration-200 ${
+              activeMode === 'idea'
+                ? 'bg-slate-900 border-purple-500 shadow-lg shadow-purple-500/10'
+                : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center gap-2 text-purple-400 font-bold text-sm mb-1">
+              <Sparkles className="w-4 h-4" /> 3. Sujet ou Idée
+            </div>
+            <p className="text-xs text-slate-400 leading-snug">
+              Structure votre pensée avec un hook fort et des arguments percutants.
+            </p>
           </button>
         </div>
-      )}
 
-      {!generatedPost && !isGenerating && showOptions && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-100 animate-in slide-in-from-top-4 fade-in duration-200 text-left space-y-8">
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">{t('step2.themesTitle')}</h3>
-            <div className="flex flex-wrap gap-2">
-              {THEME_SLUGS.map((theme) => (
-                <button
-                  key={theme}
-                  onClick={() => handleMultiSelect('themes', theme)}
-                  className={`px-4 py-2 rounded-lg border transition font-medium text-sm ${
-                    formData.themes.includes(theme)
-                      ? 'bg-orange-500 border-orange-500 text-white'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  {t(`step2.themes.${theme}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">{t('step2.toneTitle')}</h3>
-            <div className="flex flex-wrap gap-2">
-              {TONE_VALUES.map((tone) => (
-                <button
-                  key={tone}
-                  onClick={() => handleSingleSelect('tone', tone)}
-                  className={`px-4 py-2 rounded-lg border transition font-medium text-sm ${
-                    formData.tone === tone
-                      ? 'bg-orange-500 border-orange-500 text-white'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  {t(`step2.tones.${tone}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">{t('step3.visualTypeTitle')}</h3>
-            <div className="flex flex-wrap gap-2">
-              {VISUAL_TYPE_VALUES.map((visual) => (
-                <button
-                  key={visual}
-                  onClick={() => handleSingleSelect('visualType', visual)}
-                  className={`px-4 py-2 rounded-lg border transition font-medium text-sm ${
-                    formData.visualType === visual
-                      ? 'bg-orange-500 border-orange-500 text-white'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  {t(`step3.visualTypes.${visual}`)}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* AI Multimodal Processing Bridge */}
+        <div className="flex items-center justify-center gap-2 text-xs font-mono text-orange-300 py-1.5 px-4 bg-orange-950/40 border border-orange-900/60 rounded-xl text-center">
+          <span className="text-orange-400">✦</span>
+          <span>ANALYSE MULTIMODALE & GHOSTWRITER ADAPTÉ À VOTRE VOIX</span>
+          <span className="text-orange-400">✦</span>
         </div>
-      )}
 
+        {/* Live Input Field according to active mode */}
+        {!generatedPost && !isGenerating && (
+          <div className="space-y-3 pt-2">
+            {activeMode === 'video' ? (
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center space-y-3">
+                <p className="text-sm text-slate-300 font-medium">
+                  🎥 Déposez une vidéo (jusqu'à 2 Go) dans votre espace pour générer votre post en mode automatique.
+                </p>
+                <Button href="/onboarding" size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/25">
+                  Tester avec ma vidéo (Gratuit)
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder={
+                    activeMode === 'url'
+                      ? "Collez l'URL de votre site ou produit (ex: https://mon-saas.com)..."
+                      : "Entrez votre sujet ou idée (ex: Comment j'ai lancé mon projet)..."
+                  }
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm sm:text-base font-medium"
+                />
+                <Button
+                  onClick={handleGenerate}
+                  size="lg"
+                  className="px-7 py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-xl whitespace-nowrap shadow-lg shadow-orange-500/30 transition-transform hover:scale-[1.02]"
+                >
+                  Forger mon post
+                </Button>
+              </div>
+            )}
+
+            {/* Quick Demo Click Presets */}
+            {activeMode !== 'video' && (
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 pt-1">
+                <span className="font-semibold text-slate-500">Exemples rapides :</span>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPreset('url', PRESET_URL)}
+                  className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
+                >
+                  🌐 URL : linkedinforge.woosenteur.fr
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPreset('idea', PRESET_IDEA)}
+                  className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
+                >
+                  💡 Idée : Méthode de création de contenu
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 2. GENERATION LOADER & RESULT DISPLAY */}
       {(isGenerating || generatedPost) && (
-        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl shadow-slate-200/50 border border-slate-100 text-left animate-in zoom-in-95 fade-in duration-300">
+        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl shadow-slate-200/50 border border-slate-200 animate-in zoom-in-95 fade-in duration-300 space-y-6">
           {isGenerating ? (
-            <div className="py-12 space-y-8">
-              <ForgeLoader label={t('result.generatingLabel')} />
-              <div className="max-w-2xl mx-auto space-y-3 pt-4">
+            <div className="py-12 space-y-8 text-center">
+              <ForgeLoader label="Compréhension du contenu & Rédaction Ghostwriter..." />
+              <div className="max-w-xl mx-auto space-y-3 pt-4">
                 <div className="h-4 bg-slate-100 rounded-md animate-pulse w-full" />
-                <div className="h-4 bg-slate-100 rounded-md animate-pulse w-5/6" />
-                <div className="h-4 bg-slate-100 rounded-md animate-pulse w-4/6" />
-                <div className="h-4 bg-slate-100 rounded-md animate-pulse w-full mt-6" />
-                <div className="h-4 bg-slate-100 rounded-md animate-pulse w-3/4" />
+                <div className="h-4 bg-slate-100 rounded-md animate-pulse w-5/6 mx-auto" />
+                <div className="h-4 bg-slate-100 rounded-md animate-pulse w-4/6 mx-auto" />
               </div>
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <h2 className="font-display font-bold text-2xl text-black">Votre post LinkedIn</h2>
-                <span className="bg-emerald-100 text-emerald-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Généré avec succès</span>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden font-sans shadow-sm max-w-xl mx-auto my-8">
-                {/* Header */}
-                <div className="flex items-center gap-3 p-4">
-                  <div className="w-12 h-12 bg-slate-100 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
-                    <svg className="w-6 h-6 text-slate-400 mt-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 text-[15px] truncate hover:text-blue-600 hover:underline cursor-pointer leading-tight">
-                      Vous
-                    </h3>
-                    <p className="text-slate-500 text-xs truncate leading-snug">Créateur(rice) & Expert(e) de votre domaine</p>
-                    <div className="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
-                      <span>À l'instant</span>
-                      <span>•</span>
-                      <Globe2 className="w-3 h-3" />
-                    </div>
-                  </div>
-                  <button className="text-slate-600 hover:bg-slate-100 p-1.5 rounded-full transition self-start">
-                    <MoreHorizontal className="w-5 h-5" />
+              {/* Top Bar with Switcher */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedNetworkView('linkedin')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
+                      selectedNetworkView === 'linkedin'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    💼 Format LinkedIn & FB
                   </button>
+                  {tiktokPost && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedNetworkView('tiktok')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
+                        selectedNetworkView === 'tiktok'
+                          ? 'bg-black text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      🎵 Format TikTok & Reels
+                    </button>
+                  )}
                 </div>
-                
-                {/* Body */}
-                <div className="px-4 pb-2 text-[14px] text-slate-900 leading-[1.5] whitespace-pre-wrap break-words">
-                  {generatedPost}
-                </div>
-                
-                {/* Metrics */}
-                <div className="px-4 py-2 mt-2 flex items-center justify-between text-xs text-slate-500 border-b border-slate-200">
-                  <div className="flex items-center gap-1">
-                    <span className="bg-blue-600 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">👍</span>
-                    <span className="bg-rose-500 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px] -ml-1">❤️</span>
-                    <span className="ml-1">Vous et 42 autres personnes</span>
-                  </div>
-                  <div>
-                    <span className="hover:text-blue-600 hover:underline cursor-pointer">12 commentaires</span>
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="px-2 py-1 flex items-center justify-between">
-                  <button className="flex-1 flex items-center justify-center gap-2 text-slate-500 font-semibold text-[14px] py-3 rounded hover:bg-slate-100 transition">
-                    <ThumbsUp className="w-5 h-5" />
-                    <span className="hidden sm:inline">J'aime</span>
-                  </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 text-slate-500 font-semibold text-[14px] py-3 rounded hover:bg-slate-100 transition">
-                    <MessageSquare className="w-5 h-5" />
-                    <span className="hidden sm:inline">Commenter</span>
-                  </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 text-slate-500 font-semibold text-[14px] py-3 rounded hover:bg-slate-100 transition">
-                    <Repeat className="w-5 h-5" />
-                    <span className="hidden sm:inline">Republier</span>
-                  </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 text-slate-500 font-semibold text-[14px] py-3 rounded hover:bg-slate-100 transition">
-                    <Send className="w-5 h-5" />
-                    <span className="hidden sm:inline">Envoyer</span>
-                  </button>
-                </div>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-4 pt-6 border-t border-slate-100 mb-4">
-                <button
-                  onClick={handleShareLinkedIn}
-                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm transition bg-[#0A66C2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                  Aller sur LinkedIn
-                </button>
-                <button
-                  onClick={handleShareFacebook}
-                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm transition bg-[#1877F2] hover:bg-[#0c5fc7] text-white shadow-lg shadow-blue-500/20"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  Aller sur Facebook
-                </button>
-                <button
-                  onClick={handleShareTwitter}
-                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm transition bg-black hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                  Aller sur X (Twitter)
-                </button>
-                <button
-                  onClick={handleShareReddit}
-                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm transition bg-[#FF4500] hover:bg-[#cc3700] text-white shadow-lg shadow-orange-500/20"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.75-1.64-6.07-1.72.08-1.1.4-3.05 1.52-3.7.72-.4 1.73-.24 3 .5C17.2 6.3 18.46 7.5 20 7.5c1.65 0 3-1.35 3-3s-1.35-3-3-3c-1.38 0-2.54.94-2.88 2.22-1.43-.72-2.64-.8-3.6-.25-1.64.94-1.95 3.47-2 4.55-2.33.08-4.45.7-6.1 1.72C4.86 8.98 3.96 8.5 3 8.5c-1.65 0-3 1.35-3 3 0 1.32.84 2.44 2.05 2.84-.03.22-.05.44-.05.66 0 3.86 4.5 7 10 7s10-3.14 10-7c0-.22-.02-.44-.05-.66 1.21-.4 2.05-1.52 2.05-2.84zM2.3 11.5c0-1.1.9-2 2-2 .6 0 1.15.28 1.52.7-1.65.65-3.03 1.58-4.14 2.7.27-1.07 1-2.26 2.62-3.4zM12 21c-4.45 0-8.5-2.68-8.5-5.5C3.5 12.68 7.55 10 12 10s8.5 2.68 8.5 5.5c0 2.82-4.05 5.5-8.5 5.5zm5.12-6.55c.82 0 1.5-.68 1.5-1.5s-.68-1.5-1.5-1.5-1.5.68-1.5 1.5.68 1.5 1.5 1.5zM7.88 14.45c0-.83.68-1.5 1.5-1.5s1.5.67 1.5 1.5-.68 1.5-1.5 1.5-1.5-.67-1.5-1.5zm6.86 2.58c-.37.38-1.4.74-2.74.74s-2.36-.36-2.73-.74c-.18-.18-.18-.46 0-.64.18-.18.47-.18.65 0 .2.2 1.05.5 2.08.5 1.04 0 1.88-.3 2.08-.5.18-.18.47-.18.65 0 .18.18.18.46 0 .64z"/></svg>
-                  Aller sur Reddit
-                </button>
+
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <span>✓</span> Source-Check IA Validé
+                </span>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              {/* Mockup Card */}
+              {selectedNetworkView === 'tiktok' && tiktokPost ? (
+                /* TikTok Mockup */
+                <div className="bg-slate-950 text-white rounded-2xl p-5 border border-slate-800 space-y-4">
+                  <div className="flex items-center justify-between text-xs text-slate-400">
+                    <span className="font-bold flex items-center gap-1.5 text-white">
+                      <span>🎵</span> Script court TikTok & Reels
+                    </span>
+                    <span className="font-mono text-[10px] bg-slate-800 px-2 py-0.5 rounded">0-30s</span>
+                  </div>
+                  <div className="bg-slate-900 rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap font-medium border border-slate-800">
+                    {tiktokPost}
+                  </div>
+                </div>
+              ) : (
+                /* LinkedIn Mockup */
+                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden font-sans shadow-sm my-4">
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="w-11 h-11 bg-slate-100 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
+                      <svg className="w-6 h-6 text-slate-400 mt-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-slate-900 text-sm leading-tight">Vous</h4>
+                      <p className="text-slate-500 text-xs">Créateur & Fondateur</p>
+                      <div className="text-slate-400 text-xs flex items-center gap-1 mt-0.5">
+                        <span>À l'instant</span> • <Globe2 className="w-3 h-3" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Generated Post Text */}
+                  <div className="px-4 pb-3 text-[14px] text-slate-900 leading-relaxed whitespace-pre-wrap">
+                    {generatedPost}
+                  </div>
+
+                  {/* Hero Screenshot Preview if Available */}
+                  {screenshotUrl && (
+                    <div className="mx-4 mb-4 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video max-h-64 relative group">
+                      <img
+                        src={screenshotUrl}
+                        alt="Capture Hero du site web"
+                        className="w-full h-full object-cover object-top"
+                      />
+                      <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg">
+                        📸 Capture Hero du site
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LinkedIn Metrics */}
+                  <div className="px-4 py-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
+                    <div className="flex items-center gap-1">
+                      <span className="bg-blue-600 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">👍</span>
+                      <span className="bg-rose-500 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px] -ml-1">❤️</span>
+                      <span className="ml-1 font-medium">Vous et 48 personnes</span>
+                    </div>
+                    <span>14 commentaires</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="grid sm:grid-cols-2 gap-3 pt-2">
                 <button
+                  type="button"
                   onClick={handleCopy}
-                  className={`flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm transition border-2 ${
+                  className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition border-2 ${
                     copied
                       ? 'border-emerald-500 text-emerald-600 bg-emerald-50'
                       : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
-                  {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                  {copied ? t('result.copiedBtn') : t('result.copyBtn')}
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? 'Copié dans le presse-papier !' : 'Copier le texte'}
                 </button>
-                <button
-                  onClick={() => setShowPaywall(true)}
-                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm bg-black text-white hover:bg-slate-800 transition shadow-lg shadow-black/10"
+                <Button
+                  href="/onboarding"
+                  size="lg"
+                  className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25"
                 >
-                  <RefreshCw className="w-5 h-5" />
-                  Générer des visuels / Régénérer
-                </button>
+                  <span>🚀</span> Continuer dans l'Atelier
+                </Button>
               </div>
             </div>
           )}

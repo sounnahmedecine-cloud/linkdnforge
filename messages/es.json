@@ -290,113 +290,160 @@
     "copyright": "© 2026 LinkedInForge. Todos los derechos reservados."
   },
   "landing": {
-    "badge": "Generador IA de Posts para LinkedIn y Facebook",
-    "heroTitlePre": "Genera posts de LinkedIn desde una",
-    "heroTitleHighlight": "simple URL.",
-    "heroTitleSuffix": "En 1 clic.",
-    "heroSubtitle": "Diriges tu propia empresa. No tienes 2 horas al día para escribir en LinkedIn. Introduce la URL de tu SaaS, app o producto: nuestra IA la analiza y redacta un post experto con tu propio estilo. Deja de sacrificar tu captación de clientes por falta de tiempo.",
-    "ctaPrimary": "Crear mi primer post",
+    "badge": "Estudio de contenido IA para LinkedIn y redes sociales",
+    "heroTitle": "Transforma tu contenido en posts listos para publicar.",
+    "heroSubtitle": "LinkedInForge es un generador de posts de LinkedIn con IA que transforma tus vídeos, URLs e ideas en contenidos adaptados a tu estilo.",
+    "heroDescription": "Analiza un vídeo, introduce una URL o empieza desde una idea. LinkedInForge comprende tu contenido, adopta tu tono con el Ghostwriter y genera un post que puedes editar, validar y publicar.",
+    "ctaPrimary": "Probar LinkedInForge gratis",
     "ctaSecondary": "Ver cómo funciona",
-    "mockup": {
-      "draftLabel": "URL de tu producto",
-      "draftText": "https://mi-saas-increible.com",
-      "forgedLabel": "Generado en 6s (Modo Ghostwriter)",
-      "you": "Tú",
-      "justNow": "Justo ahora • 🌐",
-      "postText": "Acabo de lanzar la nueva versión de mi herramienta (y no ha sido fácil).\n\nDespués de 3 meses programando, hemos reducido el tiempo de carga por 4. \n\nEstas son las 3 decisiones técnicas que marcaron la diferencia 👇",
-      "likes": "👍 482",
-      "comments": "💬 37 comentarios",
-      "share": "🔁 Compartir"
+    "freeReassurance": "5 generaciones gratis · Sin tarjeta de crédito",
+    "slogan": "Transforma tu contenido. Forja tu presencia.",
+    "subSlogan": "Vídeos, URLs, ideas: LinkedInForge los transforma en contenido listo para publicar, con tu estilo.",
+    "transformation": {
+      "title": "Un vídeo. Una URL. Una idea. Tu contenido está listo.",
+      "subtitle": "LinkedInForge no se limita a reformular unas palabras. Analiza el contenido que le proporcionas para extraer temas clave, datos esenciales y argumentos sólidos. Después, adapta el resultado a tu propia voz.",
+      "pillars": [
+        {
+          "tag": "Vídeo → análisis → post",
+          "title": "🎥 Transforma tus vídeos en posts",
+          "body": "Sube un vídeo y deja que la IA analice la voz y la imagen para extraer las ideas clave y los mensajes esenciales. Genera publicaciones de LinkedIn basadas en lo que realmente contiene tu vídeo."
+        },
+        {
+          "tag": "URL → análisis → post",
+          "title": "🌐 Transforma una URL en contenido",
+          "body": "Pega el enlace de tu producto, web, artículo o landing page. LinkedInForge captura la sección Hero y extrae los elementos esenciales de tu propuesta de valor."
+        },
+        {
+          "tag": "Tu voz, no una plantilla",
+          "title": "✍️ Escribe con tu propio estilo auténtico",
+          "body": "El Ghostwriter aprende tu manera de comunicar a partir de tus publicaciones y ejemplos. Tu vocabulario, tu ritmo y tu forma de argumentar sirven de base. Cero textos genéricos."
+        }
+      ]
     },
-    "introBand": {
-      "title": "Tu estrategia de adquisición en LinkedIn en piloto automático.",
-      "body": "El primer generador de posts de LinkedIn diseñado para fundadores ocupados. Introduce la URL de tu web, y la IA se encarga del resto. Se acabó el síndrome de la página en blanco y los textos robóticos."
-    },
-    "guide": {
-      "sectionLabel": "Automatiza la adquisición sin perder tu esencia",
-      "title": "No publicar significa dejar que tus competidores te roben clientes.",
-      "body": "El dolor es el mismo para todo joven emprendedor: sabes que LinkedIn y Facebook son palancas de crecimiento masivas. Pero entre el producto y las ventas, falta tiempo. LinkedInForge es el único generador de posts IA que copia tu voz y convierte tus enlaces en contenido viral.",
-      "howItWorks": "Cómo funciona la IA de LinkedInForge",
+    "workflow": {
+      "sectionLabel": "Cómo funciona",
+      "title": "De tu contenido bruto a una publicación lista para compartir",
+      "subtitle": "Un flujo de trabajo transparente diseñado para ahorrarte horas manteniendo el control total.",
       "steps": [
         {
-          "title": "1. Pega la URL de tu proyecto",
-          "body": "Ya no necesitas explicarle tu negocio a una IA. Pega el enlace de tu SaaS o web. Nuestro algoritmo analiza la página y entiende al instante tu propuesta de valor."
+          "num": "01",
+          "title": "01 — Proporciona tu contenido",
+          "body": "Vídeo, URL o idea: empieza con lo que ya tienes a mano."
         },
         {
-          "title": "2. La IA clona tu voz real",
-          "body": "El Modo Ghostwriter analiza tus posts antiguos. Adiós al vocabulario genérico de ChatGPT. El texto generado utiliza tus expresiones, tu ritmo y tu nivel de cercanía."
+          "num": "02",
+          "title": "02 — LinkedInForge lo analiza",
+          "body": "La IA multimodal identifica datos, temas y ángulos de alto impacto."
         },
         {
-          "title": "3. Elige tu ángulo de marketing",
-          "body": "¿Storytelling, lanzamiento de producto o educativo? Selecciona el objetivo del post. La herramienta estructura el contenido con un gancho (hook) potente y un CTA que convierte."
+          "num": "03",
+          "title": "03 — Tu Ghostwriter interviene",
+          "body": "El contenido se redacta siguiendo tu estilo personal y tus objetivos."
         },
         {
-          "title": "4. Publica y consigue leads",
-          "body": "En 6 segundos obtienes un post ultra-profesional y un visual generado a medida. Tu presencia online sigue activa, tu autoridad crece, y tú vuelves a dirigir tu empresa."
+          "num": "04",
+          "title": "04 — Mantienes el control",
+          "body": "Previsualiza, edita, copia o programa tu publicación antes de compartirla."
         }
-      ],
-      "goldenRuleLabel": "Nuestra Promesa Anti-Robot",
-      "goldenRuleTitle": "Cero excusas. 100% conversión orgánica.",
-      "goldenRuleBody": "El algoritmo de LinkedIn odia el contenido estándar generado por IA. LinkedInForge está calibrado para pasar desapercibido. Estructuras probadas por los mejores copywriters combinadas con la extracción directa de tus URLs. ¿El resultado? Máxima visibilidad con el mínimo esfuerzo.",
-      "tryFree": "Probar con la URL de mi proyecto"
+      ]
+    },
+    "omnichannel": {
+      "title": "Un solo contenido alimenta múltiples canales",
+      "body": "LinkedInForge está diseñado para que nunca tengas que reescribir el mismo contenido dos veces. A partir de una sola fuente, genera versiones listas para cada red social.",
+      "channels": "LinkedIn · Facebook · Formatos cortos (TikTok y Reels)",
+      "videoNote": "Y con el Piloto de Vídeo, tu material audiovisual se convierte en un activo directo para tu calendario editorial."
+    },
+    "whyUs": {
+      "title": "¿Por qué LinkedInForge?",
+      "subtitle": "Un enfoque basado en comprender tu contenido real en lugar de depender de prompts genéricos.",
+      "reasons": [
+        {
+          "title": "Comprender antes de escribir",
+          "body": "La IA no empieza con un prompt vago. Trabaja directamente a partir de tu contenido real."
+        },
+        {
+          "title": "Tu estilo antes de las plantillas",
+          "body": "El Ghostwriter adapta la redacción a tu manera natural de comunicar."
+        },
+        {
+          "title": "Sustancia real, no relleno genérico",
+          "body": "Vídeo, web, lanzamiento, producto o experiencia: parte de lo que realmente tienes que contar."
+        },
+        {
+          "title": "Tú mantienes el control total",
+          "body": "LinkedInForge prepara el post. Tú lo revisas, lo editas y decides cuándo y dónde publicarlo."
+        }
+      ]
+    },
+    "rawMaterial": {
+      "title": "El contenido que ya tienes es una mina de oro.",
+      "body": "No necesitas inventar diez ideas nuevas cada semana. Ya tienes vídeos, artículos, páginas de productos, lanzamientos y experiencias.",
+      "action": "LinkedInForge te ayuda a transformar ese material existente en contenido social de alto rendimiento.",
+      "cta": "Empieza con tu próximo contenido"
     },
     "pricingTeaser": {
       "label": "Precios",
-      "title": "Simples y transparentes",
+      "title": "Invierte en tu visibilidad (sin perder el sueño)",
       "popular": "Más popular",
       "cta": "Iniciar prueba gratis",
       "plans": [
         {
           "name": "Starter",
-          "price": "14€",
+          "price": "19€",
           "desc": "/ mes",
           "features": [
             "15 posts / mes",
-            "Generación básica",
-            "Perfil auto"
+            "Modo Texto Estándar",
+            "LinkedIn y Facebook",
+            "3 estilos vocales"
           ]
         },
         {
           "name": "Starter",
-          "price": "9€",
+          "price": "11€",
           "desc": "/ mes (compromiso de 1 año)",
           "features": [
             "15 posts / mes",
-            "Generación básica",
-            "Perfil auto"
+            "Modo Texto Estándar",
+            "LinkedIn y Facebook",
+            "3 estilos vocales"
           ]
         },
         {
-          "name": "Pro",
+          "name": "Pro (Estudio Omnicanal)",
           "price": "29€",
           "desc": "/ mes",
           "features": [
             "Posts ilimitados",
-            "Ghostwriter",
-            "Visuales incluidos"
+            "🚀 Piloto de Vídeo Multimodal",
+            "📸 Captura Hero de tu web",
+            "🎵 Guiones para TikTok y Reels",
+            "🎭 Clon Ghostwriter avanzado"
           ]
         },
         {
-          "name": "Pro",
-          "price": "19€",
-          "desc": "/ mes (compromiso de 1 año)",
+          "name": "Pro (Estudio Omnicanal)",
+          "price": "15€",
+          "desc": "/ mes (o 190€ / año)",
           "features": [
             "Posts ilimitados",
-            "Ghostwriter",
-            "Visuales incluidos"
+            "🚀 Piloto de Vídeo Multimodal",
+            "📸 Captura Hero de tu web",
+            "🎵 Guiones para TikTok y Reels",
+            "🎭 Clon Ghostwriter avanzado"
           ],
           "popular": true
         }
       ]
     },
     "finalCta": {
-      "title": "¿Listo para forjar tu próximo post?",
-      "body": "Únete a los freelancers y emprendedores que usan LinkedInForge para generar leads cualificados.",
-      "cta": "Iniciar prueba gratis",
-      "note": "Prueba gratis de 14 días. Cancela en cualquier momento."
+      "title": "Empieza con tu próximo contenido.",
+      "body": "Únete a creadores y emprendedores que utilizan LinkedInForge para forjar su presencia online.",
+      "cta": "Probar LinkedInForge gratis",
+      "note": "5 generaciones gratis de prueba. Sin tarjeta de crédito requerida."
     },
     "footer": {
-      "tagline": "Posts de LinkedIn que convierten.",
+      "tagline": "Transforma tu contenido. Forja tu presencia.",
       "product": "Producto",
       "features": "Funcionalidades",
       "pricing": "Precios",
