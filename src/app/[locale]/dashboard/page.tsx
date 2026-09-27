@@ -213,12 +213,19 @@ export default function OnboardingPage() {
         setDetectedClassification(data.classification || null);
         setSiteScreenshotUrl(data.screenshotUrl || null);
         setSiteOgImage(data.ogImage || null);
-        if (data.screenshotUrl && !autopilotVideoUrl) {
-          setMockupMediaView('screenshot');
-        } else if (autopilotVideoUrl) {
+        
+        if (data.ogImage) {
+          setActiveVisualMode('og');
+        } else if (data.screenshotUrl) {
+          setActiveVisualMode('screenshot');
+        }
+
+        if (autopilotVideoUrl) {
           setMockupMediaView('video');
         } else if (data.ogImage) {
           setMockupMediaView('og');
+        } else if (data.screenshotUrl) {
+          setMockupMediaView('screenshot');
         }
         return;
       }
@@ -351,11 +358,14 @@ export default function OnboardingPage() {
   const handleDownloadScreenshot = () => {
     const url = activeVisualMode === 'screenshot' && siteScreenshotUrl ? siteScreenshotUrl : (siteOgImage || siteScreenshotUrl);
     if (!url) return;
+    const filename = `visuel-${activeVisualMode === 'og' ? 'produit' : 'capture'}-${Date.now()}.jpg`;
+    const downloadUrl = `/api/download-media?url=${encodeURIComponent(url)}&filename=${filename}`;
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `hero-screenshot-${Date.now()}.jpg`;
-    a.target = '_blank';
+    a.href = downloadUrl;
+    a.download = filename;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   };
 
   const [isPublishingBuffer, setIsPublishingBuffer] = useState(false);

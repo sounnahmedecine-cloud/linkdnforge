@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 30;
+
 export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
@@ -10,106 +12,120 @@ export async function POST(request: NextRequest) {
 
     const finalUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
 
-    const screenshotUrl = `https://s0.wp.com/mshots/v1/${encodeURIComponent(finalUrl)}?w=1200&h=675`;
+    // Reliable screenshot URL (thum.io provides high availability and CORS support)
+    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/675/${finalUrl}`;
 
-    // Strategy 1: Jina Reader API (clean markdown extraction)
+    let extractedTitle = '';
+    let extractedDescription = '';
+    let ogImage: string | null = null;
+    let htmlCleanText = '';
+
+    // Step 1: Always extract authentic HTML OpenGraph metadata (og:image, twitter:image, titles)
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+      const metaController = new AbortController();
+      const metaTimeout = setTimeout(() => metaController.abort(), 5000);
 
-      const jinaResponse = await fetch(`https://r.jina.ai/${finalUrl}`, {
-        headers: { 'Accept': 'text/plain' },
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      if (jinaResponse.ok) {
-        const text = await jinaResponse.text();
-        if (text && text.trim().length > 50) {
-          const imgMatch = text.match(/!\[.*?\]\((https?:\/\/[^\s\)]+?\.(?:jpg|jpeg|png|webp|avif)[^\s\)]*)\)/i);
-          const ogImage = imgMatch ? imgMatch[1] : null;
-
-          return NextResponse.json({
-            data: text.slice(0, 10000),
-            screenshotUrl,
-            ogImage,
-            source: 'jina'
-          });
-        }
-      }
-    } catch (jinaErr) {
-      console.warn('Jina Reader indisponible ou timeout, bascule sur fetch direct:', jinaErr);
-    }
-
-    // Strategy 2: Direct Fetch with basic HTML meta extraction
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-      const directRes = await fetch(finalUrl, {
+      const htmlRes = await fetch(finalUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml',
         },
-        signal: controller.signal,
+        signal: metaController.signal,
       });
-      clearTimeout(timeoutId);
+      clearTimeout(metaTimeout);
 
-      if (directRes.ok) {
-        const html = await directRes.text();
+      if (htmlRes.ok) {
+        const html = await htmlRes.text();
 
-        // Extract title, og:title, og:description, og:image, meta description
-        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-        const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i);
-        const ogDescMatch = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i);
-        const ogImageMatch = html.match(/<meta[^>]*property=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["']/i);
-        const metaDescMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i);
+        // Extract og:image or twitter:image
+        const ogImageMatch = html.match(/<meta[^>]*property=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["']/i)
+          || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["'](?:og:image|twitter:image)["']/i)
+          || html.match(/<meta[^>]*name=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["']/i)
+          || html.match(/<link[^>]*rel=["']image_src["'][^>]*href=["']([^"']+)["']/i);
 
-        const title = ogTitleMatch?.[1] || titleMatch?.[1] || '';
-        const description = ogDescMatch?.[1] || metaDescMatch?.[1] || '';
-        const ogImage = ogImageMatch?.[1] || '';
+        if (ogImageMatch?.[1]) {
+          const rawImg = ogImageMatch[1].trim();
+          try {
+            ogImage = new URL(rawImg, finalUrl).href;
+          } catch {
+            ogImage = rawImg;
+          }
+        }
 
-        // Extract clean text snippets from headings and paragraphs
-        const cleanText = html
+        // Extract title & description
+        const titleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i)
+          || html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        const descMatch = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i)
+          || html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i);
+
+        extractedTitle = titleMatch?.[1]?.trim() || '';
+        extractedDescription = descMatch?.[1]?.trim() || '';
+
+        // Extract clean text snippets
+        htmlCleanText = html
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
           .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+          .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, '')
           .replace(/<[^>]+>/g, ' ')
           .replace(/\s+/g, ' ')
           .trim()
-          .slice(0, 3000);
-
-        const extractedSummary = [
-          title ? `Titre: ${title}` : '',
-          description ? `Description: ${description}` : '',
-          cleanText ? `Contenu: ${cleanText}` : ''
-        ].filter(Boolean).join('\n\n');
-
-        return NextResponse.json({
-          data: extractedSummary,
-          screenshotUrl,
-          ogImage: ogImage || null,
-          source: 'direct-html'
-        });
+          .slice(0, 4000);
       }
-    } catch (directErr) {
-      console.warn('Direct fetch non concluant:', directErr);
+    } catch (metaErr) {
+      console.warn('[Scrape URL] Erreur extraction meta HTML directe:', metaErr);
     }
 
-    // Strategy 3: Graceful fallback so the generator never crashes
+    // Step 2: Try Jina Reader for high quality article markdown extraction
+    let jinaContent = '';
+    try {
+      const jinaController = new AbortController();
+      const jinaTimeout = setTimeout(() => jinaController.abort(), 7000);
+
+      const jinaResponse = await fetch(`https://r.jina.ai/${finalUrl}`, {
+        headers: { 'Accept': 'text/plain' },
+        signal: jinaController.signal,
+      });
+      clearTimeout(jinaTimeout);
+
+      if (jinaResponse.ok) {
+        const text = await jinaResponse.text();
+        if (text && text.trim().length > 50) {
+          jinaContent = text.slice(0, 10000);
+
+          // If no og:image found yet, check if Jina found an image
+          if (!ogImage) {
+            const imgMatch = text.match(/!\[.*?\]\((https?:\/\/[^\s\)]+?\.(?:jpg|jpeg|png|webp|avif)[^\s\)]*)\)/i);
+            if (imgMatch?.[1]) {
+              ogImage = imgMatch[1];
+            }
+          }
+        }
+      }
+    } catch (jinaErr) {
+      console.warn('[Scrape URL] Jina indisponible, utilisation du contenu direct:', jinaErr);
+    }
+
+    // Combine extracted content
+    const finalContent = jinaContent || [
+      extractedTitle ? `Titre : ${extractedTitle}` : '',
+      extractedDescription ? `Description : ${extractedDescription}` : '',
+      htmlCleanText ? `Contenu : ${htmlCleanText}` : '',
+    ].filter(Boolean).join('\n\n') || `Site web : ${finalUrl}`;
+
     return NextResponse.json({
-      data: `Site web : ${finalUrl}`,
+      data: finalContent,
       screenshotUrl,
-      warning: 'Le contenu de la page n’a pas pu être extrait automatiquement, génération basée sur le lien et les thématiques.',
-      source: 'fallback'
+      ogImage: ogImage || null,
+      source: jinaContent ? 'jina' : 'direct-html'
     });
 
-  } catch (error) {
-    console.error('Scrape URL Error fatal:', error);
+  } catch (error: any) {
+    console.error('[Scrape URL] Erreur fatale:', error);
     return NextResponse.json({
       data: '',
+      screenshotUrl: null,
+      ogImage: null,
       warning: 'Impossible d’accéder à l’URL renseignée.',
-    }, { status: 200 }); // Return 200 with empty data instead of breaking the entire app!
+    }, { status: 200 });
   }
 }
-
-

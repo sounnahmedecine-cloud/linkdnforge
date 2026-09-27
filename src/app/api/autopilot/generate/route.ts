@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // 1. Scrape target URL if provided and not yet scraped
     let targetUrlContent = providedContent || '';
     let screenshotUrl = targetUrl
-      ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`)}?w=1200&h=675`
+      ? `https://image.thum.io/get/width/1200/crop/675/${targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`}`
       : null;
     let ogImage: string | null = null;
 
