@@ -5,6 +5,24 @@
       "role": "admin",
       "unlimited": true,
       "createdAt": "2026-04-26"
+    },
+    {
+      "email": "abderelmalki@gmail.com",
+      "role": "admin",
+      "unlimited": true,
+      "createdAt": "2026-04-26"
+    },
+    {
+      "email": "contact@woosenteur.fr",
+      "role": "admin",
+      "unlimited": true,
+      "createdAt": "2026-04-26"
+    },
+    {
+      "email": "baba@woosenteur.fr",
+      "role": "admin",
+      "unlimited": true,
+      "createdAt": "2026-04-26"
     }
   ]
 }

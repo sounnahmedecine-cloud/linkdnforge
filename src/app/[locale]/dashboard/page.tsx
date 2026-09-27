@@ -26,6 +26,13 @@ interface User {
   unlimited: boolean;
 }
 
+const ADMIN_EMAILS = [
+  'sounnahmedecine@gmail.com',
+  'abderelmalki@gmail.com',
+  'contact@woosenteur.fr',
+  'baba@woosenteur.fr',
+];
+
 export default function OnboardingPage() {
   const router = useRouter();
   const locale = useLocale();
@@ -40,6 +47,7 @@ export default function OnboardingPage() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageError, setImageError] = useState('');
   const [user, setUser] = useState<User | null>(null);
+  const isAdmin = user?.role === 'admin' || (!!user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
 
   // Autopilot Video & Visual state
   const [autopilotVideoUrl, setAutopilotVideoUrl] = useState<string>('');
@@ -320,6 +328,12 @@ export default function OnboardingPage() {
     }
     navigator.clipboard.writeText(tiktokPost);
     window.open('https://www.tiktok.com/upload', '_blank');
+  };
+
+  const handleShareInstagram = () => {
+    navigator.clipboard.writeText(tiktokPost);
+    alert('Légende et hashtags copiés dans le presse-papier ! Vous allez être redirigé vers Instagram.');
+    window.open('https://www.instagram.com/', '_blank');
   };
 
   const handleDownloadScreenshot = () => {
@@ -838,39 +852,80 @@ export default function OnboardingPage() {
                       </button>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-800 space-y-2.5">
-                      <div className="flex items-center justify-between text-xs text-slate-400">
-                        <span className="font-semibold text-slate-300">⚡ Publication Directe (Buffer MCP)</span>
-                        <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">
-                          ✓ Comptes Connectés
-                        </span>
+                    {isAdmin ? (
+                      /* Founder Buffer Direct MCP (Only visible to admin/founder) */
+                      <div className="pt-3 border-t border-slate-800 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs text-slate-400">
+                          <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+                            👑 Espace Fondateur (Buffer MCP)
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">
+                            ✓ Vos Comptes Connectés
+                          </span>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handlePublishBuffer('tiktok')}
+                            disabled={isPublishingBuffer}
+                            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-black hover:bg-slate-900 text-white border border-slate-700 transition"
+                          >
+                            {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>🎵</span>}
+                            Publier sur TikTok (@abbi.muslim)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handlePublishBuffer('instagram')}
+                            disabled={isPublishingBuffer}
+                            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white transition shadow-md shadow-pink-500/10"
+                          >
+                            {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>📸</span>}
+                            Publier sur Insta (@aa.mina212)
+                          </button>
+                        </div>
+                        {bufferStatusMessage && (
+                          <p className="text-xs text-center font-semibold text-emerald-400 mt-1 animate-in fade-in">
+                            {bufferStatusMessage}
+                          </p>
+                        )}
                       </div>
-                      <div className="grid sm:grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handlePublishBuffer('tiktok')}
-                          disabled={isPublishingBuffer}
-                          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-black hover:bg-slate-900 text-white border border-slate-700 transition"
-                        >
-                          {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>🎵</span>}
-                          Publier sur TikTok (@abbi.muslim)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handlePublishBuffer('instagram')}
-                          disabled={isPublishingBuffer}
-                          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white transition shadow-md shadow-pink-500/10"
-                        >
-                          {isPublishingBuffer ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>📸</span>}
-                          Publier sur Insta (@aa.mina212)
-                        </button>
+                    ) : (
+                      /* Regular Client Users: 1-Click Universal Posting & Tips */
+                      <div className="pt-3 border-t border-slate-800 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs text-slate-400">
+                          <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                            ⚡ Publier sur vos Réseaux Sociaux
+                          </span>
+                          <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-950/60 border border-indigo-800 px-2 py-0.5 rounded-full">
+                            1-Clic Presse-Papier
+                          </span>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={handleShareTikTokMobile}
+                            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-black hover:bg-slate-900 text-white border border-slate-700 transition"
+                          >
+                            <span>🎵</span>
+                            Ouvrir & Poster sur TikTok
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleShareInstagram}
+                            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white transition shadow-md shadow-pink-500/10"
+                          >
+                            <span>📸</span>
+                            Ouvrir & Poster sur Instagram
+                          </button>
+                        </div>
+                        <div className="rounded-xl bg-slate-950/60 border border-slate-800/80 p-3 text-[11px] text-slate-400 leading-relaxed flex items-start gap-2">
+                          <span className="text-amber-400 text-sm mt-0.5">💡</span>
+                          <div>
+                            <strong className="text-slate-300">Prêt à poster en 5 secondes :</strong> La légende avec les crochets viraux et les hashtags est copiée dans votre presse-papier dès le clic. Téléchargez votre média et collez votre texte directement sur l'application !
+                          </div>
+                        </div>
                       </div>
-                      {bufferStatusMessage && (
-                        <p className="text-xs text-center font-semibold text-emerald-400 mt-1 animate-in fade-in">
-                          {bufferStatusMessage}
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
                 ) : (
                 /* LinkedIn & Facebook Mockup */
