@@ -149,6 +149,10 @@
     "soonLabel": "Soon",
     "featureLabels": {
       "posts": "Post generation",
+      "videoAutopilot": "Multimodal Video Autopilot (AI)",
+      "heroCapture": "Website Hero HD Screenshot",
+      "tiktokReels": "TikTok & Instagram Reels Scripts",
+      "waterfall": "Smart Waterfall (Video > URL > Subject)",
       "ghostwriter": "Ghostwriter mode",
       "toneStyles": "Tone styles",
       "variants": "Variants per post",
@@ -163,9 +167,13 @@
     },
     "featureGroups": [
       {
-        "label": "Content generation",
+        "label": "Omnichannel Studio & AI",
         "keys": [
           "posts",
+          "videoAutopilot",
+          "heroCapture",
+          "tiktokReels",
+          "waterfall",
           "ghostwriter",
           "toneStyles",
           "variants"
@@ -199,14 +207,18 @@
       {
         "id": "starter",
         "name": "Starter",
-        "monthly": 14,
-        "yearly": 9,
+        "monthly": 19,
+        "yearly": 11,
         "desc": "To get started and reclaim your time.",
-        "cta": "Start 14-day free trial",
+        "cta": "Start 7-day free trial",
         "ctaHref": "/api/stripe/checkout?plan=starter",
         "popular": false,
         "features": {
           "posts": "15 posts / month",
+          "videoAutopilot": false,
+          "heroCapture": false,
+          "tiktokReels": false,
+          "waterfall": false,
           "ghostwriter": false,
           "toneStyles": "3 styles",
           "variants": "2 variants / post",
@@ -222,15 +234,19 @@
       },
       {
         "id": "pro",
-        "name": "Pro",
+        "name": "Pro (Omnichannel Studio)",
         "monthly": 29,
-        "yearly": 19,
-        "desc": "Launch Promo: 60% off on yearly!",
-        "cta": "Start 14-day free trial",
+        "yearly": 15,
+        "desc": "Launch Promo: 45% off yearly ($190/yr)!",
+        "cta": "Start 7-day free trial",
         "ctaHref": "/api/stripe/checkout?plan=pro",
         "popular": true,
         "features": {
           "posts": "Unlimited",
+          "videoAutopilot": true,
+          "heroCapture": true,
+          "tiktokReels": true,
+          "waterfall": true,
           "ghostwriter": true,
           "toneStyles": "All styles",
           "variants": "5 variants / post",
@@ -332,42 +348,48 @@
       "plans": [
         {
           "name": "Starter",
-          "price": "14€",
+          "price": "19€",
           "desc": "/ month",
           "features": [
             "15 posts / month",
-            "Basic generation",
-            "Auto profile"
+            "Standard Text Mode",
+            "LinkedIn & Facebook",
+            "3 tone styles"
           ]
         },
         {
           "name": "Starter",
-          "price": "9€",
+          "price": "11€",
           "desc": "/ month (1-year commitment)",
           "features": [
             "15 posts / month",
-            "Basic generation",
-            "Auto profile"
+            "Standard Text Mode",
+            "LinkedIn & Facebook",
+            "3 tone styles"
           ]
         },
         {
-          "name": "Pro",
+          "name": "Pro (Omnichannel Studio)",
           "price": "29€",
           "desc": "/ month",
           "features": [
             "Unlimited posts",
-            "Ghostwriter",
-            "Visuals included"
+            "🚀 Multimodal Video Autopilot",
+            "📸 Website Hero Screenshot",
+            "🎵 TikTok & Reels Scripts",
+            "🎭 Advanced Ghostwriter Clone"
           ]
         },
         {
-          "name": "Pro",
-          "price": "19€",
-          "desc": "/ month (1-year commitment)",
+          "name": "Pro (Omnichannel Studio)",
+          "price": "15€",
+          "desc": "/ month (billed $190/yr)",
           "features": [
             "Unlimited posts",
-            "Ghostwriter",
-            "Visuals included"
+            "🚀 Multimodal Video Autopilot",
+            "📸 Website Hero Screenshot",
+            "🎵 TikTok & Reels Scripts",
+            "🎭 Advanced Ghostwriter Clone"
           ],
           "popular": true
         }

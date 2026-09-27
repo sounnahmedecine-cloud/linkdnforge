@@ -10,6 +10,10 @@ import Header from '@/components/layout/Header';
 
 type FeatureKey =
   | 'posts'
+  | 'videoAutopilot'
+  | 'heroCapture'
+  | 'tiktokReels'
+  | 'waterfall'
   | 'ghostwriter'
   | 'toneStyles'
   | 'variants'

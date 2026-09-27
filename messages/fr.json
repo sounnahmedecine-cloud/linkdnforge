@@ -149,6 +149,10 @@
     "soonLabel": "Bientôt",
     "featureLabels": {
       "posts": "Génération de posts",
+      "videoAutopilot": "Pilote Vidéo Multimodal (IA)",
+      "heroCapture": "Capture Hero HD du site web",
+      "tiktokReels": "Format TikTok & Instagram Reels",
+      "waterfall": "Cascade intelligente (Vidéo > URL > Sujet)",
       "ghostwriter": "Mode Ghostwriter",
       "toneStyles": "Styles vocaux",
       "variants": "Variantes par post",
@@ -163,9 +167,13 @@
     },
     "featureGroups": [
       {
-        "label": "Génération de contenu",
+        "label": "Studio Omnicanal & IA",
         "keys": [
           "posts",
+          "videoAutopilot",
+          "heroCapture",
+          "tiktokReels",
+          "waterfall",
           "ghostwriter",
           "toneStyles",
           "variants"
@@ -199,14 +207,18 @@
       {
         "id": "starter",
         "name": "Starter",
-        "monthly": 14,
-        "yearly": 9,
-        "desc": "Pour démarrer et retrouver du temps.",
-        "cta": "Essai gratuit 14 jours",
+        "monthly": 19,
+        "yearly": 11,
+        "desc": "Pour démarrer votre présence sans prise de tête.",
+        "cta": "Essai gratuit 7 jours",
         "ctaHref": "/api/stripe/checkout?plan=starter",
         "popular": false,
         "features": {
           "posts": "15 posts / mois",
+          "videoAutopilot": false,
+          "heroCapture": false,
+          "tiktokReels": false,
+          "waterfall": false,
           "ghostwriter": false,
           "toneStyles": "3 styles",
           "variants": "2 variantes / post",
@@ -222,15 +234,19 @@
       },
       {
         "id": "pro",
-        "name": "Pro",
+        "name": "Pro (Studio Omnicanal)",
         "monthly": 29,
-        "yearly": 19,
-        "desc": "Offre de Lancement : -60% sur l'annuel !",
-        "cta": "Essai gratuit 14 jours",
+        "yearly": 15,
+        "desc": "Offre Spéciale Lancement : -45% sur l'annuel (190€/an) !",
+        "cta": "Essai gratuit 7 jours",
         "ctaHref": "/api/stripe/checkout?plan=pro",
         "popular": true,
         "features": {
           "posts": "Illimités",
+          "videoAutopilot": true,
+          "heroCapture": true,
+          "tiktokReels": true,
+          "waterfall": true,
           "ghostwriter": true,
           "toneStyles": "Tous les styles",
           "variants": "5 variantes / post",
@@ -332,44 +348,48 @@
       "plans": [
         {
           "name": "Starter",
-          "price": "14€",
+          "price": "19€",
           "desc": "/ mois",
           "features": [
             "15 posts / mois",
-            "Options standards",
-            "Profil auto"
+            "Mode Texte Standard",
+            "LinkedIn & Facebook",
+            "3 styles vocaux"
           ]
         },
         {
           "name": "Starter",
-          "price": "9€",
+          "price": "11€",
           "desc": "/ mois (engagement 1 an)",
           "features": [
             "15 posts / mois",
-            "Options standards",
-            "Profil auto"
+            "Mode Texte Standard",
+            "LinkedIn & Facebook",
+            "3 styles vocaux"
           ]
         },
         {
-          "name": "Pro",
+          "name": "Pro (Studio Omnicanal)",
           "price": "29€",
           "desc": "/ mois",
           "features": [
             "Posts illimités",
-            "Ghostwriter (Ton, humeur, style)",
-            "Visuels inclus",
-            "Auto-publication instantanée"
+            "🚀 Pilote Vidéo Multimodal",
+            "📸 Capture Hero de votre site",
+            "🎵 Format TikTok & Reels",
+            "🎭 Clone Ghostwriter avancé"
           ]
         },
         {
-          "name": "Pro",
-          "price": "19€",
-          "desc": "/ mois (engagement 1 an)",
+          "name": "Pro (Studio Omnicanal)",
+          "price": "15€",
+          "desc": "/ mois (soit 190€ / an)",
           "features": [
             "Posts illimités",
-            "Ghostwriter (Ton, humeur, style)",
-            "Visuels inclus",
-            "Auto-publication instantanée"
+            "🚀 Pilote Vidéo Multimodal",
+            "📸 Capture Hero de votre site",
+            "🎵 Format TikTok & Reels",
+            "🎭 Clone Ghostwriter avancé"
           ],
           "popular": true
         }

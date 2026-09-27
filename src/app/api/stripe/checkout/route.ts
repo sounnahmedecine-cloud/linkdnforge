@@ -22,11 +22,11 @@ export async function GET(request: Request) {
       priceData = {
         currency: 'eur',
         product_data: {
-          name: 'LinkdnForge Pro',
-          description: billing === 'yearly' ? 'Offre de lancement (-34%)' : 'Abonnement Pro Mensuel',
+          name: 'LinkdnForge Pro - Studio Omnicanal',
+          description: billing === 'yearly' ? 'Offre Annuelle Pro (190€ / an, soit 2 mois offerts)' : 'Abonnement Pro Mensuel (29€ / mois)',
         },
-        // Pro: 19€/mo if yearly (228€ total), 29€/mo if monthly
-        unit_amount: billing === 'yearly' ? 22800 : 2900,
+        // Pro: 190€/an if yearly, 29€/mo if monthly
+        unit_amount: billing === 'yearly' ? 19000 : 2900,
         recurring: {
           interval: billing === 'yearly' ? 'year' : 'month',
         },
@@ -36,10 +36,10 @@ export async function GET(request: Request) {
         currency: 'eur',
         product_data: {
           name: 'LinkdnForge Starter',
-          description: 'Abonnement Starter',
+          description: billing === 'yearly' ? 'Abonnement Starter Annuel (140€ / an)' : 'Abonnement Starter Mensuel (19€ / mois)',
         },
-        // Starter: 9€/mo if yearly (108€ total), 14€/mo if monthly
-        unit_amount: billing === 'yearly' ? 10800 : 1400,
+        // Starter: 140€/an if yearly, 19€/mo if monthly
+        unit_amount: billing === 'yearly' ? 14000 : 1900,
         recurring: {
           interval: billing === 'yearly' ? 'year' : 'month',
         },
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
       ],
       mode,
       subscription_data: {
-        trial_period_days: 14,
+        trial_period_days: 7,
       },
       metadata: {
         plan: plan || 'starter',
