@@ -41,7 +41,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const [isYearly, setIsYearly] = useState(true);
 
   // Preset demo values
-  const PRESET_URL = 'https://linkedinforge.woosenteur.fr';
+  const PRESET_URL = 'https://linkedinforge.fr';
   const PRESET_PRODUCT = 'https://dubainegoce.fr/parfum/eclair-lattafa-100ml';
   const PRESET_IDEA = "Pourquoi la plupart des créateurs sur LinkedIn abandonnent après 3 semaines (et la méthode pour durer)";
 

@@ -34,8 +34,25 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
   return {
+    metadataBase: new URL('https://linkedinforge.fr'),
     title: t('title'),
     description: t('description'),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        fr: '/fr',
+        en: '/en',
+        es: '/es',
+      },
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      url: `https://linkedinforge.fr/${locale}`,
+      siteName: 'LinkedInForge',
+      locale: locale === 'fr' ? 'fr_FR' : locale === 'es' ? 'es_ES' : 'en_US',
+      type: 'website',
+    },
   };
 }
 

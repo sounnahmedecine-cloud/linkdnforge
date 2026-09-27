@@ -9,7 +9,7 @@ const nextConfig = {
 
   // Environment variables
   env: {
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'https://linkedinforge.fr',
   },
 
   // Headers for production

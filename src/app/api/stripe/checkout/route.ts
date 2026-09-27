@@ -50,7 +50,7 @@ export async function GET(request: Request) {
         request.headers.get('origin') ||
         (request.headers.get('host') ? `https://${request.headers.get('host')}` : null) ||
         process.env.NEXTAUTH_URL ||
-        'https://linkedinforge.woosenteur.fr';
+        'https://linkedinforge.fr';
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
