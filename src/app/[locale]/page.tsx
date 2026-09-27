@@ -11,6 +11,7 @@ import SectionLabel from '@/components/ui/SectionLabel';
 import Divider from '@/components/ui/Divider';
 import StampNumber from '@/components/ui/StampNumber';
 import Header from '@/components/layout/Header';
+import LandingGenerator from '@/components/landing/LandingGenerator';
 
 interface GuideStep {
   title: string;
@@ -39,71 +40,20 @@ export default function Home() {
       <Header variant="marketing" pricingLabel={tNav('pricing')} ctaLabel={tNav('cta')} ctaHref="/login" />
 
       {/* Hero */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left: pitch */}
-          <div className="space-y-8 animate-rise">
-            <SectionLabel>{t('badge')}</SectionLabel>
-            <h1 className="font-display font-black text-5xl sm:text-6xl lg:text-[4.2rem] leading-[1.05] tracking-tight">
-              {t('heroTitlePre')}{' '}
-              <span className="text-ember-500">{t('heroTitleHighlight')}</span>
-              {t('heroTitleSuffix')}
-            </h1>
-            <p className="text-lg text-slate-700 max-w-xl leading-relaxed">{t('heroSubtitle')}</p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button href="/login" size="lg">
-                {t('ctaPrimary')} <ArrowRight className="w-5 h-5" />
-              </Button>
-              <Button href="#comment-ca-marche" variant="outline" size="lg">
-                <PlayCircle className="w-5 h-5" /> {t('ctaSecondary')}
-              </Button>
-            </div>
-          </div>
-
-          {/* Right: the forge — raw note becomes a finished post */}
-          <div className="relative">
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/40 p-5">
-              <p className="font-mono text-[11px] uppercase tracking-widest text-slate-500 mb-3">
-                {t('mockup.draftLabel')}
-              </p>
-              <p className="text-slate-500 leading-relaxed text-[15px]">{t('mockup.draftText')}</p>
-            </div>
-
-            <div className="flex items-center gap-3 my-3 pl-5">
-              <div className="w-px h-8 bg-gradient-to-b from-iron-700 to-ember-500/60" />
-              <span className="font-mono text-[11px] uppercase tracking-widest text-orange-500">
-                {t('mockup.forgedLabel')}
-              </span>
-            </div>
-
-            <div className="rounded-xl border border-orange-500/40 bg-slate-50 shadow-[0_0_40px_-12px_rgba(255,90,31,0.35)] p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center">
-                  <AnvilMark className="w-5 h-4" />
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900 text-sm">{t('mockup.you')}</p>
-                  <p className="text-xs text-slate-500">{t('mockup.justNow')}</p>
-                </div>
-              </div>
-              <p className="text-slate-900 text-[15px] leading-relaxed">
-                {t('mockup.postText')
-                  .split('\n')
-                  .map((line, i) => (
-                    <span key={i}>
-                      {line}
-                      <br />
-                    </span>
-                  ))}
-              </p>
-              <div className="flex items-center justify-between pt-3 border-t border-slate-200 text-xs text-slate-500">
-                <span>{t('mockup.likes')}</span>
-                <span>{t('mockup.comments')}</span>
-                <span>{t('mockup.share')}</span>
-              </div>
-            </div>
-          </div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32 text-center">
+        <div className="max-w-4xl mx-auto space-y-8 animate-rise">
+          <SectionLabel className="justify-center bg-orange-100 text-orange-600 border-orange-200 mx-auto w-fit">{t('badge')}</SectionLabel>
+          <h1 className="font-display font-black text-5xl sm:text-7xl leading-[1.1] tracking-tight text-black">
+            {t('heroTitlePre')}{' '}
+            <span className="text-orange-500">{t('heroTitleHighlight')}</span>
+            {t('heroTitleSuffix')}
+          </h1>
+          <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto font-medium">
+            {t('heroSubtitle')}
+          </p>
         </div>
+
+        <LandingGenerator plans={plans} />
       </section>
 
       {/* Intro band */}
