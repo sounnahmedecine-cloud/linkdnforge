@@ -155,18 +155,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const postArguments: any = {
+      channelId,
+      text,
+      assets: assets.length > 0 ? assets : undefined,
+      schedulingType: 'automatic',
+      mode: 'shareNow',
+    };
+
+    if (channel === 'facebook') {
+      postArguments.metadata = {
+        facebook: {
+          type: 'post',
+        },
+      };
+    }
+
     const payload = {
       jsonrpc: '2.0',
       method: 'tools/call',
       params: {
         name: 'create_post',
-        arguments: {
-          channelId,
-          text,
-          assets: assets.length > 0 ? assets : undefined,
-          schedulingType: 'automatic',
-          mode: 'shareNow',
-        },
+        arguments: postArguments,
       },
       id: Date.now(),
     };

@@ -396,6 +396,7 @@ export default function DashboardPage() {
                     isAdmin={isAdmin}
                     targetUrl={currentTargetUrl}
                     customBufferToken={socialConnections.bufferToken}
+                    socialConnections={socialConnections}
                     onReset={handleResetCurrentPost}
                   />
                 </div>

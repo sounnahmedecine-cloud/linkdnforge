@@ -21,6 +21,7 @@ import {
   X,
   ExternalLink,
 } from 'lucide-react';
+import { SocialConnections } from '@/lib/studio/types';
 import ForgeLoader from '@/components/ui/ForgeLoader';
 
 interface StudioResultProps {
@@ -35,6 +36,7 @@ interface StudioResultProps {
   isAdmin?: boolean;
   targetUrl?: string;
   customBufferToken?: string;
+  socialConnections?: SocialConnections;
   onReset: () => void;
 }
 
@@ -50,6 +52,7 @@ export default function StudioResult({
   isAdmin = false,
   targetUrl,
   customBufferToken,
+  socialConnections,
   onReset,
 }: StudioResultProps) {
   const [selectedNetworkView, setSelectedNetworkView] = useState<'linkedin' | 'tiktok'>('linkedin');
@@ -76,6 +79,11 @@ export default function StudioResult({
   const [broadcastSuccessMessage, setBroadcastSuccessMessage] = useState<string | null>(null);
   const [showPublishAssistant, setShowPublishAssistant] = useState(false);
 
+  // Buffer Auto-Publish Toggle State
+  const effectiveBufferToken = customBufferToken || socialConnections?.bufferToken || (isAdmin ? '5I7pCkpokAIuLqJX-Mn6o4AK0g41_yq5xBbEjy0EpTS' : '');
+  const isBufferAvailable = !!effectiveBufferToken;
+  const [useBufferAutoPublish, setUseBufferAutoPublish] = useState<boolean>(true);
+
   const handleToggleBroadcastNetwork = (netId: string) => {
     setSelectedBroadcastNetworks((prev) =>
       prev.includes(netId) ? prev.filter((id) => id !== netId) : [...prev, netId]
@@ -98,15 +106,15 @@ export default function StudioResult({
     }
 
     const broadcastLog: string[] = [];
-    const canUseBuffer = isAdmin || !!customBufferToken;
+    const canUseBuffer = isBufferAvailable && useBufferAutoPublish;
     let anyBufferPublished = false;
     let needsWebAssistance = false;
 
     // 1. TikTok
     if (selectedBroadcastNetworks.includes('tiktok')) {
       if (canUseBuffer) {
-        await handlePublishBuffer('tiktok');
-        broadcastLog.push('TikTok (Buffer)');
+        const ok = await handlePublishBuffer('tiktok');
+        if (ok) broadcastLog.push('TikTok (@abbi.muslim)');
         anyBufferPublished = true;
       } else {
         window.open('https://www.tiktok.com/upload', '_blank');
@@ -118,8 +126,8 @@ export default function StudioResult({
     // 2. Instagram
     if (selectedBroadcastNetworks.includes('instagram')) {
       if (canUseBuffer) {
-        await handlePublishBuffer('instagram');
-        broadcastLog.push('Instagram (Buffer)');
+        const ok = await handlePublishBuffer('instagram');
+        if (ok) broadcastLog.push('Instagram (@aa.mina212)');
         anyBufferPublished = true;
       } else {
         window.open('https://www.instagram.com/', '_blank');
@@ -131,8 +139,8 @@ export default function StudioResult({
     // 3. LinkedIn
     if (selectedBroadcastNetworks.includes('linkedin')) {
       if (canUseBuffer) {
-        await handlePublishBuffer('linkedin');
-        broadcastLog.push('LinkedIn (Buffer)');
+        const ok = await handlePublishBuffer('linkedin');
+        if (ok) broadcastLog.push('LinkedIn (Abderrahman Elmalki)');
         anyBufferPublished = true;
       } else {
         window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
@@ -144,8 +152,8 @@ export default function StudioResult({
     // 4. Facebook
     if (selectedBroadcastNetworks.includes('facebook')) {
       if (canUseBuffer) {
-        await handlePublishBuffer('facebook');
-        broadcastLog.push('Facebook (Buffer)');
+        const ok = await handlePublishBuffer('facebook');
+        if (ok) broadcastLog.push('Facebook (Dubainegoce.fr)');
         anyBufferPublished = true;
       } else {
         const fbUrl = encodeURIComponent(targetUrl || 'https://linkedinforge.fr');
@@ -159,8 +167,11 @@ export default function StudioResult({
     if (selectedBroadcastNetworks.includes('x')) {
       const text = encodeURIComponent(generatedPost.slice(0, 280));
       window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
-      broadcastLog.push('X');
-      needsWebAssistance = true;
+      broadcastLog.push('X (Twitter)');
+      // If manual fallback is needed because LinkedIn/Facebook were in manual mode
+      if (!canUseBuffer) {
+        needsWebAssistance = true;
+      }
     }
 
     setIsBroadcasting(false);
@@ -264,7 +275,7 @@ export default function StudioResult({
           text: textToSend,
           mediaUrl: autopilotVideoUrl || (activeVisualMode === 'screenshot' ? siteScreenshotUrl : siteOgImage) || undefined,
           mediaType: autopilotVideoUrl ? 'video' : 'image',
-          customBufferToken,
+          customBufferToken: effectiveBufferToken,
         }),
       });
 
@@ -606,14 +617,79 @@ export default function StudioResult({
             Cochez les réseaux sur lesquels propulser votre post, puis cliquez sur le bouton pour tout envoyer d'un coup :
           </p>
 
+          {/* Passerelle Buffer Auto Toggle ("Bouton Buffer à cocher") */}
+          {isBufferAvailable && (
+            <div className="bg-slate-950/80 border border-orange-500/50 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500 text-slate-950 flex items-center justify-center font-black text-lg shrink-0 shadow-md shadow-orange-500/20">
+                  B
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-white">Mode Passerelle Buffer</span>
+                    <span className="text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                      100% Automatique
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    Publication directe sur vos comptes sans copier-coller ni ouvrir d'onglet.
+                  </p>
+                </div>
+              </div>
+
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={useBufferAutoPublish}
+                  onChange={(e) => setUseBufferAutoPublish(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-12 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                <span className="ml-2.5 text-xs font-bold text-orange-400">
+                  {useBufferAutoPublish ? 'Buffer Actif (Zéro Clic)' : 'Mode Manuel'}
+                </span>
+              </label>
+            </div>
+          )}
+
           {/* Network Checkboxes */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
-              { id: 'linkedin', label: 'LinkedIn', icon: 'in', color: 'bg-[#0A66C2]' },
-              { id: 'facebook', label: 'Facebook', icon: 'f', color: 'bg-[#1877F2]' },
-              { id: 'x', label: 'X (Twitter)', icon: '𝕏', color: 'bg-black' },
-              { id: 'tiktok', label: 'TikTok', icon: '🎵', color: 'bg-black' },
-              { id: 'instagram', label: 'Instagram', icon: '📸', color: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600' },
+              {
+                id: 'linkedin',
+                label: 'LinkedIn',
+                icon: 'in',
+                color: 'bg-[#0A66C2]',
+                sub: isBufferAvailable && useBufferAutoPublish ? 'Abderrahman' : 'Manuel',
+              },
+              {
+                id: 'facebook',
+                label: 'Facebook',
+                icon: 'f',
+                color: 'bg-[#1877F2]',
+                sub: isBufferAvailable && useBufferAutoPublish ? 'Dubainegoce.fr' : 'Manuel',
+              },
+              {
+                id: 'x',
+                label: 'X (Twitter)',
+                icon: '𝕏',
+                color: 'bg-black',
+                sub: 'Tweet Web',
+              },
+              {
+                id: 'tiktok',
+                label: 'TikTok',
+                icon: '🎵',
+                color: 'bg-black',
+                sub: isBufferAvailable && useBufferAutoPublish ? 'abbi.muslim' : 'Manuel',
+              },
+              {
+                id: 'instagram',
+                label: 'Instagram',
+                icon: '📸',
+                color: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600',
+                sub: isBufferAvailable && useBufferAutoPublish ? 'aa.mina212' : 'Manuel',
+              },
             ].map((net) => {
               const isChecked = selectedBroadcastNetworks.includes(net.id);
               return (
@@ -621,19 +697,36 @@ export default function StudioResult({
                   key={net.id}
                   type="button"
                   onClick={() => handleToggleBroadcastNetwork(net.id)}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition text-left select-none ${
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs font-bold transition text-left select-none cursor-pointer ${
                     isChecked
                       ? 'bg-slate-800 border-orange-500 text-white shadow-xs'
                       : 'bg-slate-900/60 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-300'
                   }`}
                 >
-                  <div className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${isChecked ? 'bg-orange-500 text-white' : 'border border-slate-600'}`}>
+                  <div
+                    className={`w-4 h-4 rounded flex items-center justify-center text-[10px] shrink-0 ${
+                      isChecked ? 'bg-orange-500 text-white' : 'border border-slate-600'
+                    }`}
+                  >
                     {isChecked ? '✓' : ''}
                   </div>
-                  <span className={`w-5 h-5 rounded-md ${net.color} text-white flex items-center justify-center text-[10px] font-bold shrink-0`}>
+                  <span
+                    className={`w-6 h-6 rounded-lg ${net.color} text-white flex items-center justify-center text-[11px] font-bold shrink-0`}
+                  >
                     {net.icon}
                   </span>
-                  <span className="truncate">{net.label}</span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="truncate leading-tight">{net.label}</span>
+                    <span
+                      className={`text-[9px] font-mono leading-tight ${
+                        net.sub.startsWith('Tweet')
+                          ? 'text-slate-400'
+                          : 'text-emerald-400 font-semibold'
+                      }`}
+                    >
+                      {net.sub}
+                    </span>
+                  </div>
                 </button>
               );
             })}
@@ -652,7 +745,11 @@ export default function StudioResult({
               <Sparkles className="w-5 h-5 fill-current animate-bounce" />
             )}
             <span>
-              🚀 Diffuser sur tout ({selectedBroadcastNetworks.length} canaux) en 1 Clic
+              {isBroadcasting
+                ? 'Publication en cours via Buffer...'
+                : isBufferAvailable && useBufferAutoPublish
+                ? `🚀 Propulser sur ${selectedBroadcastNetworks.length} réseau(x) via Buffer`
+                : `🚀 Diffuser sur tout (${selectedBroadcastNetworks.length} canaux) en 1 Clic`}
             </span>
           </button>
 
