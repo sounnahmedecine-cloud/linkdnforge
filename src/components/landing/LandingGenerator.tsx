@@ -130,6 +130,16 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
     window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, '_blank');
   };
 
+  const handleShareTwitter = () => {
+    const text = encodeURIComponent(generatedPost);
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+  };
+
+  const handleShareReddit = () => {
+    const text = encodeURIComponent(generatedPost);
+    window.open(`https://www.reddit.com/submit?title=Mon%20Post&text=${text}`, '_blank');
+  };
+
   if (showPaywall) {
     return (
       <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-2xl shadow-slate-200/50 max-w-4xl mx-auto text-center space-y-8 animate-in fade-in zoom-in duration-300">
@@ -398,6 +408,20 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                   Aller sur Facebook
+                </button>
+                <button
+                  onClick={handleShareTwitter}
+                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm transition bg-black hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  Aller sur X (Twitter)
+                </button>
+                <button
+                  onClick={handleShareReddit}
+                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-sm transition bg-[#FF4500] hover:bg-[#cc3700] text-white shadow-lg shadow-orange-500/20"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.75-1.64-6.07-1.72.08-1.1.4-3.05 1.52-3.7.72-.4 1.73-.24 3 .5C17.2 6.3 18.46 7.5 20 7.5c1.65 0 3-1.35 3-3s-1.35-3-3-3c-1.38 0-2.54.94-2.88 2.22-1.43-.72-2.64-.8-3.6-.25-1.64.94-1.95 3.47-2 4.55-2.33.08-4.45.7-6.1 1.72C4.86 8.98 3.96 8.5 3 8.5c-1.65 0-3 1.35-3 3 0 1.32.84 2.44 2.05 2.84-.03.22-.05.44-.05.66 0 3.86 4.5 7 10 7s10-3.14 10-7c0-.22-.02-.44-.05-.66 1.21-.4 2.05-1.52 2.05-2.84zM2.3 11.5c0-1.1.9-2 2-2 .6 0 1.15.28 1.52.7-1.65.65-3.03 1.58-4.14 2.7.27-1.07 1-2.26 2.62-3.4zM12 21c-4.45 0-8.5-2.68-8.5-5.5C3.5 12.68 7.55 10 12 10s8.5 2.68 8.5 5.5c0 2.82-4.05 5.5-8.5 5.5zm5.12-6.55c.82 0 1.5-.68 1.5-1.5s-.68-1.5-1.5-1.5-1.5.68-1.5 1.5.68 1.5 1.5 1.5zM7.88 14.45c0-.83.68-1.5 1.5-1.5s1.5.67 1.5 1.5-.68 1.5-1.5 1.5-1.5-.67-1.5-1.5zm6.86 2.58c-.37.38-1.4.74-2.74.74s-2.36-.36-2.73-.74c-.18-.18-.18-.46 0-.64.18-.18.47-.18.65 0 .2.2 1.05.5 2.08.5 1.04 0 1.88-.3 2.08-.5.18-.18.47-.18.65 0 .18.18.18.46 0 .64z"/></svg>
+                  Aller sur Reddit
                 </button>
               </div>
 
