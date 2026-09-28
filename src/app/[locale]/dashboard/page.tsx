@@ -259,11 +259,11 @@ export default function DashboardPage() {
           <main className="flex-1 w-full min-w-0">
             <div
               className={`grid grid-cols-1 ${
-                showResultPanel ? 'xl:grid-cols-2 gap-8' : 'gap-8'
+                showResultPanel ? 'lg:grid-cols-12 gap-6 items-start' : 'gap-6'
               }`}
             >
               {/* Left Column: Active Tool or Hub */}
-              <div className="space-y-6">
+              <div className={`${showResultPanel ? 'lg:col-span-5' : ''} space-y-6`}>
                 {currentTab === 'hub' && (
                   <StudioHub
                     onSelectTab={(tab) => setCurrentTab(tab)}
@@ -393,7 +393,7 @@ export default function DashboardPage() {
 
               {/* Right Column: Interactive Result Preview */}
               {showResultPanel && (
-                <div className="xl:sticky xl:top-6 space-y-6">
+                <div className="lg:col-span-7 lg:sticky lg:top-4 space-y-6">
                   <StudioResult
                     generatedPost={generatedPost}
                     isGenerating={isGenerating}

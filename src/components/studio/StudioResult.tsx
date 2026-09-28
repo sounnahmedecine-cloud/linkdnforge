@@ -1,22 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Copy,
   Check,
   RefreshCw,
   Download,
-  ThumbsUp,
-  MessageSquare,
-  Repeat,
-  Send,
-  MoreHorizontal,
   Globe2,
   Sparkles,
-  Zap,
-  CheckCircle2,
-  X,
   ExternalLink,
+  Edit3,
 } from 'lucide-react';
 import { SocialConnections } from '@/lib/studio/types';
 import ForgeLoader from '@/components/ui/ForgeLoader';
@@ -24,7 +17,6 @@ import ForgeLoader from '@/components/ui/ForgeLoader';
 interface StudioResultProps {
   generatedPost: string;
   isGenerating: boolean;
-  tiktokPost?: string;
   detectedClassification?: any;
   postExplanation?: any;
   autopilotVideoUrl?: string;
@@ -32,7 +24,6 @@ interface StudioResultProps {
   siteOgImage?: string | null;
   isAdmin?: boolean;
   targetUrl?: string;
-  customBufferToken?: string;
   socialConnections?: SocialConnections;
   onReset: () => void;
   onOpenSocialAccounts?: () => void;
@@ -43,7 +34,7 @@ interface NetworkConfig {
   label: string;
   icon: string;
   color: string;
-  badge: string;
+  hoverColor: string;
   actionText: string;
   getShareUrl: (post: string, targetUrl?: string) => string;
 }
@@ -54,8 +45,8 @@ const NETWORKS: NetworkConfig[] = [
     label: 'LinkedIn',
     icon: 'in',
     color: 'bg-[#0A66C2]',
-    badge: 'Fil d’actualité',
-    actionText: 'Ouvrir LinkedIn',
+    hoverColor: 'hover:bg-[#084e96]',
+    actionText: 'Partager sur LinkedIn',
     getShareUrl: () => 'https://www.linkedin.com/feed/?shareActive=true',
   },
   {
@@ -63,8 +54,8 @@ const NETWORKS: NetworkConfig[] = [
     label: 'Facebook',
     icon: 'f',
     color: 'bg-[#1877F2]',
-    badge: 'Page & Groupe',
-    actionText: 'Ouvrir Facebook',
+    hoverColor: 'hover:bg-[#0f60c7]',
+    actionText: 'Partager sur Facebook',
     getShareUrl: (post, url) =>
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url || 'https://linkedinforge.fr')}&quote=${encodeURIComponent(post)}`,
   },
@@ -73,7 +64,7 @@ const NETWORKS: NetworkConfig[] = [
     label: 'X (Twitter)',
     icon: '𝕏',
     color: 'bg-black',
-    badge: 'Tweet pré-rempli',
+    hoverColor: 'hover:bg-slate-800',
     actionText: 'Tweeter sur X',
     getShareUrl: (post) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.slice(0, 280))}`,
   },
@@ -82,7 +73,7 @@ const NETWORKS: NetworkConfig[] = [
     label: 'Reddit',
     icon: '🤖',
     color: 'bg-[#FF4500]',
-    badge: 'Post pré-rempli',
+    hoverColor: 'hover:bg-[#d43800]',
     actionText: 'Poster sur Reddit',
     getShareUrl: (post) => {
       const firstLine = post.split('\n')[0].replace(/^[#* \-_]+/, '').slice(0, 90) || 'Mon nouveau post';
@@ -95,7 +86,6 @@ export default function StudioResult({
   generatedPost,
   isGenerating,
   detectedClassification,
-  postExplanation,
   autopilotVideoUrl,
   siteScreenshotUrl,
   siteOgImage,
@@ -103,75 +93,49 @@ export default function StudioResult({
   onReset,
   onOpenSocialAccounts,
 }: StudioResultProps) {
+  const [postText, setPostText] = useState(generatedPost);
   const [copied, setCopied] = useState(false);
-  const [mockupMediaView, setMockupMediaView] = useState<'video' | 'screenshot' | 'og'>(
-    autopilotVideoUrl ? 'video' : siteOgImage ? 'og' : 'screenshot'
-  );
-  const [activeVisualMode, setActiveVisualMode] = useState<'screenshot' | 'og'>(
-    siteOgImage ? 'og' : 'screenshot'
-  );
+  const [activeNotification, setActiveNotification] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Selected networks for multi-broadcast
-  const [selectedBroadcastNetworks, setSelectedBroadcastNetworks] = useState<string[]>([
-    'linkedin',
-    'facebook',
-    'x',
-    'reddit',
-  ]);
-  const [broadcastSuccessMessage, setBroadcastSuccessMessage] = useState<string | null>(null);
-  const [showPublishAssistant, setShowPublishAssistant] = useState(false);
+  useEffect(() => {
+    setPostText(generatedPost);
+  }, [generatedPost]);
 
-  const handleToggleBroadcastNetwork = (netId: string) => {
-    setSelectedBroadcastNetworks((prev) =>
-      prev.includes(netId) ? prev.filter((id) => id !== netId) : [...prev, netId]
-    );
-  };
+  const hasMedia = !!(autopilotVideoUrl || siteScreenshotUrl || siteOgImage);
+  const mediaUrl = autopilotVideoUrl ? null : (siteScreenshotUrl || siteOgImage);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(generatedPost);
+    navigator.clipboard.writeText(postText);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setActiveNotification('📋 Post copié dans votre presse-papier !');
+    setTimeout(() => {
+      setCopied(false);
+      setActiveNotification(null);
+    }, 4000);
   };
 
-  // Direct share to one network (always synchronous window.open to prevent popup blocking)
   const handleShareDirect = (netId: 'linkedin' | 'facebook' | 'x' | 'reddit') => {
-    navigator.clipboard.writeText(generatedPost);
+    navigator.clipboard.writeText(postText);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 3000);
 
     const net = NETWORKS.find((n) => n.id === netId);
     if (!net) return;
 
-    const url = net.getShareUrl(generatedPost, targetUrl);
+    const url = net.getShareUrl(postText, targetUrl);
     window.open(url, '_blank');
 
-    setBroadcastSuccessMessage(`🎉 Post copié ! Fenêtre ${net.label} ouverte 👉 Faites simplement "Ctrl + V" (Coller) dans la boîte de publication.`);
-    setTimeout(() => setBroadcastSuccessMessage(null), 8000);
-  };
-
-  // Broadcast button:
-  // - If 1 network selected: opens that network directly
-  // - If multiple networks selected: copies text & opens Assistant modal (prevents browser popup block)
-  const handleBroadcastAll = () => {
-    if (selectedBroadcastNetworks.length === 0) return;
-
-    navigator.clipboard.writeText(generatedPost);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-
-    if (selectedBroadcastNetworks.length === 1) {
-      const netId = selectedBroadcastNetworks[0] as 'linkedin' | 'facebook' | 'x' | 'reddit';
-      handleShareDirect(netId);
-    } else {
-      setShowPublishAssistant(true);
-    }
+    setActiveNotification(
+      `🎉 Post copié ! Fenêtre ${net.label} ouverte 👉 Faites simplement "Ctrl + V" (Coller) dans la zone de texte.`
+    );
+    setTimeout(() => setActiveNotification(null), 8000);
   };
 
   const handleDownloadScreenshot = () => {
-    const url = activeVisualMode === 'screenshot' && siteScreenshotUrl ? siteScreenshotUrl : (siteOgImage || siteScreenshotUrl);
-    if (!url) return;
-    const filename = `visuel-${activeVisualMode === 'og' ? 'produit' : 'capture'}-${Date.now()}.jpg`;
-    const downloadUrl = `/api/download-media?url=${encodeURIComponent(url)}&filename=${filename}`;
+    if (!mediaUrl) return;
+    const filename = `visuel-${Date.now()}.jpg`;
+    const downloadUrl = `/api/download-media?url=${encodeURIComponent(mediaUrl)}&filename=${filename}`;
     const a = document.createElement('a');
     a.href = downloadUrl;
     a.download = filename;
@@ -180,436 +144,206 @@ export default function StudioResult({
     document.body.removeChild(a);
   };
 
-  return (
-    <div className="bg-slate-50/70 backdrop-blur border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
-        <h3 className="font-display font-bold text-xl sm:text-2xl text-slate-900 flex items-center gap-2">
-          <span>✨</span> Contenu Généré
-        </h3>
+  if (isGenerating) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-5 animate-in fade-in">
+        <ForgeLoader label="Compréhension du contenu & rédaction de votre post..." />
+        <div className="space-y-3 pt-2">
+          <div className="h-3 bg-slate-100 rounded-full animate-pulse w-full" />
+          <div className="h-3 bg-slate-100 rounded-full animate-pulse w-5/6" />
+          <div className="h-3 bg-slate-100 rounded-full animate-pulse w-4/6" />
+        </div>
+      </div>
+    );
+  }
 
-        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Prêt pour LinkedIn, Facebook, X & Reddit</span>
+  const charCount = postText.length;
+  const wordCount = postText.trim() ? postText.trim().split(/\s+/).length : 0;
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm animate-in fade-in duration-300">
+      {/* 1. TOP BAR : Title + Quick Utilities */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <h3 className="font-display font-bold text-lg text-slate-900">
+            Post Prêt à Diffuser
+          </h3>
+          {detectedClassification?.detectedLabel && (
+            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
+              {detectedClassification.detectedLabel}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition border ${
+              copied
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+            }`}
+          >
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copied ? 'Copié !' : 'Copier'}</span>
+          </button>
+
+          {hasMedia && mediaUrl && (
+            <button
+              type="button"
+              onClick={handleDownloadScreenshot}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
+              title="Télécharger l'image pour l'attacher à votre post"
+            >
+              <Download className="w-3.5 h-3.5 text-orange-500" />
+              <span>Visuel</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onReset}
+            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition"
+            title="Nouveau post"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {isGenerating ? (
-        <div className="bg-white rounded-2xl p-8 border border-slate-200 space-y-5">
-          <ForgeLoader label="Compréhension du contenu & rédaction avec votre Ghostwriter..." />
-          <div className="space-y-3 pt-2">
-            <div className="h-3 bg-slate-100 rounded-full animate-pulse w-full" />
-            <div className="h-3 bg-slate-100 rounded-full animate-pulse w-5/6" />
-            <div className="h-3 bg-slate-100 rounded-full animate-pulse w-4/6" />
-            <div className="h-3 bg-slate-100 rounded-full animate-pulse w-full mt-4" />
-            <div className="h-3 bg-slate-100 rounded-full animate-pulse w-3/4" />
-          </div>
+      {/* 2. INSTANT 1-CLICK SHARE BAR (Always visible at the TOP, zero scroll needed!) */}
+      <div className="space-y-1.5 bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3">
+        <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
+          <span>Partager en 1-clic :</span>
+          <span className="text-slate-400 font-normal lowercase">copie le texte &amp; ouvre la boîte</span>
         </div>
-      ) : (
-        <>
-          {/* Classification Badge Card */}
-          {detectedClassification && (
-            <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-white border border-orange-200/90 rounded-2xl p-4 space-y-2 shadow-xs animate-in fade-in duration-300">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">✨</span>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                      Format Détecté : {detectedClassification.detectedLabel}
-                    </span>
-                    <span className="block text-[11px] text-slate-500">
-                      Intention : {detectedClassification.primaryIntent} · Audience : {detectedClassification.audience}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">
-                  IA Éditoriale
-                </span>
-              </div>
 
-              <p className="text-xs text-slate-700 leading-relaxed font-medium">
-                {detectedClassification.detectedReason}
-              </p>
-
-              {detectedClassification.recommendedStructure && detectedClassification.recommendedStructure.length > 0 && (
-                <div className="pt-2 border-t border-orange-200/60 flex flex-wrap items-center gap-1.5 text-[11px]">
-                  <span className="font-bold text-slate-800">Structure :</span>
-                  {detectedClassification.recommendedStructure.map((step: string, sIdx: number) => (
-                    <span key={sIdx} className="inline-flex items-center gap-1 bg-white border border-slate-200/90 px-2 py-0.5 rounded-md text-slate-700 font-medium">
-                      <span className="text-orange-500 font-bold">{sIdx + 1}.</span> {step}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* LinkedIn Mockup */}
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden font-sans shadow-sm">
-            {/* Header */}
-            <div className="flex items-center gap-3 p-4">
-              <div className="w-12 h-12 bg-slate-100 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
-                <svg className="w-6 h-6 text-slate-400 mt-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-slate-900 text-[15px] truncate leading-tight">
-                  Vous
-                </h4>
-                <p className="text-slate-500 text-xs truncate leading-snug">Créateur & Expert</p>
-                <div className="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
-                  <span>À l'instant</span>
-                  <span>•</span>
-                  <Globe2 className="w-3 h-3" />
-                </div>
-              </div>
-              <button className="text-slate-400 hover:bg-slate-100 p-1.5 rounded-full transition self-start">
-                <MoreHorizontal className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Post Body */}
-            <div className="px-4 pb-2 text-[14px] text-slate-900 leading-[1.5] whitespace-pre-wrap break-words">
-              {generatedPost}
-            </div>
-
-            {/* Media in Mockup */}
-            {autopilotVideoUrl && (mockupMediaView === 'video' || (!siteScreenshotUrl && !siteOgImage)) && (
-              <div className="mx-4 mb-3 rounded-xl overflow-hidden bg-black aspect-video max-h-72 border border-slate-200 shadow-inner flex items-center justify-center">
-                <video src={autopilotVideoUrl} controls className="w-full h-full object-contain" />
-              </div>
-            )}
-
-            {(siteScreenshotUrl || siteOgImage) && (mockupMediaView === 'screenshot' || mockupMediaView === 'og' || !autopilotVideoUrl) && (
-              <div className="mx-4 mb-3 space-y-2">
-                <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 aspect-video max-h-72 group">
-                  <img
-                    src={mockupMediaView === 'og' && siteOgImage ? siteOgImage : (siteScreenshotUrl || siteOgImage || '')}
-                    alt="Visuel capturé"
-                    className="w-full h-full object-cover object-top"
-                  />
-                  <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg">
-                    {mockupMediaView === 'og' ? '🖼️ Photo Produit' : '📸 Capture Hero'}
-                  </div>
-                  <button
-                    onClick={handleDownloadScreenshot}
-                    className="absolute bottom-2.5 right-2.5 bg-white/95 hover:bg-white text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 transition"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Télécharger
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* LinkedIn Metrics */}
-            <div className="px-4 py-2 mt-2 flex items-center justify-between text-xs text-slate-500 border-b border-slate-200">
-              <div className="flex items-center gap-1">
-                <span className="bg-blue-600 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">👍</span>
-                <span className="bg-rose-500 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px] -ml-1">❤️</span>
-                <span className="ml-1">Vous et 48 autres personnes</span>
-              </div>
-              <span className="text-slate-400">14 commentaires</span>
-            </div>
-
-            {/* LinkedIn Action Buttons */}
-            <div className="px-2 py-1 flex items-center justify-between text-slate-500">
-              <button className="flex-1 flex items-center justify-center gap-2 font-semibold text-[13px] py-2.5 rounded hover:bg-slate-100 transition">
-                <ThumbsUp className="w-4 h-4" />
-                <span className="hidden sm:inline">J'aime</span>
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 font-semibold text-[13px] py-2.5 rounded hover:bg-slate-100 transition">
-                <MessageSquare className="w-4 h-4" />
-                <span className="hidden sm:inline">Commenter</span>
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 font-semibold text-[13px] py-2.5 rounded hover:bg-slate-100 transition">
-                <Repeat className="w-4 h-4" />
-                <span className="hidden sm:inline">Republier</span>
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 font-semibold text-[13px] py-2.5 rounded hover:bg-slate-100 transition">
-                <Send className="w-4 h-4" />
-                <span className="hidden sm:inline">Envoyer</span>
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Explanation Box */}
-      {postExplanation && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-orange-500" />
-              Pourquoi ce post ? (Transparence & Qualité)
-            </div>
-            {postExplanation.qualityCheck && (
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <span>✓</span> Source-Check IA Validé
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {NETWORKS.map((net) => (
+            <button
+              key={net.id}
+              type="button"
+              onClick={() => handleShareDirect(net.id)}
+              className={`${net.color} ${net.hoverColor} text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-xs cursor-pointer`}
+            >
+              <span className="w-4 h-4 rounded bg-white/20 flex items-center justify-center text-[10px] font-black">
+                {net.icon}
               </span>
-            )}
-          </div>
+              <span>{net.label}</span>
+              <ExternalLink className="w-3 h-3 opacity-70" />
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {postExplanation.ghostwriterStyle && (
-            <p className="text-xs text-slate-600">
-              <strong>Style Ghostwriter :</strong> {postExplanation.ghostwriterStyle}
-            </p>
-          )}
+      {/* 3. PROMINENT INLINE NOTIFICATION (Ctrl + V helper) */}
+      {activeNotification && (
+        <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold p-3 rounded-xl flex items-center gap-2 animate-in fade-in">
+          <span className="text-base">📋</span>
+          <span>{activeNotification}</span>
         </div>
       )}
 
-      {/* 🚀 CONSOLE DE DIFFUSION SANS API (LinkedIn, Facebook, X, Reddit) */}
-      {!isGenerating && (
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white rounded-3xl p-5 sm:p-6 space-y-5 shadow-2xl border border-slate-700/80 animate-in fade-in">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping" />
-              <h4 className="font-bold text-sm tracking-wide text-white uppercase flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-orange-400 fill-current" />
-                Diffusion Rapide 1-Clic
-              </h4>
+      {/* 4. POST CONTENT & PREVIEW */}
+      <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden shadow-2xs">
+        {/* Post Meta */}
+        <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs border border-slate-300">
+              Vous
             </div>
-            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/80 px-2.5 py-0.5 rounded-full font-bold">
-              Zéro API requise
+            <div>
+              <span className="font-bold text-slate-900 block leading-tight">Votre Publication</span>
+              <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                <span>Public</span> • <Globe2 className="w-3 h-3" />
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-400 font-mono">
+              {wordCount} mots • {charCount} car.
             </span>
+            <button
+              type="button"
+              onClick={() => setIsEditing(!isEditing)}
+              className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${
+                isEditing ? 'bg-orange-100 text-orange-700' : 'text-slate-500 hover:bg-slate-100'
+              }`}
+              title={isEditing ? 'Terminer la modification' : 'Modifier le texte'}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>{isEditing ? 'Terminé' : 'Ajuster'}</span>
+            </button>
           </div>
+        </div>
 
-          <p className="text-xs text-slate-300">
-            Publiez directement sans configuration technique. Choisissez vos réseaux ou lancez la diffusion groupée :
-          </p>
+        {/* Text Body */}
+        <div className="p-4">
+          {isEditing ? (
+            <textarea
+              value={postText}
+              onChange={(e) => setPostText(e.target.value)}
+              rows={12}
+              className="w-full text-[14px] text-slate-900 leading-relaxed font-sans border border-orange-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-y"
+              placeholder="Modifiez votre post ici..."
+            />
+          ) : (
+            <div className="text-[14px] text-slate-900 leading-[1.6] whitespace-pre-wrap font-sans selection:bg-orange-100">
+              {postText}
+            </div>
+          )}
+        </div>
 
-          {/* Network Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {NETWORKS.map((net) => {
-              const isChecked = selectedBroadcastNetworks.includes(net.id);
-              return (
-                <div
-                  key={net.id}
-                  className={`p-3 rounded-2xl border transition-all text-left flex flex-col justify-between space-y-2 select-none ${
-                    isChecked
-                      ? 'bg-slate-800/90 border-orange-500/80 shadow-xs'
-                      : 'bg-slate-900/60 border-slate-800 text-slate-400'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleBroadcastNetwork(net.id)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-white hover:text-orange-400 transition"
-                    >
-                      <div
-                        className={`w-4 h-4 rounded flex items-center justify-center text-[10px] shrink-0 ${
-                          isChecked ? 'bg-orange-500 text-white font-bold' : 'border border-slate-600'
-                        }`}
-                      >
-                        {isChecked ? '✓' : ''}
-                      </div>
-                      <span className={`w-5 h-5 rounded-md ${net.color} text-white flex items-center justify-center text-[10px] font-bold shrink-0`}>
-                        {net.icon}
-                      </span>
-                      <span className="truncate">{net.label}</span>
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleShareDirect(net.id)}
-                    className="w-full text-center text-[11px] font-bold py-1.5 px-2 rounded-lg bg-slate-700/60 hover:bg-orange-500 text-slate-200 hover:text-white transition flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    <span>Ouvrir</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </button>
-                </div>
-              );
-            })}
+        {/* Media Attachment if available */}
+        {autopilotVideoUrl && (
+          <div className="mx-4 mb-4 rounded-xl overflow-hidden bg-black aspect-video max-h-60 border border-slate-200">
+            <video src={autopilotVideoUrl} controls className="w-full h-full object-contain" />
           </div>
+        )}
 
-          {/* Main Action Button */}
+        {mediaUrl && (
+          <div className="mx-4 mb-4 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative group aspect-video max-h-56">
+            <img
+              src={mediaUrl}
+              alt="Visuel à attacher"
+              className="w-full h-full object-cover object-top"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={handleDownloadScreenshot}
+                className="bg-white text-slate-900 font-bold text-xs px-3.5 py-2 rounded-xl shadow-lg flex items-center gap-1.5 hover:bg-orange-500 hover:text-white transition"
+              >
+                <Download className="w-4 h-4" />
+                Télécharger le visuel HD
+              </button>
+            </div>
+            <div className="absolute top-2 left-2 bg-black/75 backdrop-blur text-white text-[10px] font-semibold px-2 py-0.5 rounded">
+              📸 Visuel HD
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 5. FOOTER HELPER : Simple 3-step reminder */}
+      <div className="text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+        <span className="flex items-center gap-1">
+          <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+          Astuce : cliquez sur le réseau, puis faites <strong>Ctrl + V</strong> dans la boîte de publication.
+        </span>
+        {onOpenSocialAccounts && (
           <button
             type="button"
-            onClick={handleBroadcastAll}
-            disabled={selectedBroadcastNetworks.length === 0}
-            className="w-full py-4 px-6 text-sm sm:text-base font-bold bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:opacity-95 disabled:opacity-50 text-white rounded-2xl shadow-xl shadow-orange-500/25 transition-all transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2.5 cursor-pointer"
+            onClick={onOpenSocialAccounts}
+            className="text-blue-600 hover:underline font-semibold"
           >
-            <Sparkles className="w-5 h-5 fill-current" />
-            <span>
-              {selectedBroadcastNetworks.length === 1
-                ? `🚀 Ouvrir et publier sur ${NETWORKS.find((n) => n.id === selectedBroadcastNetworks[0])?.label}`
-                : `🚀 Diffuser sur ma sélection (${selectedBroadcastNetworks.length} canaux)`}
-            </span>
+            Configurer mes profils
           </button>
-
-          {/* Success Banner */}
-          {broadcastSuccessMessage && (
-            <div className="bg-emerald-950/80 border border-emerald-500/80 text-emerald-300 text-xs font-bold p-3 rounded-xl flex items-center gap-2 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>{broadcastSuccessMessage}</span>
-            </div>
-          )}
-
-          {/* Bottom Actions: Copy text & New Post */}
-          <div className="pt-2 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="hover:text-white flex items-center gap-1.5 transition py-1"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Texte copié dans le presse-papier !' : 'Copier le texte seul'}</span>
-            </button>
-
-            {onOpenSocialAccounts && (
-              <button
-                type="button"
-                onClick={onOpenSocialAccounts}
-                className="hover:text-orange-400 flex items-center gap-1 transition py-1 underline font-medium"
-              >
-                Gérer mes profils sociaux
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={onReset}
-              className="hover:text-white flex items-center gap-1.5 transition py-1"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Nouveau post</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Assistant de Diffusion Modal (Zero Popup Blocking) */}
-      {showPublishAssistant && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-lg w-full p-6 sm:p-7 text-white space-y-6 shadow-2xl relative">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/20 shrink-0">
-                  ✓
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold font-display text-white">
-                    Post Copié & Prêt à Diffuser !
-                  </h3>
-                  <p className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" /> Votre texte est prêt dans le presse-papier
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPublishAssistant(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Visual Attachment Card if available */}
-            {(siteScreenshotUrl || siteOgImage) && (
-              <div className="bg-slate-950/80 border border-slate-700/90 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 shrink-0 relative">
-                    <img
-                      src={activeVisualMode === 'og' && siteOgImage ? siteOgImage : (siteScreenshotUrl || siteOgImage || '')}
-                      alt="Aperçu visuel"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-xs font-bold text-white block truncate">
-                      📸 Visuel HD prêt à l'emploi
-                    </span>
-                    <span className="text-[11px] text-slate-400 block truncate">
-                      Multiplie par 3 l'engagement sur LinkedIn & FB
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleDownloadScreenshot}
-                  className="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-md shadow-orange-500/20 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Télécharger
-                </button>
-              </div>
-            )}
-
-            {/* Instruction Banner */}
-            <div className="bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-3">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                <span>💡</span>
-                <span>Comment publier en 2 secondes :</span>
-              </div>
-              <div className="space-y-2.5 text-xs text-slate-200">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p>Cliquez ci-dessous sur le réseau de votre choix pour ouvrir la page officielle.</p>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p>Dans la zone de texte, faites <strong>Ctrl + V</strong> (ou Clic droit &gt; Coller). Votre post rédigé apparaît immédiatement !</p>
-                </div>
-                {(siteScreenshotUrl || siteOgImage) && (
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
-                    <p>Pour attacher le visuel : cliquez sur l'icône 🖼️ <em>Photo</em> du réseau social et choisissez l'image téléchargée (ou glissez-la dedans).</p>
-                  </div>
-                )}
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">✓</span>
-                  <p>Cliquez sur <strong>Publier</strong>. Votre post avec texte et visuel est en ligne !</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Direct Open Buttons for selected channels */}
-            <div className="space-y-2.5">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                Ouvrir vos pages de publication :
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {selectedBroadcastNetworks.map((netId) => {
-                  const net = NETWORKS.find((n) => n.id === netId);
-                  if (!net) return null;
-                  const shareUrl = net.getShareUrl(generatedPost, targetUrl);
-
-                  return (
-                    <a
-                      key={net.id}
-                      href={shareUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`p-3 rounded-xl ${net.color} hover:opacity-90 text-white flex items-center justify-between text-xs font-bold transition shadow-sm`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded bg-white/20 flex items-center justify-center font-bold text-xs">
-                          {net.icon}
-                        </span>
-                        {net.actionText}
-                      </span>
-                      <ExternalLink className="w-4 h-4 opacity-80" />
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={() => setShowPublishAssistant(false)}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"
-            >
-              Fermer l'assistant
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
