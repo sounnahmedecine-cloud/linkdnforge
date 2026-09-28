@@ -587,33 +587,12 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                 </div>
               )}
 
-              {/* Top Bar with Switcher */}
+              {/* Top Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedNetworkView('linkedin')}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
-                      selectedNetworkView === 'linkedin'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    💼 Format LinkedIn & FB
-                  </button>
-                  {tiktokPost && (
-                    <button
-                      type="button"
-                      onClick={() => setSelectedNetworkView('tiktok')}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
-                        selectedNetworkView === 'tiktok'
-                          ? 'bg-black text-white shadow-sm'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      🎵 Format TikTok & Reels
-                    </button>
-                  )}
+                  <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0A66C2] text-white shadow-xs flex items-center gap-1.5">
+                    💼 Post Optimisé LinkedIn, Facebook, X & Reddit
+                  </span>
                 </div>
 
                 <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -621,88 +600,82 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                 </span>
               </div>
 
-              {/* Mockup Card */}
-              {selectedNetworkView === 'tiktok' && tiktokPost ? (
-                /* TikTok Mockup */
-                <div className="bg-slate-950 text-white rounded-2xl p-5 border border-slate-800 space-y-4">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="font-bold flex items-center gap-1.5 text-white">
-                      <span>🎵</span> Script court TikTok & Reels
-                    </span>
-                    <span className="font-mono text-[10px] bg-slate-800 px-2 py-0.5 rounded">0-30s</span>
+              {/* LinkedIn & Social Mockup */}
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden font-sans shadow-sm my-4">
+                <div className="flex items-center gap-3 p-4">
+                  <div className="w-11 h-11 bg-slate-100 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
+                    <svg className="w-6 h-6 text-slate-400 mt-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                   </div>
-                  <div className="bg-slate-900 rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap font-medium border border-slate-800">
-                    {tiktokPost}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-slate-900 text-sm leading-tight">Vous</h4>
+                    <p className="text-slate-500 text-xs">Créateur & Fondateur</p>
+                    <div className="text-slate-400 text-xs flex items-center gap-1 mt-0.5">
+                      <span>À l'instant</span> • <Globe2 className="w-3 h-3" />
+                    </div>
                   </div>
                 </div>
-              ) : (
-                /* LinkedIn Mockup */
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden font-sans shadow-sm my-4">
-                  <div className="flex items-center gap-3 p-4">
-                    <div className="w-11 h-11 bg-slate-100 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
-                      <svg className="w-6 h-6 text-slate-400 mt-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-slate-900 text-sm leading-tight">Vous</h4>
-                      <p className="text-slate-500 text-xs">Créateur & Fondateur</p>
-                      <div className="text-slate-400 text-xs flex items-center gap-1 mt-0.5">
-                        <span>À l'instant</span> • <Globe2 className="w-3 h-3" />
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Generated Post Text */}
-                  <div className="px-4 pb-3 text-[14px] text-slate-900 leading-relaxed whitespace-pre-wrap">
-                    {generatedPost}
-                  </div>
-
-                  {/* Hero Screenshot Preview if Available */}
-                  {screenshotUrl && (
-                    <div className="mx-4 mb-4 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video max-h-64 relative group">
-                      <img
-                        src={screenshotUrl}
-                        alt="Capture Hero du site web"
-                        className="w-full h-full object-cover object-top"
-                      />
-                      <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg">
-                        📸 Capture Hero du site
-                      </div>
-                    </div>
-                  )}
-
-                  {/* LinkedIn Metrics */}
-                  <div className="px-4 py-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
-                    <div className="flex items-center gap-1">
-                      <span className="bg-blue-600 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">👍</span>
-                      <span className="bg-rose-500 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px] -ml-1">❤️</span>
-                      <span className="ml-1 font-medium">Vous et 48 personnes</span>
-                    </div>
-                    <span>14 commentaires</span>
-                  </div>
+                {/* Generated Post Text */}
+                <div className="px-4 pb-3 text-[14px] text-slate-900 leading-relaxed whitespace-pre-wrap">
+                  {generatedPost}
                 </div>
-              )}
+
+                {/* Hero Screenshot Preview if Available */}
+                {screenshotUrl && (
+                  <div className="mx-4 mb-4 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video max-h-64 relative group">
+                    <img
+                      src={screenshotUrl}
+                      alt="Capture Hero du site web"
+                      className="w-full h-full object-cover object-top"
+                    />
+                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg">
+                      📸 Capture Hero du site
+                    </div>
+                  </div>
+                )}
+
+                {/* LinkedIn Metrics */}
+                <div className="px-4 py-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
+                  <div className="flex items-center gap-1">
+                    <span className="bg-blue-600 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">👍</span>
+                    <span className="bg-rose-500 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px] -ml-1">❤️</span>
+                    <span className="ml-1 font-medium">Vous et 48 personnes</span>
+                  </div>
+                  <span>14 commentaires</span>
+                </div>
+              </div>
 
               {/* Action Buttons */}
-              <div className="grid sm:grid-cols-2 gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition border-2 ${
-                    copied
-                      ? 'border-emerald-500 text-emerald-600 bg-emerald-50'
-                      : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copied ? 'Copié dans le presse-papier !' : 'Copier le texte'}
-                </button>
-                <Button
-                  href="/dashboard"
-                  size="lg"
-                  className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25"
-                >
-                  <span>🚀</span> Ouvrir dans le Studio
-                </Button>
+              <div className="space-y-2 pt-2">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition border-2 ${
+                      copied
+                        ? 'border-emerald-500 text-emerald-600 bg-emerald-50'
+                        : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copied ? 'Copié dans le presse-papier !' : 'Copier le texte'}
+                  </button>
+                  <Button
+                    href="/dashboard"
+                    onClick={() => {
+                      if (generatedPost) {
+                        localStorage.setItem('linkdnforge_pending_draft', generatedPost);
+                      }
+                    }}
+                    size="lg"
+                    className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25"
+                  >
+                    <span>✨</span> S'inscrire pour plus d'options (Gratuit)
+                  </Button>
+                </div>
+                <p className="text-center text-xs text-slate-500 pt-1">
+                  🔒 100% Gratuit sans carte bancaire • Sauvegarde, style Ghostwriter et diffusion directe inclus
+                </p>
               </div>
             </div>
           )}

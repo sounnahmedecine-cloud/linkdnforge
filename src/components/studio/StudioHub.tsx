@@ -40,7 +40,7 @@ export default function StudioHub({
             Donnez ce que vous avez. L'IA analyse la matière brute, identifie la famille éditoriale et applique votre style Ghostwriter.
           </p>
 
-          <div className="mt-4 flex items-center gap-3 text-xs text-slate-300">
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-300">
             <span className="flex items-center gap-1.5 font-medium">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               Ghostwriter actif : <strong className="text-white capitalize">{ghostwriterProfile.tone || 'Expert'}</strong>
@@ -50,7 +50,14 @@ export default function StudioHub({
               onClick={() => onSelectTab('profile')}
               className="text-orange-400 hover:text-orange-300 underline font-semibold transition"
             >
-              Modifier mon identité
+              Mon profil
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => onSelectTab('accounts')}
+              className="text-emerald-400 hover:text-emerald-300 underline font-semibold transition flex items-center gap-1"
+            >
+              <span>📡</span> 4 Réseaux Prêts (LinkedIn, FB, X, Reddit)
             </button>
           </div>
         </div>

@@ -58,6 +58,7 @@ export interface SocialConnections {
   instagramAccountName?: string;
   facebookPageName?: string;
   xHandle?: string;
+  redditUsername?: string;
   snapchatConnected?: boolean;
 }
 

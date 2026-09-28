@@ -104,6 +104,13 @@ export default function DashboardPage() {
     setGhostwriterProfile(getGhostwriterProfile());
     setSocialConnections(getSocialConnections());
     setScheduledPosts(getScheduledPosts());
+
+    // 3. Pending draft from landing generator
+    const pendingDraft = localStorage.getItem('linkdnforge_pending_draft');
+    if (pendingDraft) {
+      setGeneratedPost(pendingDraft);
+      localStorage.removeItem('linkdnforge_pending_draft');
+    }
   }, []);
 
   const handleLogout = async () => {
@@ -390,7 +397,6 @@ export default function DashboardPage() {
                   <StudioResult
                     generatedPost={generatedPost}
                     isGenerating={isGenerating}
-                    tiktokPost={tiktokPost}
                     detectedClassification={detectedClassification}
                     postExplanation={postExplanation}
                     autopilotVideoUrl={currentVideoUrl}
@@ -398,9 +404,9 @@ export default function DashboardPage() {
                     siteOgImage={currentSiteOgImage}
                     isAdmin={isAdmin}
                     targetUrl={currentTargetUrl}
-                    customBufferToken={socialConnections.bufferToken}
                     socialConnections={socialConnections}
                     onReset={handleResetCurrentPost}
+                    onOpenSocialAccounts={() => setCurrentTab('accounts')}
                   />
                 </div>
               )}
