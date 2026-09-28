@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Edit3,
   Loader2,
+  X,
 } from 'lucide-react';
 import { SocialConnections } from '@/lib/studio/types';
 import ForgeLoader from '@/components/ui/ForgeLoader';
@@ -37,7 +38,7 @@ interface NetworkConfig {
   color: string;
   hoverColor: string;
   actionText: string;
-  getShareUrl: (post: string, targetUrl?: string) => string;
+  getShareUrl: (post: string, targetUrl?: string, customMeta?: { redditSubreddit?: string }) => string;
 }
 
 const NETWORKS: NetworkConfig[] = [
@@ -76,8 +77,12 @@ const NETWORKS: NetworkConfig[] = [
     color: 'bg-[#FF4500]',
     hoverColor: 'hover:bg-[#d43800]',
     actionText: 'Poster sur Reddit',
-    getShareUrl: (post) => {
+    getShareUrl: (post, _url, customMeta) => {
       const firstLine = post.split('\n')[0].replace(/^[#* \-_]+/, '').slice(0, 90) || 'Mon nouveau post';
+      const cleanSub = customMeta?.redditSubreddit?.replace(/^[ru]\//, '').trim();
+      if (cleanSub) {
+        return `https://www.reddit.com/r/${encodeURIComponent(cleanSub)}/submit?title=${encodeURIComponent(firstLine)}&text=${encodeURIComponent(post)}`;
+      }
       return `https://www.reddit.com/submit?title=${encodeURIComponent(firstLine)}&text=${encodeURIComponent(post)}`;
     },
   },
@@ -97,7 +102,12 @@ export default function StudioResult({
 }: StudioResultProps) {
   const [postText, setPostText] = useState(generatedPost);
   const [copied, setCopied] = useState(false);
-  const [activeNotification, setActiveNotification] = useState<string | null>(null);
+  const [activeNotification, setActiveNotification] = useState<{
+    title: string;
+    message: string;
+    network?: string;
+  } | null>(null);
+  const [lastSharedNetwork, setLastSharedNetwork] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isBroadcastingMake, setIsBroadcastingMake] = useState(false);
 
@@ -132,7 +142,10 @@ export default function StudioResult({
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Erreur lors de l’envoi à Make.com');
       }
-      setActiveNotification('🚀 Succès ! Post transmis à Make.com pour diffusion automatique sur vos 4 réseaux.');
+      setActiveNotification({
+        title: '🚀 Post transmis à Make.com avec succès !',
+        message: 'Votre webhook exécute actuellement la diffusion en arrière-plan sur l\'ensemble de vos réseaux reliés.',
+      });
     } catch (e: any) {
       alert(`Erreur Make : ${e.message}`);
     } finally {
@@ -150,28 +163,37 @@ export default function StudioResult({
   const handleCopy = () => {
     navigator.clipboard.writeText(postText);
     setCopied(true);
-    setActiveNotification('📋 Post copié dans votre presse-papier !');
+    setActiveNotification({
+      title: '📋 Texte copié dans votre presse-papier !',
+      message: 'Vous pouvez le coller n\'importe où d\'un simple Ctrl + V (ou clic droit > Coller).',
+    });
     setTimeout(() => {
       setCopied(false);
-      setActiveNotification(null);
     }, 4000);
   };
 
   const handleShareDirect = (netId: 'linkedin' | 'facebook' | 'x' | 'reddit') => {
     navigator.clipboard.writeText(postText);
     setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+    setLastSharedNetwork(netId);
+    setTimeout(() => {
+      setCopied(false);
+      setLastSharedNetwork(null);
+    }, 4500);
 
     const net = NETWORKS.find((n) => n.id === netId);
     if (!net) return;
 
-    const url = net.getShareUrl(postText, targetUrl);
+    const url = net.getShareUrl(postText, targetUrl, {
+      redditSubreddit: socialConnections?.redditUsername,
+    });
     window.open(url, '_blank');
 
-    setActiveNotification(
-      `🎉 Post copié ! Fenêtre ${net.label} ouverte 👉 Faites simplement "Ctrl + V" (Coller) dans la zone de texte.`
-    );
-    setTimeout(() => setActiveNotification(null), 8000);
+    setActiveNotification({
+      title: `🎉 Fenêtre ${net.label} ouverte & Texte copié !`,
+      message: `Votre publication est prête dans votre presse-papier. Rendez-vous sur l'onglet ${net.label} qui vient de s'ouvrir, faites simplement "Ctrl + V" (Coller) et cliquez sur Publier.`,
+      network: netId,
+    });
   };
 
   const handleDownloadScreenshot = () => {
@@ -302,28 +324,61 @@ export default function StudioResult({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {NETWORKS.map((net) => (
-            <button
-              key={net.id}
-              type="button"
-              onClick={() => handleShareDirect(net.id)}
-              className={`${net.color} ${net.hoverColor} text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-xs cursor-pointer`}
-            >
-              <span className="w-4 h-4 rounded bg-white/20 flex items-center justify-center text-[10px] font-black">
-                {net.icon}
-              </span>
-              <span>{net.label}</span>
-              <ExternalLink className="w-3 h-3 opacity-70" />
-            </button>
-          ))}
+          {NETWORKS.map((net) => {
+            const isJustShared = lastSharedNetwork === net.id;
+            return (
+              <button
+                key={net.id}
+                type="button"
+                onClick={() => handleShareDirect(net.id)}
+                className={`${isJustShared ? 'bg-emerald-600' : `${net.color} ${net.hoverColor}`} text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-xs cursor-pointer active:scale-95`}
+              >
+                <span className="w-4 h-4 rounded bg-white/20 flex items-center justify-center text-[10px] font-black shrink-0">
+                  {isJustShared ? '✓' : net.icon}
+                </span>
+                <span className="truncate">{isJustShared ? 'Ouvert !' : net.label}</span>
+                <ExternalLink className="w-3 h-3 opacity-70 shrink-0" />
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* 3. PROMINENT INLINE NOTIFICATION (Ctrl + V helper) */}
       {activeNotification && (
-        <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold p-3 rounded-xl flex items-center gap-2 animate-in fade-in">
-          <span className="text-base">📋</span>
-          <span>{activeNotification}</span>
+        <div className="bg-gradient-to-r from-emerald-50 via-teal-50/60 to-emerald-50 border-2 border-emerald-400 text-emerald-950 text-xs rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in zoom-in-95">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
+              ✓
+            </div>
+            <div>
+              <div className="font-extrabold text-emerald-950 text-xs sm:text-sm flex items-center gap-1.5">
+                <span>{activeNotification.title}</span>
+              </div>
+              <p className="text-emerald-900 text-[11px] sm:text-xs mt-0.5 leading-relaxed font-medium">
+                {activeNotification.message}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              <span>Recopier le texte</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveNotification(null)}
+              className="p-1.5 text-emerald-700 hover:text-emerald-900 rounded-lg hover:bg-emerald-100/60 transition cursor-pointer"
+              title="Fermer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
