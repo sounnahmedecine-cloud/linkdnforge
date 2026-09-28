@@ -106,8 +106,11 @@ export default function StudioResult({
     title: string;
     message: string;
     network?: string;
+    actionUrl?: string;
+    actionLabel?: string;
   } | null>(null);
   const [lastSharedNetwork, setLastSharedNetwork] = useState<string | null>(null);
+  const [publishedPostUrl, setPublishedPostUrl] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isBroadcastingMake, setIsBroadcastingMake] = useState(false);
   const [linkedInAuth, setLinkedInAuth] = useState<{
@@ -149,9 +152,15 @@ export default function StudioResult({
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Erreur lors de la publication directe sur LinkedIn');
       }
+
+      const postViewUrl = data.feedUrl || 'https://www.linkedin.com/feed/';
+      setPublishedPostUrl(postViewUrl);
+
       setActiveNotification({
         title: '🎉 Publication réussie sur votre profil LinkedIn !',
-        message: `Votre post a été directement publié sur votre compte (${data.authorName || linkedInAuth.profile?.name || 'LinkedIn'}).`,
+        message: `Votre post est en ligne sur le profil de ${data.authorName || linkedInAuth.profile?.name || 'LinkedIn'}.`,
+        actionUrl: postViewUrl,
+        actionLabel: '👁️ Voir mon post sur LinkedIn',
       });
     } catch (e: any) {
       alert(`Erreur LinkedIn : ${e.message}`);
@@ -236,12 +245,20 @@ export default function StudioResult({
     const url = net.getShareUrl(postText, targetUrl, {
       redditSubreddit: socialConnections?.redditUsername,
     });
-    window.open(url, '_blank');
+    const profileOrFeedUrl = netId === 'linkedin'
+      ? (socialConnections?.linkedinProfileName || 'https://www.linkedin.com/feed/')
+      : netId === 'facebook'
+      ? (socialConnections?.facebookPageName || 'https://www.facebook.com')
+      : netId === 'x'
+      ? (socialConnections?.xHandle ? `https://twitter.com/${socialConnections.xHandle.replace('@', '')}` : 'https://twitter.com')
+      : (socialConnections?.redditUsername ? `https://www.reddit.com/r/${socialConnections.redditUsername.replace(/^[ru]\//, '')}` : 'https://www.reddit.com');
 
     setActiveNotification({
       title: `🎉 Fenêtre ${net.label} ouverte & Texte copié !`,
       message: `Votre publication est prête dans votre presse-papier. Rendez-vous sur l'onglet ${net.label} qui vient de s'ouvrir, faites simplement "Ctrl + V" (Coller) et cliquez sur Publier.`,
       network: netId,
+      actionUrl: profileOrFeedUrl,
+      actionLabel: `Voir mon compte ${net.label}`,
     });
   };
 
@@ -290,18 +307,30 @@ export default function StudioResult({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleCopy}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition border ${
-              copied
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-            }`}
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copié !' : 'Copier'}</span>
-          </button>
+          {publishedPostUrl ? (
+            <a
+              href={publishedPostUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Voir mon post LinkedIn</span>
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={handleCopy}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition border ${
+                copied
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+              }`}
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copié !' : 'Copier'}</span>
+            </button>
+          )}
 
           {hasMedia && mediaUrl && (
             <button
@@ -346,24 +375,47 @@ export default function StudioResult({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handlePublishLinkedInDirect}
-            disabled={isPublishingLinkedInDirect}
-            className="px-4 py-2 bg-white hover:bg-blue-50 disabled:opacity-50 text-[#0A66C2] font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer"
-          >
-            {isPublishingLinkedInDirect ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0A66C2]" />
-                <span>Publication en cours...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3.5 h-3.5 fill-[#0A66C2]" />
-                <span>Publier sur mon LinkedIn</span>
-              </>
-            )}
-          </button>
+          {publishedPostUrl ? (
+            <div className="flex items-center gap-2 shrink-0">
+              <a
+                href={publishedPostUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Voir mon post sur LinkedIn</span>
+              </a>
+              <button
+                type="button"
+                onClick={handlePublishLinkedInDirect}
+                disabled={isPublishingLinkedInDirect}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs transition cursor-pointer"
+                title="Republier"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isPublishingLinkedInDirect ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePublishLinkedInDirect}
+              disabled={isPublishingLinkedInDirect}
+              className="px-4 py-2 bg-white hover:bg-blue-50 disabled:opacity-50 text-[#0A66C2] font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer"
+            >
+              {isPublishingLinkedInDirect ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0A66C2]" />
+                  <span>Publication en cours...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 fill-[#0A66C2]" />
+                  <span>Publier sur mon LinkedIn</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
 
@@ -461,14 +513,26 @@ export default function StudioResult({
           </div>
 
           <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Recopier le texte</span>
-            </button>
+            {activeNotification.actionUrl ? (
+              <a
+                href={activeNotification.actionUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{activeNotification.actionLabel || 'Voir mon post sur LinkedIn'}</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>Recopier le texte</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setActiveNotification(null)}

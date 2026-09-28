@@ -182,10 +182,13 @@ export async function publishToLinkedInFeed(
   });
 
   if (restRes.ok) {
-    const postId = restRes.headers.get('x-restli-id') || restRes.headers.get('x-linkedin-id') || 'ok';
+    const postId = restRes.headers.get('x-restli-id') || restRes.headers.get('x-linkedin-id') || '';
+    const viewUrl = postId && postId !== 'ok'
+      ? `https://www.linkedin.com/feed/update/${encodeURIComponent(postId)}/`
+      : 'https://www.linkedin.com/in/me/recent-activity/all/';
     return {
-      id: postId,
-      url: 'https://www.linkedin.com/feed/',
+      id: postId || 'rest-published',
+      url: viewUrl,
     };
   }
 
@@ -231,8 +234,13 @@ export async function publishToLinkedInFeed(
   }
 
   const ugcData = await ugcRes.json();
+  const ugcId = ugcData.id || '';
+  const ugcViewUrl = ugcId && ugcId !== 'ugc-published'
+    ? `https://www.linkedin.com/feed/update/${encodeURIComponent(ugcId)}/`
+    : 'https://www.linkedin.com/in/me/recent-activity/all/';
+
   return {
-    id: ugcData.id || 'ugc-published',
-    url: 'https://www.linkedin.com/feed/',
+    id: ugcId || 'ugc-published',
+    url: ugcViewUrl,
   };
 }
