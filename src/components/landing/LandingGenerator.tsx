@@ -45,6 +45,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const [isYearly, setIsYearly] = useState(true);
   const [editorialStyle, setEditorialStyle] = useState('auto');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -154,6 +155,11 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
       trialCount = 1;
     }
 
+    // Anti-bot silent rejection
+    if (honeypot) {
+      return;
+    }
+
     if (trialCount >= 5) {
       setShowPaywall(true);
       return;
@@ -200,6 +206,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
         videoMeta: videoFile ? { name: videoFile.name, size: videoFile.size } : undefined,
         targetUrl: isUrl ? (trimmed.startsWith('http') ? trimmed : `https://${trimmed}`) : undefined,
         postSubject: !isUrl && trimmed ? trimmed : undefined,
+        hp_website: honeypot || undefined,
       };
 
       const response = await fetch('/api/autopilot/generate', {
@@ -371,6 +378,18 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
               </button>
             </div>
           ) : null}
+
+          {/* Honeypot invisible anti-bot */}
+          <div className="hidden opacity-0 pointer-events-none absolute -left-[9999px]" aria-hidden="true">
+            <input
+              type="text"
+              name="hp_website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+            />
+          </div>
 
           {/* Universal Textarea / Input */}
           <textarea

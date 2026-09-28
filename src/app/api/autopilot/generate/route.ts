@@ -31,7 +31,13 @@ export async function POST(request: NextRequest) {
       linkedinProfile,
       targetNetwork,
       locale = 'fr',
+      hp_website,
     } = body;
+
+    // Protection Anti-Bot Honeypot
+    if (hp_website) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 400 });
+    }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
