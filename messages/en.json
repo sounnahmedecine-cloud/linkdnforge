@@ -4,8 +4,11 @@
     "description": "LinkedInForge turns your raw ideas into high-authority LinkedIn posts. Built for freelancers and entrepreneurs."
   },
   "nav": {
+    "generator": "Generator",
+    "howItWorks": "How it works",
     "pricing": "Pricing",
-    "cta": "Get started",
+    "autopilot": "Video Autopilot",
+    "cta": "Try for free",
     "ctaOnboarding": "Get started",
     "logout": "Log out"
   },

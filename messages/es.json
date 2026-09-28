@@ -4,8 +4,11 @@
     "description": "LinkedInForge convierte tus ideas en bruto en posts de LinkedIn de alta autoridad. Pensado para freelancers y emprendedores."
   },
   "nav": {
+    "generator": "Generador",
+    "howItWorks": "Cómo funciona",
     "pricing": "Precios",
-    "cta": "Empezar",
+    "autopilot": "Piloto de Video",
+    "cta": "Probar gratis",
     "ctaOnboarding": "Empezar",
     "logout": "Cerrar sesión"
   },

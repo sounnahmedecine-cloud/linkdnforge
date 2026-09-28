@@ -121,13 +121,30 @@ export default function IdeaForge({
               Options avancées (Ton de la voix & Style)
             </span>
             <div className="flex items-center gap-2 text-slate-400">
-              <span>{showAdvanced ? 'Masquer' : `Ton : ${tone}`}</span>
+              <span>{showAdvanced ? 'Masquer' : `Style : ${editorialStyle === 'auto' ? '✨ Automatique (Recommandé)' : editorialStyle} • Ton : ${tone}`}</span>
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </button>
 
           {showAdvanced && (
             <div className="p-5 bg-white space-y-4 border-t border-slate-100 text-xs">
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5">
+                  Style Rédactionnel
+                </label>
+                <select
+                  value={editorialStyle}
+                  onChange={(e) => setEditorialStyle(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-amber-500"
+                >
+                  <option value="auto">✨ Automatique (Recommandé - Détecté par l'IA)</option>
+                  <option value="expert">💼 Expertise & Opinion tranchée</option>
+                  <option value="story">📖 Storytelling & Coulisses</option>
+                  <option value="educational">🎓 Tutoriel & Conseils actionnables</option>
+                  <option value="announcement">📢 Annonce & Nouveauté</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block font-bold text-slate-800 mb-1.5">
                   Ton de la voix Ghostwriter

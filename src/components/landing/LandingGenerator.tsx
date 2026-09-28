@@ -13,7 +13,9 @@ import {
   X,
   Loader2,
   ShoppingBag,
-  FileText
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import ForgeLoader from '@/components/ui/ForgeLoader';
@@ -41,6 +43,8 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
   const [copied, setCopied] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isYearly, setIsYearly] = useState(true);
+  const [editorialStyle, setEditorialStyle] = useState('auto');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -190,7 +194,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
 
       const payload: any = {
         locale,
-        editorialStyle: 'auto',
+        editorialStyle: editorialStyle || 'auto',
         tone: 'expert',
         videoUrl: uploadedVideoUrl || undefined,
         videoMeta: videoFile ? { name: videoFile.name, size: videoFile.size } : undefined,
@@ -443,6 +447,68 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
               )}
             </Button>
           </div>
+        </div>
+
+        {/* Advanced Options Accordion (Style Rédactionnel) */}
+        <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/60">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full px-4 sm:px-5 py-3 bg-slate-900/80 hover:bg-slate-800/80 text-left text-xs font-bold text-slate-300 flex items-center justify-between transition"
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+              Options avancées (Style rédactionnel)
+            </span>
+            <div className="flex items-center gap-2 text-slate-400">
+              <span className="text-orange-400 font-medium">
+                {showAdvanced
+                  ? 'Masquer'
+                  : `Style : ${
+                      editorialStyle === 'auto'
+                        ? '✨ Automatique (Recommandé)'
+                        : editorialStyle === 'app'
+                        ? '🚀 Application'
+                        : editorialStyle === 'product'
+                        ? '🛍️ Produit'
+                        : editorialStyle === 'editorial'
+                        ? '📰 Éditorial'
+                        : editorialStyle === 'expert'
+                        ? '💼 Expertise'
+                        : editorialStyle === 'announcement'
+                        ? '📢 Annonce'
+                        : '🎓 Éducatif'
+                    }`}
+              </span>
+              {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </div>
+          </button>
+
+          {showAdvanced && (
+            <div className="p-4 bg-slate-900 space-y-3 border-t border-slate-800 text-xs">
+              <div>
+                <label className="block font-bold text-slate-300 mb-1.5">
+                  Style Rédactionnel
+                </label>
+                <select
+                  value={editorialStyle}
+                  onChange={(e) => setEditorialStyle(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-orange-500"
+                >
+                  <option value="auto">✨ Automatique (Recommandé - Détecte fidèlement le sujet réel)</option>
+                  <option value="app">🚀 Application / Expérience web (Jeu, SaaS, Outil en ligne)</option>
+                  <option value="product">🛍️ Produit / E-commerce (Vente & Bénéfices réels)</option>
+                  <option value="editorial">📰 Éditorial / Analyse de fond</option>
+                  <option value="expert">💼 Expertise & Thèse de fond</option>
+                  <option value="announcement">📢 Annonce / Lancement officiel</option>
+                  <option value="educational">🎓 Éducatif / Guide & Méthode</option>
+                </select>
+                <p className="text-[11px] text-slate-400 mt-1.5">
+                  Par défaut, l'IA analyse fidèlement la matière brute et adapte le format éditorial le plus percutant.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Dynamic Real-time Detection Banner (The Interface Transforms Upon Detection) */}

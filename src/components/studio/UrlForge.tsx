@@ -99,13 +99,6 @@ export default function UrlForge({
           detectedCategory: data.detectedCategory || 'general',
           source: data.source,
         });
-
-        // Auto-adapt style if category is gaming
-        if (data.detectedCategory === 'gaming') {
-          setEditorialStyle('game');
-        } else if (data.detectedCategory === 'ecommerce') {
-          setEditorialStyle('product');
-        }
       } else {
         setScrapeError(data.warning || 'Impossible de lire le contenu de la page.');
       }
@@ -317,7 +310,7 @@ export default function UrlForge({
               Options avancées (Style forcé & Objectif)
             </span>
             <div className="flex items-center gap-2 text-slate-400">
-              <span>{showAdvanced ? 'Masquer' : `Style : ${editorialStyle === 'app' ? '🚀 Application' : editorialStyle === 'product' ? '🛍️ Produit' : '✨ Automatique'}`}</span>
+              <span>{showAdvanced ? 'Masquer' : `Style : ${editorialStyle === 'auto' ? '✨ Automatique (Recommandé)' : editorialStyle === 'app' ? '🚀 Application' : editorialStyle === 'product' ? '🛍️ Produit' : editorialStyle}`}</span>
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </button>

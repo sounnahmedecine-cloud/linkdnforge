@@ -4,8 +4,11 @@
     "description": "Transformez vos vidéos, URLs et idées en posts LinkedIn adaptés à votre style avec LinkedInForge. Ghostwriter IA, analyse multimodale et création de contenu social."
   },
   "nav": {
+    "generator": "Générateur",
+    "howItWorks": "Comment ça marche",
     "pricing": "Tarifs",
-    "cta": "Commencer",
+    "autopilot": "Autopilot Vidéo",
+    "cta": "Essayer gratuitement",
     "ctaOnboarding": "Commencer",
     "logout": "Déconnexion"
   },

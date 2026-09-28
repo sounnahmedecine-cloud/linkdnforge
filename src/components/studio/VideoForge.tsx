@@ -133,7 +133,7 @@ export default function VideoForge({
               Options avancées (Style, Objectif & Ton)
             </span>
             <div className="flex items-center gap-2 text-slate-400">
-              <span>{showAdvanced ? 'Masquer' : 'Style : ✨ Automatique'}</span>
+              <span>{showAdvanced ? 'Masquer' : `Style : ${editorialStyle === 'auto' ? '✨ Automatique (Recommandé)' : editorialStyle === 'product' ? '🛍️ Produit' : editorialStyle === 'expert' ? '💼 Expertise' : editorialStyle === 'educational' ? '🎓 Éducatif' : editorialStyle === 'story' ? '📖 Storytelling' : editorialStyle === 'announcement' ? '📢 Annonce' : editorialStyle}`}</span>
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </button>
