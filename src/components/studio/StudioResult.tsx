@@ -110,6 +110,55 @@ export default function StudioResult({
   const [lastSharedNetwork, setLastSharedNetwork] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isBroadcastingMake, setIsBroadcastingMake] = useState(false);
+  const [linkedInAuth, setLinkedInAuth] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    profile?: { name: string };
+  } | null>(null);
+  const [isPublishingLinkedInDirect, setIsPublishingLinkedInDirect] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/linkedin/status')
+      .then((res) => res.json())
+      .then((data) => setLinkedInAuth(data))
+      .catch((e) => console.error('Error checking LinkedIn auth status:', e));
+  }, []);
+
+  const handlePublishLinkedInDirect = async () => {
+    if (!linkedInAuth?.connected) {
+      if (onOpenSocialAccounts) {
+        onOpenSocialAccounts();
+      } else {
+        window.location.href = '/api/auth/linkedin';
+      }
+      return;
+    }
+
+    setIsPublishingLinkedInDirect(true);
+    setActiveNotification(null);
+    try {
+      const res = await fetch('/api/publish/linkedin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: postText,
+          targetUrl: targetUrl || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erreur lors de la publication directe sur LinkedIn');
+      }
+      setActiveNotification({
+        title: '🎉 Publication réussie sur votre profil LinkedIn !',
+        message: `Votre post a été directement publié sur votre compte (${data.authorName || linkedInAuth.profile?.name || 'LinkedIn'}).`,
+      });
+    } catch (e: any) {
+      alert(`Erreur LinkedIn : ${e.message}`);
+    } finally {
+      setIsPublishingLinkedInDirect(false);
+    }
+  };
 
   const effectiveMakeWebhook = socialConnections?.makeWebhookUrl?.trim();
 
@@ -277,7 +326,48 @@ export default function StudioResult({
         </div>
       </div>
 
-      {/* 2. MAKE.COM 1-CLIC BROADCAST (100% Automatique sans copier-coller) */}
+      {/* 2. DIRECT LINKEDIN PUBLISH (0 Clic, 100% Officiel via OAuth) */}
+      {linkedInAuth?.connected && (
+        <div className="bg-gradient-to-r from-[#0A66C2] via-[#084e96] to-[#004182] text-white rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-[#0A66C2]/20 border border-blue-400/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-white text-[#0A66C2] flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+              in
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+                <span>🚀</span> Publication Directe LinkedIn
+                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono bg-blue-300/30 text-blue-100 font-bold">
+                  0 Clic
+                </span>
+              </span>
+              <span className="text-[11px] text-blue-100/80 block truncate">
+                Connecté en tant que {linkedInAuth.profile?.name}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handlePublishLinkedInDirect}
+            disabled={isPublishingLinkedInDirect}
+            className="px-4 py-2 bg-white hover:bg-blue-50 disabled:opacity-50 text-[#0A66C2] font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer"
+          >
+            {isPublishingLinkedInDirect ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0A66C2]" />
+                <span>Publication en cours...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5 fill-[#0A66C2]" />
+                <span>Publier sur mon LinkedIn</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* 3. MAKE.COM 1-CLIC BROADCAST (100% Automatique sans copier-coller) */}
       <div className="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-purple-500/30 shadow-sm">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-purple-500/20">
@@ -285,13 +375,13 @@ export default function StudioResult({
           </div>
           <div className="min-w-0">
             <span className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
-              <span>⚡</span> Diffusion 1-Clic via Make.com
+              <span>⚡</span> Diffusion Multi-Réseaux via Make.com
               <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono bg-purple-500/30 text-purple-300 font-bold">
-                API Directe
+                Passerelle
               </span>
             </span>
             <span className="text-[11px] text-purple-200/70 block truncate">
-              Publie automatiquement sur LinkedIn, Facebook, X et Reddit
+              Publie simultanément sur Facebook, X, Reddit et LinkedIn
             </span>
           </div>
         </div>
@@ -316,11 +406,20 @@ export default function StudioResult({
         </button>
       </div>
 
-      {/* 3. INSTANT 1-CLICK SHARE BAR (Manual fallback) */}
+      {/* 4. INSTANT 1-CLICK SHARE BAR (Manual fallback) */}
       <div className="space-y-1.5 bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3">
-        <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-          <span>Ou ouverture manuelle par réseau :</span>
-          <span className="text-slate-400 font-normal lowercase">copie le texte &amp; ouvre la boîte (Ctrl+V)</span>
+        <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] px-1">
+          <span className="font-bold text-slate-500 uppercase tracking-wider">
+            Ouverture manuelle par réseau :
+          </span>
+          {!linkedInAuth?.connected && (
+            <a
+              href="/api/auth/linkedin"
+              className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 transition"
+            >
+              <span>🔗 Lier LinkedIn (0 Clic)</span>
+            </a>
+          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SocialConnections } from '@/lib/studio/types';
 import { saveSocialConnections } from '@/lib/studio/storage';
 import {
@@ -33,6 +33,28 @@ export default function SocialConnectionsView({
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isTestingMake, setIsTestingMake] = useState(false);
   const [makeTestResult, setMakeTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [linkedInStatus, setLinkedInStatus] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    profile?: { name: string; email?: string; picture?: string };
+  } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/linkedin/status')
+      .then((res) => res.json())
+      .then((data) => setLinkedInStatus(data))
+      .catch((err) => console.error('Failed to load LinkedIn status:', err));
+  }, []);
+
+  const handleDisconnectLinkedIn = async () => {
+    if (!window.confirm('Voulez-vous déconnecter votre compte LinkedIn ?')) return;
+    try {
+      await fetch('/api/auth/linkedin/status', { method: 'DELETE' });
+      setLinkedInStatus({ connected: false, hasAppConfigured: true });
+    } catch (e) {
+      console.error('Failed to disconnect LinkedIn:', e);
+    }
+  };
 
   const testMakeWebhook = async () => {
     if (!formData.makeWebhookUrl?.trim()) {
@@ -168,8 +190,8 @@ export default function SocialConnectionsView({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 1. LinkedIn */}
-            <div className={`border rounded-2xl p-5 space-y-3 transition shadow-xs ${
-              formData.linkedinProfileName ? 'bg-blue-50/30 border-blue-300' : 'bg-slate-50/50 border-slate-200'
+            <div className={`border rounded-2xl p-5 space-y-3.5 transition shadow-xs ${
+              linkedInStatus?.connected || formData.linkedinProfileName ? 'bg-blue-50/30 border-blue-300' : 'bg-slate-50/50 border-slate-200'
             }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -182,9 +204,13 @@ export default function SocialConnectionsView({
                   </div>
                 </div>
 
-                {formData.linkedinProfileName ? (
+                {linkedInStatus?.connected ? (
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                    <Check className="w-3 h-3 text-emerald-600" /> Profil Relié
+                    <Check className="w-3 h-3 text-emerald-600" /> OAuth Connecté
+                  </span>
+                ) : formData.linkedinProfileName ? (
+                  <span className="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <Check className="w-3 h-3 text-blue-600" /> Profil Relié
                   </span>
                 ) : (
                   <span className="text-[11px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
@@ -193,9 +219,54 @@ export default function SocialConnectionsView({
                 )}
               </div>
 
+              {/* LinkedIn OAuth 1-Click Status / Connection Box */}
+              {linkedInStatus?.connected ? (
+                <div className="bg-emerald-50/90 border border-emerald-300/80 rounded-xl p-3 flex items-center justify-between text-xs animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    <div>
+                      <span className="font-bold text-emerald-950 block">
+                        {linkedInStatus.profile?.name || 'Compte LinkedIn Relié'}
+                      </span>
+                      <span className="text-[10px] text-emerald-700 block">
+                        ⚡ Publication 0-clic directe active dans le Studio
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDisconnectLinkedIn}
+                    className="px-2 py-1 text-slate-500 hover:text-rose-600 hover:bg-white text-[11px] rounded-lg transition font-medium border border-transparent hover:border-slate-200 cursor-pointer"
+                  >
+                    Déconnecter
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-blue-50/60 border border-blue-200/90 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-950 flex items-center gap-1">
+                      <span>⚡</span> Publication Automatique (0 Clic)
+                    </span>
+                    <span className="text-[10px] uppercase font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">
+                      Officiel
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-blue-900 leading-snug">
+                    Connectez votre profil LinkedIn pour publier directement sans copier-coller ni quitter l'application.
+                  </p>
+                  <a
+                    href="/api/auth/linkedin"
+                    className="w-full py-2 px-3 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition"
+                  >
+                    <span className="w-3.5 h-3.5 rounded bg-white/20 flex items-center justify-center text-[9px] font-black">in</span>
+                    <span>Lier mon profil LinkedIn officiel</span>
+                  </a>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  URL de votre profil ou page LinkedIn :
+                  Ou URL de votre profil LinkedIn (partage assisté) :
                 </label>
                 <input
                   type="text"
