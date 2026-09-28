@@ -19,6 +19,9 @@ export interface LinkedInTokenData {
 }
 
 export function getLinkedInRedirectUri(origin?: string): string {
+  if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+    return `${origin.replace(/\/$/, '')}/api/auth/linkedin/callback`;
+  }
   if (process.env.LINKEDIN_REDIRECT_URI) {
     return process.env.LINKEDIN_REDIRECT_URI;
   }
