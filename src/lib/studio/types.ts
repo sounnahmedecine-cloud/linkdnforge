@@ -59,6 +59,7 @@ export interface SocialConnections {
   facebookPageName?: string;
   xHandle?: string;
   redditUsername?: string;
+  makeWebhookUrl?: string;
   snapchatConnected?: boolean;
 }
 

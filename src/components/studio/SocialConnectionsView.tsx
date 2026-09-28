@@ -12,6 +12,8 @@ import {
   Check,
   Send,
   HelpCircle,
+  Loader2,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -29,6 +31,36 @@ export default function SocialConnectionsView({
 }: SocialConnectionsViewProps) {
   const [formData, setFormData] = useState<SocialConnections>(connections);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isTestingMake, setIsTestingMake] = useState(false);
+  const [makeTestResult, setMakeTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const testMakeWebhook = async () => {
+    if (!formData.makeWebhookUrl?.trim()) {
+      alert('Veuillez renseigner votre URL de Webhook Make.com avant de tester.');
+      return;
+    }
+    setIsTestingMake(true);
+    setMakeTestResult(null);
+    try {
+      const res = await fetch('/api/broadcast/make', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          isTestPing: true,
+          customWebhookUrl: formData.makeWebhookUrl.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erreur lors du test Make.com.');
+      }
+      setMakeTestResult({ success: true, message: data.message || 'Ping reçu avec succès par Make.com !' });
+    } catch (e: any) {
+      setMakeTestResult({ success: false, message: e.message || 'Échec de la connexion à Make.' });
+    } finally {
+      setIsTestingMake(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -366,6 +398,96 @@ export default function SocialConnectionsView({
                   Tester Reddit
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Make.com Central Gateway */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white rounded-3xl p-6 sm:p-7 border border-slate-700/80 shadow-xl space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-purple-500/25">
+                M
+              </div>
+              <div>
+                <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
+                  Passerelle Make.com (Integromat)
+                  <span className="text-[10px] font-mono uppercase bg-purple-500/20 text-purple-300 border border-purple-500/40 px-2 py-0.5 rounded-full font-bold">
+                    100% Automatique (0 Clic)
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300">
+                  Reliez votre Custom Webhook Make pour diffuser instantanément sur LinkedIn, Facebook, X et Reddit via leurs API.
+                </p>
+              </div>
+            </div>
+
+            <a
+              href="https://make.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-semibold text-purple-300 hover:text-purple-200 flex items-center gap-1 self-start sm:self-auto transition"
+            >
+              Ouvrir Make.com
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-200 mb-1.5 flex items-center justify-between">
+                <span>URL de votre Custom Webhook Make.com :</span>
+                {formData.makeWebhookUrl && (
+                  <span className="text-[11px] font-mono text-emerald-400 font-semibold">
+                    ✓ Webhook configuré
+                  </span>
+                )}
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  name="makeWebhookUrl"
+                  value={formData.makeWebhookUrl || ''}
+                  onChange={handleInputChange}
+                  placeholder="https://hook.eu1.make.com/votre_identifiant_unique"
+                  className="flex-1 bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={testMakeWebhook}
+                  disabled={isTestingMake || !formData.makeWebhookUrl}
+                  className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-purple-600/20 cursor-pointer"
+                >
+                  {isTestingMake ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  <span>{isTestingMake ? 'Test...' : 'Pinger Make.com'}</span>
+                </button>
+              </div>
+            </div>
+
+            {makeTestResult && (
+              <div
+                className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 animate-in fade-in ${
+                  makeTestResult.success
+                    ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-300'
+                    : 'bg-rose-950/80 border-rose-500/80 text-rose-300'
+                }`}
+              >
+                {makeTestResult.success ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                ) : (
+                  <span className="text-rose-400 shrink-0">⚠️</span>
+                )}
+                <span>{makeTestResult.message}</span>
+              </div>
+            )}
+
+            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-xs text-slate-300 space-y-1.5">
+              <strong className="text-white block font-bold">Comment configurer Make en 3 étapes :</strong>
+              <ol className="list-decimal pl-4 space-y-1 text-slate-400">
+                <li>Dans Make, créez un nouveau scénario avec le module déclencheur <strong>Webhooks &gt; Custom Webhook</strong>.</li>
+                <li>Copiez l'URL fournie par Make et collez-la ci-dessus, puis cliquez sur <strong>Pinger Make.com</strong> pour qu'il détecte la structure de données.</li>
+                <li>Ajoutez ensuite vos modules <strong>LinkedIn</strong>, <strong>Facebook</strong>, <strong>X (Twitter)</strong> et <strong>Reddit</strong> à la suite !</li>
+              </ol>
             </div>
           </div>
         </div>

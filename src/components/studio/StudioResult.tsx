@@ -10,6 +10,7 @@ import {
   Sparkles,
   ExternalLink,
   Edit3,
+  Loader2,
 } from 'lucide-react';
 import { SocialConnections } from '@/lib/studio/types';
 import ForgeLoader from '@/components/ui/ForgeLoader';
@@ -90,6 +91,7 @@ export default function StudioResult({
   siteScreenshotUrl,
   siteOgImage,
   targetUrl,
+  socialConnections,
   onReset,
   onOpenSocialAccounts,
 }: StudioResultProps) {
@@ -97,6 +99,46 @@ export default function StudioResult({
   const [copied, setCopied] = useState(false);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isBroadcastingMake, setIsBroadcastingMake] = useState(false);
+
+  const effectiveMakeWebhook = socialConnections?.makeWebhookUrl?.trim();
+
+  const handleBroadcastMake = async () => {
+    if (!effectiveMakeWebhook) {
+      const wantToSetup = window.confirm(
+        'Vous n’avez pas encore relié votre Webhook Make.com dans vos réglages.\n\nSouhaitez-vous ouvrir vos réglages pour coller l’URL de votre Webhook ?'
+      );
+      if (wantToSetup && onOpenSocialAccounts) {
+        onOpenSocialAccounts();
+      }
+      return;
+    }
+
+    setIsBroadcastingMake(true);
+    setActiveNotification(null);
+    try {
+      const res = await fetch('/api/broadcast/make', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: postText,
+          mediaUrl: mediaUrl || undefined,
+          targetUrl: targetUrl || undefined,
+          networks: ['linkedin', 'facebook', 'x', 'reddit'],
+          customWebhookUrl: effectiveMakeWebhook || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erreur lors de l’envoi à Make.com');
+      }
+      setActiveNotification('🚀 Succès ! Post transmis à Make.com pour diffusion automatique sur vos 4 réseaux.');
+    } catch (e: any) {
+      alert(`Erreur Make : ${e.message}`);
+    } finally {
+      setIsBroadcastingMake(false);
+    }
+  };
 
   useEffect(() => {
     setPostText(generatedPost);
@@ -213,11 +255,50 @@ export default function StudioResult({
         </div>
       </div>
 
-      {/* 2. INSTANT 1-CLICK SHARE BAR (Always visible at the TOP, zero scroll needed!) */}
+      {/* 2. MAKE.COM 1-CLIC BROADCAST (100% Automatique sans copier-coller) */}
+      <div className="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-purple-500/30 shadow-sm">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-purple-500/20">
+            M
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+              <span>⚡</span> Diffusion 1-Clic via Make.com
+              <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono bg-purple-500/30 text-purple-300 font-bold">
+                API Directe
+              </span>
+            </span>
+            <span className="text-[11px] text-purple-200/70 block truncate">
+              Publie automatiquement sur LinkedIn, Facebook, X et Reddit
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleBroadcastMake}
+          disabled={isBroadcastingMake}
+          className="px-3.5 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-md shadow-purple-500/20 shrink-0 cursor-pointer"
+        >
+          {isBroadcastingMake ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Envoi à Make...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-3.5 h-3.5 fill-current" />
+              <span>Diffuser sur tout (Make)</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* 3. INSTANT 1-CLICK SHARE BAR (Manual fallback) */}
       <div className="space-y-1.5 bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3">
         <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-          <span>Partager en 1-clic :</span>
-          <span className="text-slate-400 font-normal lowercase">copie le texte &amp; ouvre la boîte</span>
+          <span>Ou ouverture manuelle par réseau :</span>
+          <span className="text-slate-400 font-normal lowercase">copie le texte &amp; ouvre la boîte (Ctrl+V)</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

@@ -57,7 +57,7 @@ export default function StudioHub({
               onClick={() => onSelectTab('accounts')}
               className="text-emerald-400 hover:text-emerald-300 underline font-semibold transition flex items-center gap-1"
             >
-              <span>📡</span> 4 Réseaux Prêts (LinkedIn, FB, X, Reddit)
+              <span>⚡</span> 4 Réseaux &amp; Passerelle Make.com
             </button>
           </div>
         </div>
