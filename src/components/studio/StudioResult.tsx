@@ -65,8 +65,8 @@ const NETWORKS: NetworkConfig[] = [
     color: 'bg-[#1877F2]',
     badge: 'Page & Groupe',
     actionText: 'Ouvrir Facebook',
-    getShareUrl: (_post, url) =>
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url || 'https://linkedinforge.fr')}`,
+    getShareUrl: (post, url) =>
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url || 'https://linkedinforge.fr')}&quote=${encodeURIComponent(post)}`,
   },
   {
     id: 'x',
@@ -145,8 +145,8 @@ export default function StudioResult({
     const url = net.getShareUrl(generatedPost, targetUrl);
     window.open(url, '_blank');
 
-    setBroadcastSuccessMessage(`🎉 Post copié ! Fenêtre ${net.label} ouverte. Faites Ctrl + V pour coller et publier.`);
-    setTimeout(() => setBroadcastSuccessMessage(null), 7000);
+    setBroadcastSuccessMessage(`🎉 Post copié ! Fenêtre ${net.label} ouverte 👉 Faites simplement "Ctrl + V" (Coller) dans la boîte de publication.`);
+    setTimeout(() => setBroadcastSuccessMessage(null), 8000);
   };
 
   // Broadcast button:
@@ -507,24 +507,62 @@ export default function StudioResult({
               </button>
             </div>
 
+            {/* Visual Attachment Card if available */}
+            {(siteScreenshotUrl || siteOgImage) && (
+              <div className="bg-slate-950/80 border border-slate-700/90 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 shrink-0 relative">
+                    <img
+                      src={activeVisualMode === 'og' && siteOgImage ? siteOgImage : (siteScreenshotUrl || siteOgImage || '')}
+                      alt="Aperçu visuel"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold text-white block truncate">
+                      📸 Visuel HD prêt à l'emploi
+                    </span>
+                    <span className="text-[11px] text-slate-400 block truncate">
+                      Multiplie par 3 l'engagement sur LinkedIn & FB
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadScreenshot}
+                  className="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-md shadow-orange-500/20 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Télécharger
+                </button>
+              </div>
+            )}
+
             {/* Instruction Banner */}
             <div className="bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-3">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                 <span>💡</span>
-                <span>Comment publier en 2 secondes sans blocage :</span>
+                <span>Comment publier en 2 secondes :</span>
               </div>
-              <div className="space-y-2 text-xs text-slate-200">
+              <div className="space-y-2.5 text-xs text-slate-200">
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p>Cliquez ci-dessous sur le réseau de votre choix pour ouvrir la page.</p>
+                  <p>Cliquez ci-dessous sur le réseau de votre choix pour ouvrir la page officielle.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p>Faites simplement <strong>Ctrl + V</strong> (ou Coller) dans la boîte de publication (déjà pré-rempli pour X et Reddit).</p>
+                  <p>Dans la zone de texte, faites <strong>Ctrl + V</strong> (ou Clic droit &gt; Coller). Votre post rédigé apparaît immédiatement !</p>
                 </div>
+                {(siteScreenshotUrl || siteOgImage) && (
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+                    <p>Pour attacher le visuel : cliquez sur l'icône 🖼️ <em>Photo</em> du réseau social et choisissez l'image téléchargée (ou glissez-la dedans).</p>
+                  </div>
+                )}
                 <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
-                  <p>Cliquez sur <strong>Publier</strong>. Votre post est en ligne !</p>
+                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">✓</span>
+                  <p>Cliquez sur <strong>Publier</strong>. Votre post avec texte et visuel est en ligne !</p>
                 </div>
               </div>
             </div>
