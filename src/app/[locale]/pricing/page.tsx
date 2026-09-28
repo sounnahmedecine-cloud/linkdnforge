@@ -12,7 +12,6 @@ import {
   FileText, 
   ChevronDown, 
   ChevronUp, 
-  Star, 
   Sparkles, 
   ArrowRight,
   HelpCircle
@@ -76,27 +75,6 @@ function FeatureValue({ value, soonLabel }: { value: string | boolean; soonLabel
   }
   return <span className="text-sm text-slate-700 font-medium">{value}</span>;
 }
-
-const REVIEWS = [
-  {
-    stars: 5,
-    quote: "LinkdnForge a divisé par 4 mon temps de rédaction. Mes posts génèrent en moyenne 14 000 impressions qualifiées par semaine sans que j'y passe mes soirées.",
-    author: "Marc D.",
-    role: "Consultant B2B & Formateur"
-  },
-  {
-    stars: 5,
-    quote: "L'analyse automatique des URLs de produits et des vidéos est bluffante. Fini les clichés ChatGPT que tout le monde repère à 10 kilomètres.",
-    author: "Sarah B.",
-    role: "Fondatrice E-commerce & DNVB"
-  },
-  {
-    stars: 5,
-    quote: "Le mode Ghostwriter respecte vraiment mon style direct. J'ai signé 3 nouveaux clients en inbound grâce à la régularité sur LinkedIn.",
-    author: "Alexandre P.",
-    role: "Développeur Freelance"
-  }
-];
 
 const BEFORE_YOU_CHOOSE = [
   {
@@ -299,34 +277,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* 5. Supporting Social Proof / Customer Reviews (MoroAI inspired) */}
-        <section className="space-y-6 pt-4">
-          <div className="grid sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {REVIEWS.map((r, i) => (
-              <figure
-                key={i}
-                className="bg-slate-50/80 rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-4"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1 text-amber-400">
-                    {[...Array(r.stars)].map((_, s) => (
-                      <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <blockquote className="text-sm text-slate-700 italic leading-relaxed">
-                    « {r.quote} »
-                  </blockquote>
-                </div>
-                <figcaption className="pt-2 border-t border-slate-200/60 text-xs">
-                  <strong className="text-slate-900 font-bold block">{r.author}</strong>
-                  <span className="text-slate-500">{r.role}</span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
-
-        {/* 6. Section "Avant de choisir" (MoroAI Signature) */}
+        {/* 5. Section "Avant de choisir" (Transparence & Sécurité) */}
         <section className="bg-slate-50 rounded-3xl p-8 sm:p-12 border border-slate-200/90 max-w-5xl mx-auto space-y-8">
           <div className="text-center sm:text-left space-y-2">
             <span className="text-xs font-mono uppercase tracking-wider text-orange-600 font-bold">
