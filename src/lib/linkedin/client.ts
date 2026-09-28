@@ -1,8 +1,4 @@
-/**
- * LinkedIn OAuth 2.0 & Publishing Client
- * Handles authorization URL generation, token exchange, user profile fetching,
- * and direct UGC/Rest posting to LinkedIn.
- */
+import { NextRequest } from 'next/server';
 
 export interface LinkedInProfile {
   sub: string; // The user ID, used for author URN "urn:li:person:<sub_id>"
@@ -18,14 +14,54 @@ export interface LinkedInTokenData {
   profile: LinkedInProfile;
 }
 
+export function getPublicOrigin(request?: NextRequest): string {
+  if (request) {
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    const host = forwardedHost || request.headers.get('host');
+    if (host && !host.includes('0.0.0.0')) {
+      const proto = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+      return `${proto}://${host}`;
+    }
+  }
+
+  if (process.env.LINKEDIN_REDIRECT_URI) {
+    try {
+      const parsed = new URL(process.env.LINKEDIN_REDIRECT_URI);
+      return parsed.origin;
+    } catch {}
+  }
+
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
+  }
+
+  if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes('0.0.0.0')) {
+    return process.env.NEXTAUTH_URL.replace(/\/$/, '');
+  }
+
+  if (request) {
+    const raw = request.nextUrl.origin;
+    if (raw && !raw.includes('0.0.0.0')) {
+      return raw;
+    }
+  }
+
+  return 'https://linkedinforge.fr';
+}
+
 export function getLinkedInRedirectUri(origin?: string): string {
-  if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+  if (origin && !origin.includes('0.0.0.0') && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
     return `${origin.replace(/\/$/, '')}/api/auth/linkedin/callback`;
   }
   if (process.env.LINKEDIN_REDIRECT_URI) {
     return process.env.LINKEDIN_REDIRECT_URI;
   }
-  const base = origin || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  if (origin && !origin.includes('0.0.0.0')) {
+    return `${origin.replace(/\/$/, '')}/api/auth/linkedin/callback`;
+  }
+  const base = (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes('0.0.0.0'))
+    ? process.env.NEXTAUTH_URL
+    : 'https://linkedinforge.fr';
   return `${base.replace(/\/$/, '')}/api/auth/linkedin/callback`;
 }
 

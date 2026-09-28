@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getLinkedInAuthUrl } from '@/lib/linkedin/client';
+import { getLinkedInAuthUrl, getPublicOrigin } from '@/lib/linkedin/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const origin = request.nextUrl.origin;
+    const origin = getPublicOrigin(request);
     const state = `li_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     if (!process.env.LINKEDIN_CLIENT_ID) {

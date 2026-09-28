@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangeLinkedInCode, getLinkedInUserProfile } from '@/lib/linkedin/client';
+import { exchangeLinkedInCode, getLinkedInUserProfile, getPublicOrigin } from '@/lib/linkedin/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const origin = request.nextUrl.origin;
+  const origin = getPublicOrigin(request);
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const state = searchParams.get('state');
