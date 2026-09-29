@@ -85,28 +85,18 @@ export function getFacebookRedirectUri(origin?: string): string {
 
 export function getFacebookAuthUrl(state: string, origin?: string): string {
   const appId = process.env.FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1824637551887356';
-  const configId = process.env.FACEBOOK_CONFIG_ID || '953590050578460';
-
   const redirectUri = getFacebookRedirectUri(origin);
+  const scope = encodeURIComponent('pages_show_list,pages_manage_posts,pages_read_engagement,public_profile');
 
-  if (configId) {
-    return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
-      appId
-    )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&config_id=${encodeURIComponent(
-      configId
-    )}&auth_type=rerequest&response_type=code`;
-  }
-
-  const scope = encodeURIComponent('pages_show_list,pages_manage_posts,public_profile');
-
+  // Request required permissions directly with rerequest to ensure pages_read_engagement is granted
   return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
     appId
   )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${scope}&auth_type=rerequest&response_type=code`;
 }
 
 export async function exchangeFacebookCode(code: string, origin?: string): Promise<{ accessToken: string; expiresIn: number }> {
-  const appId = process.env.FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-  const appSecret = process.env.FACEBOOK_APP_SECRET;
+  const appId = process.env.FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1824637551887356';
+  const appSecret = process.env.FACEBOOK_APP_SECRET || '6bec92e15ec7fede64ff48472f4d7133';
   const redirectUri = getFacebookRedirectUri(origin);
 
   if (!appId || !appSecret) {
