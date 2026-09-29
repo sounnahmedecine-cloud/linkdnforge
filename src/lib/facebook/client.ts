@@ -85,8 +85,18 @@ export function getFacebookRedirectUri(origin?: string): string {
 
 export function getFacebookAuthUrl(state: string, origin?: string): string {
   const appId = process.env.FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1824637551887356';
+  const configId = process.env.FACEBOOK_CONFIG_ID || '953590050578460';
 
   const redirectUri = getFacebookRedirectUri(origin);
+
+  if (configId) {
+    return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
+      appId
+    )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&config_id=${encodeURIComponent(
+      configId
+    )}&response_type=code`;
+  }
+
   const scope = encodeURIComponent('pages_show_list,pages_manage_posts,public_profile');
 
   return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
