@@ -144,7 +144,7 @@ export default function StudioSidebar({
               type="button"
               onClick={() => onSelectTab('accounts')}
               className="w-full flex items-center justify-between py-1.5 px-2.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition"
-              title="Gérer les connexions réseaux sociaux & Make.com"
+              title="Gérer les connexions réseaux sociaux"
             >
               <span className="flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-amber-500" />
@@ -169,7 +169,7 @@ export default function StudioSidebar({
               type="button"
               onClick={() => onSelectTab('accounts')}
               className="p-2 rounded-xl hover:bg-slate-100 text-amber-500 transition"
-              title="Passerelle 4 Réseaux & Make.com"
+              title="Passerelle 4 Réseaux Sociaux"
             >
               <Zap className="w-4 h-4" />
             </button>

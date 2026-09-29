@@ -26,7 +26,6 @@ export const DEFAULT_SOCIAL_CONNECTIONS: SocialConnections = {
   facebookPageName: '',
   xHandle: '',
   redditUsername: '',
-  makeWebhookUrl: '',
   snapchatConnected: false,
 };
 
