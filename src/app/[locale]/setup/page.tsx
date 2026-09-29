@@ -6,6 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import Header from '@/components/layout/Header';
 import { Check, ArrowRight, Zap } from 'lucide-react';
+import { trackPurchase } from '@/lib/analytics';
 
 export default function SetupPage() {
   const router = useRouter();
@@ -18,6 +19,24 @@ export default function SetupPage() {
   });
   const [scraping, setScraping] = useState(false);
   const [scrapeStatus, setScrapeStatus] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSuccess = urlParams.get('success') === 'true';
+    if (isSuccess) {
+      const alreadyTracked = sessionStorage.getItem('stripe_purchase_tracked');
+      if (!alreadyTracked) {
+        trackPurchase({
+          planId: 'pro',
+          billing: 'yearly',
+          value: 190,
+          currency: 'EUR',
+        });
+        sessionStorage.setItem('stripe_purchase_tracked', 'true');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const cookies = document.cookie.split(';');

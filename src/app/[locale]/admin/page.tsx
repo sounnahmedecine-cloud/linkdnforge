@@ -17,12 +17,21 @@ export default async function AdminDashboard({ params: { locale } }: { params: {
   try {
     user = JSON.parse(authToken);
   } catch (err) {
-    redirect(`/${locale}/login`);
+    try {
+      user = JSON.parse(decodeURIComponent(authToken));
+    } catch {
+      redirect(`/${locale}/login`);
+    }
   }
 
-  const ADMIN_EMAILS = ['abderelmalki@gmail.com', 'contact@woosenteur.fr', 'baba@woosenteur.fr'];
+  const ADMIN_EMAILS = [
+    'sounnahmedecine@gmail.com',
+    'abderelmalki@gmail.com',
+    'contact@woosenteur.fr',
+    'baba@woosenteur.fr',
+  ];
 
-  if (!ADMIN_EMAILS.includes(user.email)) {
+  if (!user?.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
     return (
       <div className="min-h-screen bg-white text-slate-900 flex flex-col">
         <div className="flex-1 flex items-center justify-center">

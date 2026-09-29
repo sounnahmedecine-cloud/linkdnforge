@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/Button';
 import SectionLabel from '@/components/ui/SectionLabel';
 import Header from '@/components/layout/Header';
 import LandingGenerator from '@/components/landing/LandingGenerator';
+import { trackCtaClick } from '@/lib/analytics';
 
 interface Pillar {
   tag: string;
@@ -160,6 +161,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
             <Button 
               href="/forge" 
+              onClick={() => trackCtaClick('hero_cta_primary', 'landing_hero', '/forge')}
               size="lg" 
               className="w-full sm:w-auto px-8 py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition-transform hover:scale-[1.02]"
             >
@@ -167,6 +169,7 @@ export default function Home() {
             </Button>
             <a
               href="#comment-ca-marche"
+              onClick={() => trackCtaClick('hero_cta_secondary', 'landing_hero', '#comment-ca-marche')}
               className="w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-center"
             >
               {t('ctaSecondary')}

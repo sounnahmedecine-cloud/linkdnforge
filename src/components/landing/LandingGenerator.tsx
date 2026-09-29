@@ -19,6 +19,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import ForgeLoader from '@/components/ui/ForgeLoader';
+import {
+  trackGeneratePostStart,
+  trackGeneratePostSuccess,
+  trackGeneratePostError,
+  trackPostCopied,
+  trackNetworkTabSwitched,
+  trackPaywallViewed,
+  trackBeginCheckout,
+  trackCtaClick
+} from '@/lib/analytics';
 
 interface LandingGeneratorProps {
   plans: any[];
@@ -161,9 +171,21 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
     }
 
     if (trialCount >= 5) {
+      trackPaywallViewed(trialCount);
       setShowPaywall(true);
       return;
     }
+
+    const trimmed = inputText.trim();
+    const isUrl = /^https?:\/\//i.test(trimmed) || /^(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/i.test(trimmed);
+    const inputType: 'video' | 'url' | 'topic' = videoFile ? 'video' : (isUrl ? 'url' : 'topic');
+
+    trackGeneratePostStart({
+      inputType,
+      editorialStyle,
+      hasVideo: Boolean(videoFile),
+      hasUrl: isUrl,
+    });
 
     setIsGenerating(true);
     setGeneratedPost('');
@@ -195,9 +217,6 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
 
       setGeneratingStepLabel('Compréhension du contenu & Rédaction Ghostwriter...');
 
-      const trimmed = inputText.trim();
-      const isUrl = /^https?:\/\//i.test(trimmed) || /^(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/i.test(trimmed);
-
       const payload: any = {
         locale,
         editorialStyle: editorialStyle || 'auto',
@@ -225,9 +244,20 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
       setDetectedClassification(data.classification || null);
       setScreenshotUrl(data.screenshotUrl || null);
 
+      trackGeneratePostSuccess({
+        inputType,
+        hasTiktok: Boolean(data.tiktokPost),
+        hasScreenshot: Boolean(data.screenshotUrl),
+        postLength: data.post?.length || 0,
+      });
+
       localStorage.setItem('linkdnforge_free_trials_count', (trialCount + 1).toString());
     } catch (error: any) {
       console.error(error);
+      trackGeneratePostError({
+        errorMessage: error?.message || 'unknown error',
+        inputType,
+      });
       setGeneratedPost(error.message || t('result.genericError'));
     } finally {
       setIsGenerating(false);
@@ -239,6 +269,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
     const textToCopy = selectedNetworkView === 'tiktok' && tiktokPost ? tiktokPost : generatedPost;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
+    trackPostCopied(selectedNetworkView, textToCopy.length);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -299,7 +330,15 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                </ul>
 
                <Button 
-                 href={`/api/stripe/checkout?plan=${plan.name.toLowerCase().includes('pro') ? 'pro' : 'starter'}&billing=${isYearly ? 'yearly' : 'monthly'}`} 
+                 href={`/api/stripe/checkout?plan=${plan.name.toLowerCase().includes('pro') ? 'pro' : 'starter'}&billing=${isYearly ? 'yearly' : 'monthly'}`}
+                  onClick={() => {
+                    const isPro = plan.name.toLowerCase().includes('pro');
+                    trackBeginCheckout({
+                      planId: isPro ? 'pro' : 'starter',
+                      billing: isYearly ? 'yearly' : 'monthly',
+                      value: isYearly ? (isPro ? 190 : 140) : (isPro ? 29 : 19),
+                    });
+                  }} 
                  className={`w-full py-3 text-sm font-bold rounded-xl transition-transform hover:scale-105 ${
                    plan.popular 
                      ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25' 
@@ -590,9 +629,42 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
               {/* Top Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-2">
-                  <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0A66C2] text-white shadow-xs flex items-center gap-1.5">
-                    💼 Post Optimisé LinkedIn, Facebook, X & Reddit
-                  </span>
+                  {tiktokPost ? (
+                    <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedNetworkView('linkedin');
+                          trackNetworkTabSwitched('linkedin');
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                          selectedNetworkView === 'linkedin'
+                            ? 'bg-[#0A66C2] text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        💼 Post LinkedIn
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedNetworkView('tiktok');
+                          trackNetworkTabSwitched('tiktok');
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                          selectedNetworkView === 'tiktok'
+                            ? 'bg-black text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>📱</span> Script TikTok / Reels
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0A66C2] text-white shadow-xs flex items-center gap-1.5">
+                      💼 Post Optimisé LinkedIn, Facebook, X & Reddit
+                    </span>
+                  )}
                 </div>
 
                 <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -617,7 +689,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
 
                 {/* Generated Post Text */}
                 <div className="px-4 pb-3 text-[14px] text-slate-900 leading-relaxed whitespace-pre-wrap">
-                  {generatedPost}
+                  {selectedNetworkView === 'tiktok' && tiktokPost ? tiktokPost : generatedPost}
                 </div>
 
                 {/* Hero Screenshot Preview if Available */}
@@ -666,6 +738,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
                       if (generatedPost) {
                         localStorage.setItem('linkdnforge_pending_draft', generatedPost);
                       }
+                      trackCtaClick("signup_for_more_options", "generator_result", "/dashboard");
                     }}
                     size="lg"
                     className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25"

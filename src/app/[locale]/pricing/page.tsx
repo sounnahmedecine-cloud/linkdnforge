@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { 
   Check, 
   CheckCircle2,
@@ -22,6 +22,11 @@ import Badge from '@/components/ui/Badge';
 import SectionLabel from '@/components/ui/SectionLabel';
 import Header from '@/components/layout/Header';
 import { Link } from '@/i18n/navigation';
+import {
+  trackViewPricing,
+  trackBillingToggled,
+  trackBeginCheckout,
+} from '@/lib/analytics';
 
 type FeatureKey =
   | 'posts'
@@ -109,6 +114,16 @@ export default function PricingPage() {
   const faq = t.raw('faq') as FaqItem[];
   const soonLabel = t('soonLabel');
 
+  useEffect(() => {
+    trackViewPricing('pricing_page');
+  }, []);
+
+  const handleToggleBilling = () => {
+    const nextVal = !isYearly;
+    setIsYearly(nextVal);
+    trackBillingToggled(nextVal ? 'yearly' : 'monthly');
+  };
+
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
@@ -170,7 +185,7 @@ export default function PricingPage() {
           </span>
           <button 
             type="button"
-            onClick={() => setIsYearly(!isYearly)}
+            onClick={handleToggleBilling}
             className="relative inline-flex h-8 w-16 items-center rounded-full bg-orange-500 transition-colors focus:outline-none shadow-inner"
             aria-label="Basculer entre facturation mensuelle et annuelle"
           >
@@ -259,6 +274,14 @@ export default function PricingPage() {
               <div className="pt-8 space-y-3">
                 <Button
                   href={`${plan.ctaHref}&billing=${isYearly ? 'yearly' : 'monthly'}`}
+                  onClick={() => {
+                    const isPro = plan.id === 'pro' || plan.name.toLowerCase().includes('pro');
+                    trackBeginCheckout({
+                      planId: isPro ? 'pro' : 'starter',
+                      billing: isYearly ? 'yearly' : 'monthly',
+                      value: isYearly ? (isPro ? 190 : 140) : (isPro ? 29 : 19),
+                    });
+                  }}
                   className={`w-full py-4 text-base font-bold rounded-2xl transition-transform hover:scale-[1.02] shadow-md ${
                     plan.popular 
                       ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30' 

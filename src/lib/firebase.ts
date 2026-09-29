@@ -11,7 +11,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'studio-8127417460-db3b2.firebasestorage.app',
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '124686847779',
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:124686847779:web:6ce9e932981f089c0d8696',
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-9ZX02HRM95'
 };
 
 // Initialize Firebase
@@ -21,14 +21,26 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 let analytics: ReturnType<typeof getAnalytics> | null = null;
+let analyticsPromise: Promise<ReturnType<typeof getAnalytics> | null> | null = null;
 
-// Initialize Analytics conditionally
+export const getAnalyticsSafe = async (): Promise<ReturnType<typeof getAnalytics> | null> => {
+  if (typeof window === "undefined") return null;
+  if (analytics) return analytics;
+  if (!analyticsPromise) {
+    analyticsPromise = isSupported().then((supported) => {
+      if (supported) {
+        analytics = getAnalytics(app);
+        return analytics;
+      }
+      return null;
+    }).catch(() => null);
+  }
+  return analyticsPromise;
+};
+
+// Eagerly start initialization in browser
 if (typeof window !== "undefined") {
-  isSupported().then((yes) => {
-    if (yes) {
-      analytics = getAnalytics(app);
-    }
-  });
+  getAnalyticsSafe();
 }
 
 // Helper for guest login

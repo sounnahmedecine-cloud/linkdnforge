@@ -12,9 +12,14 @@ function hasValidSession(request: NextRequest): boolean {
   if (!authToken?.value) return false;
   try {
     const user = JSON.parse(authToken.value);
-    return typeof user?.email === 'string';
+    return typeof user?.email === 'string' && user.email.length > 0;
   } catch {
-    return false;
+    try {
+      const user = JSON.parse(decodeURIComponent(authToken.value));
+      return typeof user?.email === 'string' && user.email.length > 0;
+    } catch {
+      return false;
+    }
   }
 }
 

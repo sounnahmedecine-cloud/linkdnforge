@@ -5,14 +5,16 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password, isSignUp } = await request.json();
 
-    if (!email || !password) {
+    const cleanEmail = typeof email === 'string' ? email.trim() : '';
+
+    if (!cleanEmail || !password) {
       return NextResponse.json(
         { error: 'Email et mot de passe requis' },
         { status: 400 }
       );
     }
 
-    if (password.length < 8) {
+    if (isSignUp && password.length < 8) {
       return NextResponse.json(
         { error: 'Le mot de passe doit avoir au moins 8 caractères' },
         { status: 400 }
@@ -21,14 +23,13 @@ export async function POST(request: NextRequest) {
 
     // Check if user is admin
     const adminData = adminsConfig.admins.find(
-      (admin: any) => admin.email.toLowerCase() === email.toLowerCase()
+      (admin: any) => admin.email.toLowerCase() === cleanEmail.toLowerCase()
     );
 
-    // For now, mock authentication - in production, use Firebase
-    // TODO: Integrate with Firebase Authentication
+    // Mock authentication user
     const mockUser = {
       uid: `user_${Date.now()}`,
-      email,
+      email: cleanEmail,
       role: adminData ? 'admin' : 'user',
       unlimited: adminData?.unlimited || false,
       createdAt: new Date().toISOString()
@@ -41,9 +42,10 @@ export async function POST(request: NextRequest) {
     });
 
     response.cookies.set('auth_token', JSON.stringify(mockUser), {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
       maxAge: 30 * 24 * 60 * 60 // 30 days
     });
 

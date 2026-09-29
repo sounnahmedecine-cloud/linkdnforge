@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { analytics } from '@/lib/firebase';
+import { getAnalyticsSafe } from '@/lib/firebase';
 import { logEvent } from 'firebase/analytics';
 
 /**
@@ -13,7 +13,7 @@ export function FirebaseAnalytics() {
   const hasLoggedRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !analytics) return;
+    if (typeof window === 'undefined') return;
 
     hasLoggedRef.current = false;
 
@@ -39,22 +39,23 @@ export function FirebaseAnalytics() {
     const currentPath = window.location.pathname;
 
     // 2. Déclencheur sur véritable interaction humaine
-    const logHumanVisit = () => {
+    const logHumanVisit = async () => {
       if (hasLoggedRef.current) return;
       hasLoggedRef.current = true;
 
       // Nettoyer les écouteurs dès la première interaction
       cleanupListeners();
 
-      if (!analytics) return;
-
       try {
-        logEvent(analytics, 'page_view', {
+        const an = await getAnalyticsSafe();
+        if (!an) return;
+
+        logEvent(an, 'page_view', {
           page_path: currentPath,
           is_human: true,
         });
 
-        logEvent(analytics, 'human_verified_session', {
+        logEvent(an, 'human_verified_session', {
           page_path: currentPath,
           user_agent: userAgent.slice(0, 100),
           screen_res: `${window.innerWidth}x${window.innerHeight}`,

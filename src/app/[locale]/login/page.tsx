@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import Header from '@/components/layout/Header';
+import { trackAuth } from '@/lib/analytics';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const t = useTranslations('login');
-  const router = useRouter();
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,6 +18,24 @@ export default function LoginPage() {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError(t('emailRequired') || 'Veuillez saisir votre adresse email');
+      return;
+    }
+
+    if (!password) {
+      setError(t('passwordRequired') || 'Veuillez saisir votre mot de passe');
+      return;
+    }
+
+    if (isSignUp && password.length < 8) {
+      setError(t('passwordMinLength') || 'Le mot de passe doit comporter au moins 8 caractères');
+      return;
+    }
+
     setError('');
     setIsLoading(true);
 
@@ -24,18 +43,26 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, isSignUp })
+        body: JSON.stringify({ email: trimmedEmail, password, isSignUp })
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || t('genericError'));
       }
 
-      router.push('/dashboard');
+      try {
+        trackAuth('email', isSignUp);
+      } catch (trackErr) {
+        console.warn('Analytics tracking error:', trackErr);
+      }
+
+      // Hard redirect to ensure fresh cookies are sent, router cache is bypassed,
+      // and prevent multiple clicks. Keep isLoading true so button stays in loading state.
+      window.location.assign(`/${locale}/dashboard`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('genericErrorFallback'));
-    } finally {
       setIsLoading(false);
     }
   };
@@ -72,6 +99,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('emailPlaceholder')}
+                autoComplete="email"
                 className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 transition"
                 required
               />
@@ -84,14 +112,27 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={isSignUp ? t('passwordPlaceholder') : ''}
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 className="w-full bg-slate-100/60 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-smoke-500/60 focus:outline-none focus:border-orange-500 transition"
                 required
-                minLength={8}
+                minLength={isSignUp ? 8 : undefined}
               />
             </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full" size="lg">
-              {isLoading ? t('processing') : isSignUp ? t('signUpSubmit') : t('signInSubmit')}
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2"
+              size="lg"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>{t('processing')}</span>
+                </>
+              ) : (
+                <span>{isSignUp ? t('signUpSubmit') : t('signInSubmit')}</span>
+              )}
             </Button>
           </form>
 
@@ -101,11 +142,12 @@ export default function LoginPage() {
               <>
                 {t('haveAccount')}{' '}
                 <button
+                  type="button"
                   onClick={() => {
                     setIsSignUp(false);
                     setError('');
                   }}
-                  className="text-black hover:text-black/80 transition"
+                  className="text-black hover:text-black/80 transition font-medium"
                 >
                   {t('switchToSignIn')}
                 </button>
@@ -114,11 +156,12 @@ export default function LoginPage() {
               <>
                 {t('noAccount')}{' '}
                 <button
+                  type="button"
                   onClick={() => {
                     setIsSignUp(true);
                     setError('');
                   }}
-                  className="text-black hover:text-black/80 transition"
+                  className="text-black hover:text-black/80 transition font-medium"
                 >
                   {t('switchToSignUp')}
                 </button>
