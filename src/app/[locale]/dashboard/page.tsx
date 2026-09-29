@@ -33,6 +33,7 @@ import {
 } from '@/lib/studio/storage';
 import { ArrowLeft } from 'lucide-react';
 import PaywallModal from '@/components/studio/PaywallModal';
+import SocialOnboardingModal from '@/components/studio/SocialOnboardingModal';
 import { trackPaywallViewed } from '@/lib/analytics';
 
 interface User {
@@ -90,6 +91,7 @@ export default function DashboardPage() {
   // Paywall & trial state (5 free generations)
   const [trialCount, setTrialCount] = useState<number>(0);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
+  const [showSocialOnboarding, setShowSocialOnboarding] = useState<boolean>(false);
 
   // Collapsible sidebar state (persisted in localStorage)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -144,6 +146,14 @@ export default function DashboardPage() {
     if (pendingDraft) {
       setGeneratedPost(pendingDraft);
       localStorage.removeItem('linkdnforge_pending_draft');
+    }
+
+    // 6. Check Social Onboarding (shows only once upon first arrival)
+    const isOnboarded = localStorage.getItem('linkdnforge_social_onboarded');
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasSocialParam = urlParams.has('linkedin_connected') || urlParams.has('facebook_connected');
+    if (!isOnboarded && !hasSocialParam) {
+      setShowSocialOnboarding(true);
     }
   }, []);
 
@@ -480,6 +490,13 @@ export default function DashboardPage() {
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
         userEmail={user?.email}
+      />
+
+      {/* Social Onboarding 1-Click modal on first arrival */}
+      <SocialOnboardingModal
+        isOpen={showSocialOnboarding}
+        onClose={() => setShowSocialOnboarding(false)}
+        onOpenSettings={() => setCurrentTab('accounts')}
       />
     </div>
   );
