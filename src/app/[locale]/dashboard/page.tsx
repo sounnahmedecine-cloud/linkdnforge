@@ -149,11 +149,9 @@ export default function DashboardPage() {
       localStorage.removeItem('linkdnforge_pending_draft');
     }
 
-    // 6. Check Social Onboarding (shows only once upon first arrival)
+    // 6. Check Social Onboarding (shows until user completes onboarding or clicks to enter studio)
     const isOnboarded = localStorage.getItem('linkdnforge_social_onboarded');
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasSocialParam = urlParams.has('linkedin_connected') || urlParams.has('facebook_connected');
-    if (!isOnboarded && !hasSocialParam) {
+    if (!isOnboarded) {
       setShowSocialOnboarding(true);
     }
   }, []);

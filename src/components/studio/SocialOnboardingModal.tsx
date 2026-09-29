@@ -72,9 +72,18 @@ export default function SocialOnboardingModal({
           <h2 className="font-display font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
             Reliez vos canaux en 1 Clic
           </h2>
-          <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-            Pour diffuser vos posts instantanément en 0 clic, connectez vos comptes une seule fois. Cette étape ne vous sera plus demandée par la suite.
+          <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+            Pour diffuser vos posts instantanément en 0 clic, connectez vos comptes une seule fois.
           </p>
+
+          {connectedCount > 0 && (
+            <div className="pt-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold animate-in fade-in">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                {connectedCount} canal{connectedCount > 1 ? 'aux' : ''} connecté{connectedCount > 1 ? 's' : ''} avec succès ! Vous pouvez lier vos autres canaux ou entrer dans le Studio.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Channels Grid (4 Channels) */}
