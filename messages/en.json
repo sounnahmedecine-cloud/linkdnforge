@@ -298,95 +298,95 @@
     "copyright": "© 2026 LinkedInForge. All rights reserved."
   },
   "landing": {
-    "badge": "AI Content Studio for LinkedIn and Social Networks",
+    "badge": "AI Content Creation Studio",
     "heroTitle": "Transform your content into ready-to-publish posts.",
-    "heroSubtitle": "LinkedInForge is an AI LinkedIn post generator that transforms your videos, URLs, and ideas into content tailored to your style.",
-    "heroDescription": "Analyze a video, provide an URL, or start from an idea. LinkedInForge understands your content, adopts your tone with the Ghostwriter, and generates a post you can edit, validate, and publish.",
-    "ctaPrimary": "Try LinkedInForge for free",
+    "heroSubtitle": "A video, an URL, or an idea. LinkedInForge does the rest.",
+    "heroDescription": "",
+    "ctaPrimary": "Generate my first post →",
     "ctaSecondary": "See how it works",
     "freeReassurance": "5 free generations · No credit card required",
     "slogan": "Transform your content. Forge your presence.",
     "subSlogan": "Videos, URLs, ideas: LinkedInForge transforms them into ready-to-publish content, in your style.",
     "transformation": {
-      "title": "A video. An URL. An idea. Your content is ready.",
-      "subtitle": "LinkedInForge doesn't just rephrase words. It analyzes your content to identify topics, key facts, and strong arguments. Then it adapts the result to your personal voice.",
+      "title": "No matter your starting point.",
+      "subtitle": "A single piece of content is all it takes.",
       "pillars": [
         {
-          "tag": "Video → analysis → post",
-          "title": "🎥 Turn your videos into posts",
-          "body": "Drop a video and let the AI analyze speech and visuals to extract key ideas and messages. Create LinkedIn posts grounded in what's actually inside your video."
+          "tag": "🎥 Video",
+          "title": "YouTube, Drive or raw file",
+          "body": "AI analyzes audio and video to extract the core thesis, key facts, and golden moments."
         },
         {
-          "tag": "URL → analysis → post",
-          "title": "🌐 Turn any URL into content",
-          "body": "Paste the link to your product, site, article, or landing page. LinkedInForge captures the Hero section and extracts your core value proposition."
+          "tag": "🔗 URL",
+          "title": "Article, blog or web page",
+          "body": "Paste any link: AI extracts your value proposition, arguments, and captures the Hero visual."
         },
         {
-          "tag": "Your voice, not a template",
-          "title": "✍️ Write in your own authentic style",
-          "body": "The Ghostwriter learns your communication style from your past posts and examples. Your vocabulary, pacing, and arguments serve as the foundation."
+          "tag": "💡 Idea",
+          "title": "A few words are enough",
+          "body": "An insight, voice note or story: the Ghostwriter structures and writes engaging copy for you."
         }
       ]
     },
     "workflow": {
-      "sectionLabel": "How it works",
-      "title": "From raw content to a ready-to-share post",
-      "subtitle": "A transparent workflow designed to save you hours while keeping total creative control.",
+      "sectionLabel": "The Workflow",
+      "title": "You provide the content. LinkedInForge handles the rest.",
+      "subtitle": "From raw material to high-impact posts in 4 clear steps.",
       "steps": [
         {
           "num": "01",
-          "title": "01 — Provide your content",
-          "body": "Video, URL, or idea: start with what you already have on hand."
+          "title": "01 — Your content",
+          "body": "Drop a video, paste an URL, or type a simple raw idea."
         },
         {
           "num": "02",
-          "title": "02 — LinkedInForge analyzes it",
-          "body": "The AI analyzes audio, video, and text to extract facts and key angles."
+          "title": "02 — AI Analysis",
+          "body": "The AI extracts key angles, core arguments, and takeaways."
         },
         {
           "num": "03",
-          "title": "03 — Your Ghostwriter steps in",
-          "body": "Content is crafted according to your personal tone, goals, and platform best practices."
+          "title": "03 — Adaptation & Writing",
+          "body": "The Ghostwriter applies your authentic tone and formats for maximum engagement."
         },
         {
           "num": "04",
-          "title": "04 — You stay in control",
-          "body": "Preview, edit, copy, or schedule your publication with full peace of mind."
+          "title": "04 — Ready to publish",
+          "body": "Preview, fine-tune in one click, and share directly across your channels."
         }
       ]
     },
     "omnichannel": {
-      "title": "One source of content powers multiple channels",
-      "body": "LinkedInForge is designed so you never have to rewrite the same message twice. Repurpose one core piece of content across multiple social platforms.",
-      "channels": "LinkedIn · Facebook · Short formats (TikTok & Reels)",
-      "videoNote": "With the Video Autopilot, your video footage becomes instantly actionable for your entire editorial calendar."
+      "title": "One source of content. Custom posts for each platform.",
+      "body": "Stop wasting hours rewriting the same message. LinkedInForge adapts your story to the native format of each network.",
+      "channels": "LinkedIn · Facebook · Instagram & TikTok · X (Twitter)",
+      "videoNote": "From long-form LinkedIn storytelling to short video scripts: every network gets its tailored format."
     },
     "whyUs": {
-      "title": "Why LinkedInForge?",
-      "subtitle": "An approach rooted in understanding your real content rather than relying on generic prompts.",
+      "title": "LinkedInForge doesn't generate random text.",
+      "subtitle": "It understands your content before writing.",
       "reasons": [
         {
-          "title": "Understand before writing",
-          "body": "The AI never starts from a vague prompt. It works directly from your real, grounded content."
+          "title": "01 — Understands the source",
+          "body": "Audio, visual ingestion, webpage scraping or raw text brief analysis."
         },
         {
-          "title": "Your voice over templates",
-          "body": "The Ghostwriter adapts copy to your natural, authentic way of speaking."
+          "title": "02 — Identifies context",
+          "body": "Extracts key insights, data points, and actionable takeaways."
         },
         {
-          "title": "Real substance, not generic fluff",
-          "body": "Video, landing page, launch, product, or experience: start from what you actually have to share."
+          "title": "03 — Adapts your voice",
+          "body": "Applies your Ghostwriter persona (tone, pacing, formatting and vocabulary)."
         },
         {
-          "title": "You stay in full control",
-          "body": "LinkedInForge prepares the post. You review, edit, and decide when and where to publish."
+          "title": "04 — Crafts the post",
+          "body": "Magnetic hook, clean spacing, hashtags and Hero visual extracted in real time."
         }
       ]
     },
     "rawMaterial": {
-      "title": "The content you already have is raw gold.",
-      "body": "You don't need to reinvent ten new ideas every week. You already have videos, blog articles, product pages, launches, and customer stories.",
-      "action": "LinkedInForge helps you transform that existing material into high-performing social content.",
+      "title": "The content you already have is pure raw gold.",
+      "body": "You already have videos, blog articles, product pages, wins, and customer lessons.",
+      "action": "LinkedInForge turns this existing goldmine into top-tier social posts.",
       "cta": "Start with your next piece of content"
     },
     "pricingTeaser": {
@@ -445,10 +445,10 @@
       ]
     },
     "finalCta": {
-      "title": "Start with your next piece of content.",
-      "body": "Join the creators, founders, and freelancers using LinkedInForge to forge their online presence.",
-      "cta": "Try LinkedInForge for free",
-      "note": "5 free generations included. No credit card required."
+      "title": "Stop spending all your time writing.",
+      "body": "Join the creators, founders, and freelances who automate their social presence without losing their authenticity.",
+      "cta": "Try LinkedInForge for free →",
+      "note": "5 free generations · No credit card required"
     },
     "footer": {
       "tagline": "Transform your content. Forge your presence.",
