@@ -32,6 +32,8 @@ import {
   getScheduledPosts,
 } from '@/lib/studio/storage';
 import { ArrowLeft } from 'lucide-react';
+import PaywallModal from '@/components/studio/PaywallModal';
+import { trackPaywallViewed } from '@/lib/analytics';
 
 interface User {
   email: string;
@@ -85,6 +87,10 @@ export default function DashboardPage() {
   const [currentSiteOgImage, setCurrentSiteOgImage] = useState<string | null>(null);
   const [currentTargetUrl, setCurrentTargetUrl] = useState<string>('');
 
+  // Paywall & trial state (5 free generations)
+  const [trialCount, setTrialCount] = useState<number>(0);
+  const [showPaywall, setShowPaywall] = useState<boolean>(false);
+
   // Initial load
   useEffect(() => {
     // 1. Auth token from cookie
@@ -105,7 +111,14 @@ export default function DashboardPage() {
     setSocialConnections(getSocialConnections());
     setScheduledPosts(getScheduledPosts());
 
-    // 3. Pending draft from landing generator
+    // 3. Free trials count
+    const savedTrials = localStorage.getItem('linkdnforge_free_trials_count');
+    if (savedTrials) {
+      const parsed = parseInt(savedTrials, 10);
+      if (!isNaN(parsed)) setTrialCount(parsed);
+    }
+
+    // 4. Pending draft from landing generator
     const pendingDraft = localStorage.getItem('linkdnforge_pending_draft');
     if (pendingDraft) {
       setGeneratedPost(pendingDraft);
@@ -163,6 +176,13 @@ export default function DashboardPage() {
     tone?: string;
     postObjective?: string;
   }) => {
+    // Enforce 5 free generations paywall for non-admin users
+    if (!isAdmin && trialCount >= 5) {
+      setShowPaywall(true);
+      trackPaywallViewed(trialCount);
+      return;
+    }
+
     setIsGenerating(true);
     setGeneratedPost('');
     setTiktokPost('');
@@ -225,6 +245,20 @@ export default function DashboardPage() {
       });
 
       setRecentPosts(getRecentPosts());
+
+      // Free trial quota tracking (5 free generations)
+      if (!isAdmin) {
+        const nextTrial = trialCount + 1;
+        setTrialCount(nextTrial);
+        localStorage.setItem('linkdnforge_free_trials_count', String(nextTrial));
+        if (nextTrial >= 5) {
+          // Trigger paywall modal automatically upon reaching 5th generation
+          setTimeout(() => {
+            setShowPaywall(true);
+            trackPaywallViewed(nextTrial);
+          }, 1500);
+        }
+      }
     } catch (error: any) {
       console.error('Erreur génération:', error);
       alert(error.message || 'Erreur lors de la génération.');
@@ -253,6 +287,8 @@ export default function DashboardPage() {
             isAdmin={isAdmin}
             userEmail={user?.email}
             onLogout={handleLogout}
+            trialCount={trialCount}
+            onOpenPaywall={() => setShowPaywall(true)}
           />
 
           {/* Center / Right Content Area */}
@@ -414,6 +450,13 @@ export default function DashboardPage() {
           </main>
         </div>
       </div>
+
+      {/* Paywall modal when free generations are exhausted */}
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        userEmail={user?.email}
+      />
     </div>
   );
 }

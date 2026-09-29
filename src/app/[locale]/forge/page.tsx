@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import Header from '@/components/layout/Header';
-import LandingGenerator from '@/components/landing/LandingGenerator';
+import LandingLeadCapture from '@/components/landing/LandingLeadCapture';
 import Logo from '@/components/ui/Logo';
 
 interface FaqItem {
@@ -102,9 +102,9 @@ export default function ForgePage() {
           </div>
         </div>
 
-        {/* 3. The Generator Engine Workspace */}
+        {/* 3. The Lead Capture Workspace */}
         <section className="relative">
-          <LandingGenerator plans={plans} />
+          <LandingLeadCapture />
         </section>
 
         {/* 4. Reassurance badges under workspace */}

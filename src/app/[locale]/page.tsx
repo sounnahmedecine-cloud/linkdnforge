@@ -26,7 +26,7 @@ import Logo from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import SectionLabel from '@/components/ui/SectionLabel';
 import Header from '@/components/layout/Header';
-import LandingGenerator from '@/components/landing/LandingGenerator';
+import LandingLeadCapture from '@/components/landing/LandingLeadCapture';
 import { trackCtaClick } from '@/lib/analytics';
 
 interface Pillar {
@@ -181,9 +181,9 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Interactive Showcase / Hero Demo Component */}
+        {/* Interactive Lead Capture Showcase Component */}
         <div id="demo" className="mt-14 scroll-mt-24">
-          <LandingGenerator plans={plans} />
+          <LandingLeadCapture />
         </div>
       </section>
 

@@ -23,6 +23,8 @@ interface StudioSidebarProps {
   isAdmin?: boolean;
   userEmail?: string;
   onLogout?: () => void;
+  trialCount?: number;
+  onOpenPaywall?: () => void;
 }
 
 export default function StudioSidebar({
@@ -32,6 +34,8 @@ export default function StudioSidebar({
   isAdmin = false,
   userEmail,
   onLogout,
+  trialCount = 0,
+  onOpenPaywall,
 }: StudioSidebarProps) {
   const mainNavItems: { id: StudioTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'hub', label: 'Studio Accueil', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -147,6 +151,35 @@ export default function StudioSidebar({
             })}
           </nav>
         </div>
+
+        {/* Free trial status card for non-admin */}
+        {!isAdmin && onOpenPaywall && (
+          <div className="hidden lg:block bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200/90 rounded-2xl p-4 space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-orange-950 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                Essai gratuit
+              </span>
+              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-white text-orange-600 border border-orange-200">
+                {Math.max(0, 5 - trialCount)} / 5 offerts
+              </span>
+            </div>
+            <div className="w-full bg-orange-200/50 rounded-full h-1.5 overflow-hidden">
+              <div
+                className="bg-orange-500 h-full rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, (trialCount / 5) * 100)}%` }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onOpenPaywall}
+              className="w-full py-2 px-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-200" />
+              <span>Passer en Illimité</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* User footer */}
