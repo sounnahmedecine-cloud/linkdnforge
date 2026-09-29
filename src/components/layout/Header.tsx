@@ -26,6 +26,7 @@ interface HeaderProps {
   user?: AppUser | null;
   onLogout?: () => void;
   logoutLabel?: string;
+  onOpenMobileMenu?: () => void;
 }
 
 export default function Header({
@@ -40,6 +41,7 @@ export default function Header({
   user,
   onLogout,
   logoutLabel = 'Déconnexion',
+  onOpenMobileMenu,
 }: HeaderProps) {
   const tNav = useTranslations('nav');
   const pathname = usePathname();
@@ -99,22 +101,43 @@ export default function Header({
 
   if (variant === 'app') {
     return (
-      <div className="flex items-center justify-between mb-12" suppressHydrationWarning>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs" suppressHydrationWarning>
         <div className="flex items-center gap-3">
+          {onOpenMobileMenu && (
+            <button
+              type="button"
+              onClick={onOpenMobileMenu}
+              className="lg:hidden p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+              aria-label="Ouvrir le menu de navigation"
+            >
+              <Menu className="w-5 h-5 text-slate-900" />
+              <span className="text-xs font-bold hidden sm:inline">Menu</span>
+            </button>
+          )}
           <Logo />
-          {user?.role === 'admin' && <Badge tone="spark">👑 Admin</Badge>}
+          {user?.role === 'admin' && (
+            <span className="text-[10px] bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full border border-purple-200">
+              👑 Admin
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-4">
-          {user?.email && <span className="text-sm text-slate-500">{user.email}</span>}
+        <div className="flex items-center gap-3">
+          {user?.email && (
+            <span className="hidden md:inline text-xs font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+              {user.email}
+            </span>
+          )}
           <LanguageSwitcher />
-          <button
-            onClick={onLogout}
-            className="px-4 py-2 border border-slate-300 text-slate-700 hover:text-slate-900 rounded-lg hover:border-slate-300 transition text-sm"
-          >
-            {logoutLabel}
-          </button>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="px-3 py-1.5 border border-slate-200 text-slate-700 hover:text-rose-600 hover:border-rose-200 rounded-xl hover:bg-rose-50 transition text-xs font-bold cursor-pointer"
+            >
+              {logoutLabel}
+            </button>
+          )}
         </div>
-      </div>
+      </header>
     );
   }
 

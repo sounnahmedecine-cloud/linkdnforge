@@ -34,85 +34,85 @@ export default function StudioHub({
       </div>
 
       {/* 3 Main Entry Doors */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
         {/* Door 1: Video */}
         <div
           onClick={() => onSelectTab('video')}
-          className="group relative bg-white hover:bg-orange-50/20 border-2 border-slate-200 hover:border-orange-500 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-xl flex flex-col justify-between"
+          className="group relative bg-white hover:bg-orange-50/20 border border-slate-200 hover:border-orange-500 rounded-2xl p-5 sm:p-6 transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md flex flex-col justify-between"
         >
-          <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-orange-100 group-hover:bg-orange-500 text-orange-600 group-hover:text-white flex items-center justify-center transition-colors duration-200 shadow-inner">
-              <Film className="w-6 h-6" />
+          <div className="space-y-3">
+            <div className="w-11 h-11 rounded-xl bg-orange-100 group-hover:bg-orange-500 text-orange-600 group-hover:text-white flex items-center justify-center transition-colors duration-200 shadow-inner">
+              <Film className="w-5 h-5" />
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
+              <h2 className="text-lg font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
                 🎥 Vidéo → Contenu
               </h2>
             </div>
 
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Déposez votre vidéo (TikTok, Reels, Démo). L'IA transcrit, extrait les moments clés et crée un post LinkedIn + script court.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Importez une vidéo (TikTok, Reels, Démo) pour extraire les moments clés et rédiger le post parfait.
             </p>
           </div>
 
-          <div className="pt-6 flex items-center justify-between text-sm font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-            <span>Commencer avec une vidéo</span>
-            <ArrowRight className="w-4 h-4" />
+          <div className="pt-4 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+            <span>Créer depuis une vidéo</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </div>
 
         {/* Door 2: URL */}
         <div
           onClick={() => onSelectTab('url')}
-          className="group relative bg-white hover:bg-blue-50/20 border-2 border-slate-200 hover:border-blue-500 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-xl flex flex-col justify-between"
+          className="group relative bg-white hover:bg-blue-50/20 border border-slate-200 hover:border-blue-500 rounded-2xl p-5 sm:p-6 transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md flex flex-col justify-between"
         >
-          <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-blue-100 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition-colors duration-200 shadow-inner">
-              <Globe2 className="w-6 h-6" />
+          <div className="space-y-3">
+            <div className="w-11 h-11 rounded-xl bg-blue-100 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition-colors duration-200 shadow-inner">
+              <Globe2 className="w-5 h-5" />
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+              <h2 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                 🔗 URL → Contenu
               </h2>
             </div>
 
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Collez un lien (e-commerce, article, landing SaaS). L'IA détecte la nature de la page, extrait le visuel et rédige le post idéal.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Collez un lien (site, article, produit) pour capturer le visuel et rédiger le post instantanément.
             </p>
           </div>
 
-          <div className="pt-6 flex items-center justify-between text-sm font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
+          <div className="pt-4 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
             <span>Transformer un lien</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </div>
 
         {/* Door 3: Idea */}
         <div
           onClick={() => onSelectTab('idea')}
-          className="group relative bg-white hover:bg-amber-50/20 border-2 border-slate-200 hover:border-amber-500 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-xl flex flex-col justify-between"
+          className="group relative bg-white hover:bg-amber-50/20 border border-slate-200 hover:border-amber-500 rounded-2xl p-5 sm:p-6 transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md flex flex-col justify-between"
         >
-          <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 group-hover:bg-amber-500 text-amber-700 group-hover:text-white flex items-center justify-center transition-colors duration-200 shadow-inner">
-              <Sparkles className="w-6 h-6" />
+          <div className="space-y-3">
+            <div className="w-11 h-11 rounded-xl bg-amber-100 group-hover:bg-amber-500 text-amber-700 group-hover:text-white flex items-center justify-center transition-colors duration-200 shadow-inner">
+              <Sparkles className="w-5 h-5" />
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
+              <h2 className="text-lg font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
                 ✍️ Une Idée → Post
               </h2>
             </div>
 
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Une victoire, une anecdote, une réflexion marché ? Tapez deux lignes de contexte et laissez votre Ghostwriter structurer le post.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Tapez votre idée brute en 2 lignes et laissez le Ghostwriter la forger selon votre style unique.
             </p>
           </div>
 
-          <div className="pt-6 flex items-center justify-between text-sm font-bold text-amber-600 group-hover:translate-x-1 transition-transform">
+          <div className="pt-4 flex items-center justify-between text-xs font-bold text-amber-600 group-hover:translate-x-1 transition-transform">
             <span>Rédiger une idée</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </div>
       </div>

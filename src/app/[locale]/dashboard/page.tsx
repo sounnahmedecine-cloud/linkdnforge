@@ -93,8 +93,9 @@ export default function DashboardPage() {
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
   const [showSocialOnboarding, setShowSocialOnboarding] = useState<boolean>(false);
 
-  // Collapsible sidebar state (persisted in localStorage)
+  // Collapsible sidebar & mobile drawer state
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   const toggleSidebarCollapse = () => {
     setIsSidebarCollapsed((prev) => {
@@ -303,12 +304,18 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans">
       {/* Top Navbar */}
-      <Header variant="app" user={user} onLogout={handleLogout} logoutLabel={tNav('logout')} />
+      <Header
+        variant="app"
+        user={user}
+        onLogout={handleLogout}
+        logoutLabel={tNav('logout')}
+        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+      />
 
       {/* Main Studio Layout */}
       <div className="flex-1 max-w-[1560px] w-full mx-auto p-3 sm:p-5 lg:p-7">
-        <div className="flex flex-col lg:flex-row gap-5 items-start">
-          {/* Left Navigation Sidebar */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+          {/* Navigation Sidebar (Desktop fixed + Mobile slide-over drawer) */}
           <StudioSidebar
             currentTab={currentTab}
             onSelectTab={(tab) => {
@@ -323,6 +330,8 @@ export default function DashboardPage() {
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}
             ghostwriterTone={ghostwriterProfile.tone}
+            mobileOpen={isMobileMenuOpen}
+            onCloseMobile={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Center / Right Content Area */}
