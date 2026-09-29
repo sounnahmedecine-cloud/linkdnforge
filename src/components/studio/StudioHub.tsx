@@ -46,14 +46,6 @@ export default function StudioHub({
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">
-                  Audio & Vision
-                </span>
-                <span className="text-[11px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-full">
-                  Priorité 1
-                </span>
-              </div>
               <h2 className="text-xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
                 🎥 Vidéo → Contenu
               </h2>
@@ -81,14 +73,6 @@ export default function StudioHub({
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                  Scraping & Hero HD
-                </span>
-                <span className="text-[11px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-full">
-                  Produit / Article
-                </span>
-              </div>
               <h2 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                 🔗 URL → Contenu
               </h2>
@@ -116,14 +100,6 @@ export default function StudioHub({
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">
-                  Ghostwriter Pur
-                </span>
-                <span className="text-[11px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-full">
-                  Pensée brute
-                </span>
-              </div>
               <h2 className="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
                 ✍️ Une Idée → Post
               </h2>

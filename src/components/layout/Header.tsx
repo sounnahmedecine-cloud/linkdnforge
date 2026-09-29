@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Film, Menu, X, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Film, Menu, X, Sparkles, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Logo from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
@@ -44,15 +44,47 @@ export default function Header({
   const tNav = useTranslations('nav');
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(user || null);
+
+  useEffect(() => {
+    if (user) {
+      setCurrentUser(user);
+      return;
+    }
+    if (typeof document !== 'undefined') {
+      try {
+        const match = document.cookie.match(/(?:^|;\s*)auth_token=([^;]*)/);
+        if (match && match[1]) {
+          const parsed = JSON.parse(decodeURIComponent(match[1]));
+          if (parsed && typeof parsed.email === 'string' && parsed.email.length > 0) {
+            setCurrentUser(parsed);
+          }
+        }
+      } catch (e) {
+        // ignore cookie parse error
+      }
+    }
+  }, [user]);
 
   const resolvedGenerator = generatorLabel || tNav('generator') || 'Générateur';
   const resolvedHowItWorks = howItWorksLabel || tNav('howItWorks') || 'Comment ça marche';
   const resolvedPricing = pricingLabel || tNav('pricing') || 'Tarifs';
   const resolvedAutopilot = autopilotLabel || tNav('autopilot') || 'Autopilot Vidéo';
   const resolvedCta = ctaLabel || tNav('cta') || 'Essayer gratuitement';
+  const resolvedSignIn = tNav('signIn') || 'Se connecter';
+  const resolvedMyStudio = tNav('myStudio') || 'Mon Atelier';
 
   const isForgeActive = pathname === '/forge' || pathname.startsWith('/forge');
   const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing');
+
+  const handleCtaClick = () => {
+    if (ctaHref.includes('#demo') || ctaHref === '#demo') {
+      setTimeout(() => {
+        const el = document.getElementById('landing-email-input');
+        el?.focus();
+      }, 150);
+    }
+  };
 
   if (variant === 'minimal') {
     return (
@@ -140,10 +172,28 @@ export default function Header({
 
         {/* Right Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
-          <LanguageSwitcher />
-          <Button href={ctaHref} size="md" className="font-bold shadow-sm">
-            {resolvedCta}
-          </Button>
+          {currentUser ? (
+            <>
+              <LanguageSwitcher />
+              <Button href="/dashboard" size="md" className="font-bold shadow-sm bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-1.5">
+                <span>{resolvedMyStudio}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-slate-600 hover:text-slate-950 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                {resolvedSignIn}
+              </Link>
+              <LanguageSwitcher />
+              <Button href={ctaHref} size="md" className="font-bold shadow-sm" onClick={handleCtaClick}>
+                {resolvedCta}
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger & Actions */}
@@ -217,16 +267,40 @@ export default function Header({
             </Link>
           </div>
 
-          <div className="pt-2">
-            <Button
-              href={ctaHref}
-              size="lg"
-              className="w-full font-bold justify-center shadow-md"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {resolvedCta}
-            </Button>
-          </div>
+          {currentUser ? (
+            <div className="pt-2">
+              <Button
+                href="/dashboard"
+                size="lg"
+                className="w-full font-bold justify-center shadow-md bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>{resolvedMyStudio}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="pt-2 space-y-2">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-3 rounded-xl border border-slate-200 text-slate-700 hover:text-black font-bold flex items-center justify-center text-sm transition hover:bg-slate-50"
+              >
+                {resolvedSignIn}
+              </Link>
+              <Button
+                href={ctaHref}
+                size="lg"
+                className="w-full font-bold justify-center shadow-md"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleCtaClick();
+                }}
+              >
+                {resolvedCta}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </nav>

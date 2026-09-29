@@ -139,7 +139,7 @@ export default function PricingPage() {
         variant="marketing" 
         pricingLabel={tNav('pricing')} 
         ctaLabel={tNav('cta')} 
-        ctaHref="/forge" 
+        ctaHref="/#demo" 
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 space-y-20">

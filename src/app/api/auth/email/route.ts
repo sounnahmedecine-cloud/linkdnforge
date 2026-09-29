@@ -7,14 +7,14 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = typeof email === 'string' ? email.trim() : '';
 
-    if (!cleanEmail || !password) {
+    if (!cleanEmail || !cleanEmail.includes('@')) {
       return NextResponse.json(
-        { error: 'Email et mot de passe requis' },
+        { error: 'Adresse email valide requise' },
         { status: 400 }
       );
     }
 
-    if (isSignUp && password.length < 8) {
+    if (password && isSignUp && password.length < 8) {
       return NextResponse.json(
         { error: 'Le mot de passe doit avoir au moins 8 caractères' },
         { status: 400 }

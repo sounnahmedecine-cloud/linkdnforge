@@ -61,7 +61,7 @@ export default function IdeaForge({
         </button>
         <span className="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" />
-          Mode Ghostwriter Idée
+          Mode Idée
         </span>
       </div>
 
@@ -70,14 +70,14 @@ export default function IdeaForge({
           <span>✍️</span> De quoi voulez-vous parler ?
         </h2>
         <p className="text-sm text-slate-500">
-          Écrivez votre pensée brute, une anecdote ou quelques mots clés. Votre Ghostwriter se charge de la structuration, du hook accrocheur et de la mise en valeur.
+          Écrivez votre idée, une anecdote ou quelques mots clés. L'IA se charge de la structuration, du hook accrocheur et de la mise en valeur.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <label className="block text-sm font-bold text-slate-800">
-            Votre sujet, pensée ou anecdote
+            Votre sujet, idée ou anecdote
           </label>
           <textarea
             required

@@ -136,7 +136,7 @@ export default function Home() {
         variant="marketing" 
         pricingLabel={tNav('pricing')} 
         ctaLabel={tNav('cta')} 
-        ctaHref="/forge" 
+        ctaHref="#demo" 
       />
 
       {/* 2. HERO SECTION */}
@@ -160,8 +160,13 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
             <Button 
-              href="/forge" 
-              onClick={() => trackCtaClick('hero_cta_primary', 'landing_hero', '/forge')}
+              href="#demo" 
+              onClick={() => {
+                trackCtaClick('hero_cta_primary', 'landing_hero', '#demo');
+                setTimeout(() => {
+                  document.getElementById('landing-email-input')?.focus();
+                }, 100);
+              }}
               size="lg" 
               className="w-full sm:w-auto px-8 py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition-transform hover:scale-[1.02]"
             >

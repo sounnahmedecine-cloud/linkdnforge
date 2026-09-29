@@ -10,6 +10,8 @@
     "autopilot": "Piloto de Video",
     "cta": "Probar gratis",
     "ctaOnboarding": "Empezar",
+    "myStudio": "Mi Taller",
+    "signIn": "Iniciar sesión",
     "logout": "Cerrar sesión"
   },
   "login": {

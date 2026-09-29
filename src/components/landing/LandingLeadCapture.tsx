@@ -98,10 +98,11 @@ export default function LandingLeadCapture() {
             <div className="flex flex-col sm:flex-row items-stretch gap-3">
               <div className="relative flex-1">
                 <input
+                  id="landing-email-input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Entrez votre plus bel email..."
+                  placeholder="Entrez votre adresse email..."
                   autoComplete="email"
                   required
                   disabled={isLoading}
@@ -121,7 +122,7 @@ export default function LandingLeadCapture() {
                   </>
                 ) : (
                   <>
-                    <span>Accéder au Studio gratuit</span>
+                    <span>Essayer gratuitement</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

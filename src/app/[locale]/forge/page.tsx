@@ -67,7 +67,7 @@ export default function ForgePage() {
         variant="marketing"
         pricingLabel={tNav('pricing')}
         ctaLabel={tNav('cta')}
-        ctaHref="/login"
+        ctaHref="#demo"
       />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-12 w-full">
@@ -103,7 +103,7 @@ export default function ForgePage() {
         </div>
 
         {/* 3. The Lead Capture Workspace */}
-        <section className="relative">
+        <section id="demo" className="relative scroll-mt-24">
           <LandingLeadCapture />
         </section>
 
