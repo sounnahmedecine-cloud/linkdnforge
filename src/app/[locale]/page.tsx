@@ -25,6 +25,7 @@ import Logo from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import SectionLabel from '@/components/ui/SectionLabel';
 import Header from '@/components/layout/Header';
+import HeroShowcase from '@/components/landing/HeroShowcase';
 import LandingLeadCapture from '@/components/landing/LandingLeadCapture';
 import { trackCtaClick } from '@/lib/analytics';
 
@@ -122,53 +123,23 @@ export default function Home() {
         ctaHref="#demo" 
       />
 
-      {/* 2. HERO SECTION : ÉPURÉ & ULTRA-DIRECT */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-10 sm:pt-16 sm:pb-16 text-center">
-        <div className="max-w-4xl mx-auto space-y-4 animate-rise">
+      {/* 2. HERO SECTION SHOWCASE : VISUEL & IMPACTANT */}
+      <HeroShowcase />
+
+      {/* 2.1. DEMO & CAPTURE INTERACTIVE */}
+      <section id="demo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 scroll-mt-24">
+        <div className="text-center max-w-3xl mx-auto mb-8 space-y-2">
           <SectionLabel className="justify-center bg-orange-100 text-orange-600 border-orange-200 mx-auto w-fit">
-            {t('badge')}
+            Générateur en direct
           </SectionLabel>
-
-          <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl leading-[1.08] tracking-tight text-black">
-            {t('heroTitle')}
-          </h1>
-
-          <p className="text-xl sm:text-2xl text-slate-800 leading-snug max-w-2xl mx-auto font-bold">
-            {t('heroSubtitle')}
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button 
-              href="#demo" 
-              onClick={() => {
-                trackCtaClick('hero_cta_primary', 'landing_hero', '#demo');
-                setTimeout(() => {
-                  document.getElementById('landing-email-input')?.focus();
-                }, 100);
-              }}
-              size="lg" 
-              className="w-full sm:w-auto px-8 py-4 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition-transform hover:scale-[1.02]"
-            >
-              {t('ctaPrimary')}
-            </Button>
-            <a
-              href="#comment-ca-marche"
-              onClick={() => trackCtaClick('hero_cta_secondary', 'landing_hero', '#comment-ca-marche')}
-              className="w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-center"
-            >
-              {t('ctaSecondary')}
-            </a>
-          </div>
-
-          <p className="text-xs sm:text-sm text-slate-500 font-semibold">
-            {t('freeReassurance')}
+          <h2 className="font-display font-black text-2xl sm:text-4xl text-slate-900">
+            Testez instantanément avec vos contenus
+          </h2>
+          <p className="text-slate-600 text-sm sm:text-base">
+            Choisissez un exemple ou entrez votre propre contenu pour voir la magie opérer.
           </p>
         </div>
-
-        {/* Interactive Lead Capture & Live Demonstration Component */}
-        <div id="demo" className="mt-10 scroll-mt-24">
-          <LandingLeadCapture />
-        </div>
+        <LandingLeadCapture />
       </section>
 
       {/* 3. SECTION SOMBRE : LA COMPRÉHENSION IA (LA DIFFÉRENCIATION CLÉ) */}
