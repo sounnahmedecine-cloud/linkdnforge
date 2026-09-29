@@ -68,14 +68,14 @@ export function getPublicOrigin(request?: NextRequest): string {
 }
 
 export function getFacebookRedirectUri(origin?: string): string {
-  if (origin && !origin.includes('0.0.0.0') && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+  if (origin && !origin.includes('0.0.0.0')) {
     return `${origin.replace(/\/$/, '')}/api/auth/facebook/callback`;
   }
   if (process.env.FACEBOOK_REDIRECT_URI) {
     return process.env.FACEBOOK_REDIRECT_URI;
   }
-  if (origin && !origin.includes('0.0.0.0')) {
-    return `${origin.replace(/\/$/, '')}/api/auth/facebook/callback`;
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '')}/api/auth/facebook/callback`;
   }
   const base = process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes('0.0.0.0')
     ? process.env.NEXTAUTH_URL
@@ -84,23 +84,9 @@ export function getFacebookRedirectUri(origin?: string): string {
 }
 
 export function getFacebookAuthUrl(state: string, origin?: string): string {
-  const appId = process.env.FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-  if (!appId) {
-    throw new Error('FACEBOOK_APP_ID is not configured');
-  }
+  const appId = process.env.FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1824637551887356';
 
   const redirectUri = getFacebookRedirectUri(origin);
-  const configId = process.env.FACEBOOK_CONFIG_ID;
-
-  if (configId) {
-    return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
-      appId
-    )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&config_id=${encodeURIComponent(
-      configId
-    )}&response_type=code`;
-  }
-
-  // Requested scopes: pages_show_list, pages_read_engagement, pages_manage_posts, public_profile
   const scope = encodeURIComponent('pages_show_list,pages_read_engagement,pages_manage_posts,public_profile');
 
   return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
