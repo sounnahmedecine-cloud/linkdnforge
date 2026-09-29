@@ -201,49 +201,51 @@ export async function publishToFacebookPage(
     throw new Error('Identifiants de la Page Facebook manquants (pageAccessToken / pageId)');
   }
 
-  // If mediaUrl is provided, post photo with caption
+  // Include targetUrl in message text if not already present, avoiding Meta domain verification restrictions on separate link param
+  const messageText = targetUrl && !text.includes(targetUrl)
+    ? `${text}\n\n${targetUrl}`
+    : text;
+
+  // 1. If mediaUrl is provided, post photo with caption
   if (mediaUrl) {
-    const photoUrl = new URL(`https://graph.facebook.com/v19.0/${encodeURIComponent(pageId)}/photos`);
-    const params = new URLSearchParams({
-      url: mediaUrl,
-      caption: text,
-      access_token: pageAccessToken,
-    });
+    try {
+      const photoUrl = new URL(`https://graph.facebook.com/v19.0/${encodeURIComponent(pageId)}/photos`);
+      const params = new URLSearchParams({
+        url: mediaUrl,
+        caption: messageText,
+        access_token: pageAccessToken,
+      });
 
-    const res = await fetch(photoUrl.toString(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
-    });
+      const res = await fetch(photoUrl.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
 
-    const data = await res.json();
-    if (!res.ok || !data.id) {
-      throw new Error(data.error?.message || 'Erreur lors de la publication de la photo sur Facebook');
+      const data = await res.json();
+      if (res.ok && (data.id || data.post_id)) {
+        const postId = data.post_id || data.id;
+        return {
+          id: postId,
+          url: `https://www.facebook.com/${postId.replace(/^[0-9]+_/, '')}`,
+        };
+      }
+    } catch (photoErr) {
+      console.warn('Facebook photo publish failed, falling back to feed post:', photoErr);
     }
-
-    const postId = data.post_id || data.id;
-    return {
-      id: postId,
-      url: `https://www.facebook.com/${postId.replace(/^[0-9]+_/, '')}`,
-    };
   }
 
-  // Standard text or link feed post
+  // 2. Standard text feed post
   const feedUrl = new URL(`https://graph.facebook.com/v19.0/${encodeURIComponent(pageId)}/feed`);
-  const bodyParams: Record<string, string> = {
-    message: text,
+  const formParams = new URLSearchParams({
+    message: messageText,
     access_token: pageAccessToken,
-  };
+  });
 
-  if (targetUrl) {
-    bodyParams.link = targetUrl;
-  }
-
-  const params = new URLSearchParams(bodyParams);
   const res = await fetch(feedUrl.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
+    body: formParams.toString(),
   });
 
   const data = await res.json();
