@@ -45,7 +45,7 @@ export default function PaywallModal({ isOpen, onClose, userEmail }: PaywallModa
           </h2>
 
           <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-            Ne laissez plus votre visibilité LinkedIn au hasard. Débloquez les générations illimitées, le pilote vidéo multimodal et la capture automatique.
+            Ne laissez plus votre visibilité LinkedIn au hasard. Débloquez les générations illimitées, la transformation de vos vidéos et la capture automatique d'images.
           </p>
 
           {/* Billing Switch */}
@@ -153,11 +153,11 @@ export default function PaywallModal({ isOpen, onClose, userEmail }: PaywallModa
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-orange-600 font-bold shrink-0" />
-                  <span><strong>Autopilot Vidéo Multimodal</strong> (IA voix & vidéo)</span>
+                  <span><strong>Transformation Vidéo</strong> (analyse voix & images)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-orange-600 font-bold shrink-0" />
-                  <span><strong>Capture Hero HD automatique</strong> du produit</span>
+                  <span><strong>Capture automatique</strong> d'images HD</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-orange-600 font-bold shrink-0" />

@@ -283,7 +283,7 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
           Passez à la vitesse supérieure avec l'offre Pro
         </h2>
         <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto">
-          Débloquez les posts illimités, le pilote vidéo multimodal, la capture Hero HD automatique et les scripts TikTok & Reels.
+          Débloquez les posts illimités, la transformation de vidéos et liens web, la capture d'images HD et les scripts pour vos réseaux.
         </p>
         
         <div className="flex justify-center items-center gap-4 mt-6">

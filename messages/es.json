@@ -157,7 +157,7 @@
     "soonLabel": "Próximamente",
     "featureLabels": {
       "posts": "Generación de posts",
-      "videoAutopilot": "Piloto de Vídeo Multimodal (IA)",
+      "videoAutopilot": "Transformación de vídeos con IA",
       "heroCapture": "Captura Hero HD del sitio web",
       "tiktokReels": "Guiones para TikTok & Instagram Reels",
       "waterfall": "Cascada inteligente (Vídeo > URL > Tema)",
@@ -341,7 +341,7 @@
         {
           "num": "02",
           "title": "02 — LinkedInForge lo analiza",
-          "body": "La IA multimodal identifica datos, temas y ángulos de alto impacto."
+          "body": "La IA analiza la voz, el vídeo y el texto para extraer las ideas clave."
         },
         {
           "num": "03",
@@ -423,10 +423,10 @@
           "desc": "/ mes",
           "features": [
             "Posts ilimitados",
-            "🚀 Piloto de Vídeo Multimodal",
-            "📸 Captura Hero de tu web",
+            "🚀 Creación a partir de tus vídeos",
+            "📸 Captura de imágenes de tu web",
             "🎵 Guiones para TikTok y Reels",
-            "🎭 Clon Ghostwriter avanzado"
+            "🎭 Estilo Ghostwriter personalizado"
           ]
         },
         {
@@ -435,10 +435,10 @@
           "desc": "/ mes (o 190€ / año)",
           "features": [
             "Posts ilimitados",
-            "🚀 Piloto de Vídeo Multimodal",
-            "📸 Captura Hero de tu web",
+            "🚀 Creación a partir de tus vídeos",
+            "📸 Captura de imágenes de tu web",
             "🎵 Guiones para TikTok y Reels",
-            "🎭 Clon Ghostwriter avanzado"
+            "🎭 Estilo Ghostwriter personalizado"
           ],
           "popular": true
         }

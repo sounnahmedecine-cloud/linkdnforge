@@ -1,7 +1,7 @@
 {
   "metadata": {
     "title": "LinkedInForge — Générateur de posts LinkedIn IA & création de contenu",
-    "description": "Transformez vos vidéos, URLs et idées en posts LinkedIn adaptés à votre style avec LinkedInForge. Ghostwriter IA, analyse multimodale et création de contenu social."
+    "description": "Transformez vos vidéos, liens web et idées en posts LinkedIn adaptés à votre style avec LinkedInForge. Ghostwriter IA et création de contenu social simplifiée."
   },
   "nav": {
     "generator": "Générateur",
@@ -157,7 +157,7 @@
     "soonLabel": "Bientôt",
     "featureLabels": {
       "posts": "Génération de posts",
-      "videoAutopilot": "Pilote Vidéo Multimodal (IA)",
+      "videoAutopilot": "Transformation de vidéos par l'IA",
       "heroCapture": "Capture Hero HD du site web",
       "tiktokReels": "Format TikTok & Instagram Reels",
       "waterfall": "Cascade intelligente (Vidéo > URL > Sujet)",
@@ -423,10 +423,10 @@
           "desc": "/ mois",
           "features": [
             "Posts illimités",
-            "🚀 Pilote Vidéo Multimodal",
-            "📸 Capture Hero de votre site",
+            "🚀 Création depuis vos vidéos",
+            "📸 Capture d'images de votre site",
             "🎵 Format TikTok & Reels",
-            "🎭 Clone Ghostwriter avancé"
+            "🎭 Style Ghostwriter personnalisé"
           ]
         },
         {
@@ -435,10 +435,10 @@
           "desc": "/ mois (soit 190€ / an)",
           "features": [
             "Posts illimités",
-            "🚀 Pilote Vidéo Multimodal",
-            "📸 Capture Hero de votre site",
+            "🚀 Création depuis vos vidéos",
+            "📸 Capture d'images de votre site",
             "🎵 Format TikTok & Reels",
-            "🎭 Clone Ghostwriter avancé"
+            "🎭 Style Ghostwriter personnalisé"
           ],
           "popular": true
         }

@@ -114,11 +114,11 @@ export default function VideoDropzone({ onVideoUploaded, onVideoRemoved }: Video
         }
       }
 
-      // 2. Upload final chunk (triggers assembly & Google AI indexing)
+      // 2. Upload final chunk (triggers assembly & AI analysis)
       if (abortController.signal.aborted) return;
       const lastIndex = totalChunks - 1;
       setUploadProgress(90);
-      setStatusMessage("Indexation & Analyse multimodale par l'IA Google...");
+      setStatusMessage("Compréhension et analyse de votre vidéo par l'IA...");
 
       let finalData: any = null;
       let finalAttempts = 0;

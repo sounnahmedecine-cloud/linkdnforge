@@ -89,7 +89,7 @@ export default function LandingLeadCapture() {
               Débloquez vos 5 générations offertes dans l'Atelier
             </h2>
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
-              Entrez votre adresse email pour accéder immédiatement au studio complet : pilote vidéo multimodal, analyse d'URLs en direct, capture Hero HD et script TikTok/Reels.
+              Entrez votre adresse email pour accéder immédiatement au studio complet : transformation de vidéos et liens web, extraction d'images HD et scripts pour vos réseaux.
             </p>
           </div>
 

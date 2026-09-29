@@ -157,7 +157,7 @@
     "soonLabel": "Soon",
     "featureLabels": {
       "posts": "Post generation",
-      "videoAutopilot": "Multimodal Video Autopilot (AI)",
+      "videoAutopilot": "AI Video Transformation",
       "heroCapture": "Website Hero HD Screenshot",
       "tiktokReels": "TikTok & Instagram Reels Scripts",
       "waterfall": "Smart Waterfall (Video > URL > Subject)",
@@ -341,7 +341,7 @@
         {
           "num": "02",
           "title": "02 — LinkedInForge analyzes it",
-          "body": "Multimodal AI extracts facts, key insights, and actionable angles."
+          "body": "The AI analyzes audio, video, and text to extract facts and key angles."
         },
         {
           "num": "03",
@@ -423,10 +423,10 @@
           "desc": "/ month",
           "features": [
             "Unlimited posts",
-            "🚀 Multimodal Video Autopilot",
-            "📸 Website Hero Screenshot",
+            "🚀 Turn Videos into Content",
+            "📸 Website Screenshot Capture",
             "🎵 TikTok & Reels Scripts",
-            "🎭 Advanced Ghostwriter Clone"
+            "🎭 Custom Ghostwriter Voice"
           ]
         },
         {
@@ -435,10 +435,10 @@
           "desc": "/ month (billed $190/yr)",
           "features": [
             "Unlimited posts",
-            "🚀 Multimodal Video Autopilot",
-            "📸 Website Hero Screenshot",
+            "🚀 Turn Videos into Content",
+            "📸 Website Screenshot Capture",
             "🎵 TikTok & Reels Scripts",
-            "🎭 Advanced Ghostwriter Clone"
+            "🎭 Custom Ghostwriter Voice"
           ],
           "popular": true
         }
