@@ -87,7 +87,7 @@ export function getFacebookAuthUrl(state: string, origin?: string): string {
   const appId = process.env.FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1824637551887356';
 
   const redirectUri = getFacebookRedirectUri(origin);
-  const scope = encodeURIComponent('pages_show_list,pages_read_engagement,pages_manage_posts,public_profile');
+  const scope = encodeURIComponent('pages_show_list,pages_manage_posts,public_profile');
 
   return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
     appId
