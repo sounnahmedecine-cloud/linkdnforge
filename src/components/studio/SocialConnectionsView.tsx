@@ -38,12 +38,23 @@ export default function SocialConnectionsView({
     hasAppConfigured: boolean;
     profile?: { name: string; email?: string; picture?: string };
   } | null>(null);
+  const [facebookStatus, setFacebookStatus] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    page?: { id: string; name: string };
+    user?: { name: string };
+  } | null>(null);
 
   useEffect(() => {
     fetch('/api/auth/linkedin/status')
       .then((res) => res.json())
       .then((data) => setLinkedInStatus(data))
       .catch((err) => console.error('Failed to load LinkedIn status:', err));
+
+    fetch('/api/auth/facebook/status')
+      .then((res) => res.json())
+      .then((data) => setFacebookStatus(data))
+      .catch((err) => console.error('Failed to load Facebook status:', err));
   }, []);
 
   const handleDisconnectLinkedIn = async () => {
@@ -53,6 +64,16 @@ export default function SocialConnectionsView({
       setLinkedInStatus({ connected: false, hasAppConfigured: true });
     } catch (e) {
       console.error('Failed to disconnect LinkedIn:', e);
+    }
+  };
+
+  const handleDisconnectFacebook = async () => {
+    if (!window.confirm('Voulez-vous déconnecter votre Page Facebook ?')) return;
+    try {
+      await fetch('/api/auth/facebook/status', { method: 'DELETE' });
+      setFacebookStatus({ connected: false, hasAppConfigured: true });
+    } catch (e) {
+      console.error('Failed to disconnect Facebook:', e);
     }
   };
 
@@ -301,8 +322,8 @@ export default function SocialConnectionsView({
             </div>
 
             {/* 2. Facebook */}
-            <div className={`border rounded-2xl p-5 space-y-3 transition shadow-xs ${
-              formData.facebookPageName ? 'bg-blue-50/20 border-blue-300' : 'bg-slate-50/50 border-slate-200'
+            <div className={`border rounded-2xl p-5 space-y-3.5 transition shadow-xs ${
+              facebookStatus?.connected || formData.facebookPageName ? 'bg-blue-50/30 border-blue-300' : 'bg-slate-50/50 border-slate-200'
             }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -311,13 +332,17 @@ export default function SocialConnectionsView({
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-slate-900">Facebook</h4>
-                    <p className="text-[11px] text-slate-500">Page ou Groupe professionnel</p>
+                    <p className="text-[11px] text-slate-500">Page officielle d'entreprise / créateur</p>
                   </div>
                 </div>
 
-                {formData.facebookPageName ? (
+                {facebookStatus?.connected ? (
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                    <Check className="w-3 h-3 text-emerald-600" /> Page Reliée
+                    <Check className="w-3 h-3 text-emerald-600" /> OAuth Connecté
+                  </span>
+                ) : formData.facebookPageName ? (
+                  <span className="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <Check className="w-3 h-3 text-blue-600" /> Page Reliée
                   </span>
                 ) : (
                   <span className="text-[11px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
@@ -326,9 +351,54 @@ export default function SocialConnectionsView({
                 )}
               </div>
 
+              {/* Facebook OAuth 1-Click Status / Connection Box */}
+              {facebookStatus?.connected ? (
+                <div className="bg-emerald-50/90 border border-emerald-300/80 rounded-xl p-3 flex items-center justify-between text-xs animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    <div>
+                      <span className="font-bold text-emerald-950 block">
+                        Page : {facebookStatus.page?.name || 'Page Facebook Reliée'}
+                      </span>
+                      <span className="text-[10px] text-emerald-700 block">
+                        ⚡ Publication 0-clic directe active dans le Studio
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDisconnectFacebook}
+                    className="px-2 py-1 text-slate-500 hover:text-rose-600 hover:bg-white text-[11px] rounded-lg transition font-medium border border-transparent hover:border-slate-200 cursor-pointer"
+                  >
+                    Déconnecter
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-blue-50/60 border border-blue-200/90 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-950 flex items-center gap-1">
+                      <span>⚡</span> Publication Directe Page (0 Clic)
+                    </span>
+                    <span className="text-[10px] uppercase font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">
+                      Officiel
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-blue-900 leading-snug">
+                    Connectez votre Page Facebook pour publier directement sans copier-coller.
+                  </p>
+                  <a
+                    href="/api/auth/facebook"
+                    className="w-full py-2 px-3 bg-[#1877F2] hover:bg-[#0f60c7] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition"
+                  >
+                    <span className="w-3.5 h-3.5 rounded bg-white/20 flex items-center justify-center text-[9px] font-black">f</span>
+                    <span>Lier ma Page Facebook officielle</span>
+                  </a>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  URL de votre Page ou Profil Facebook :
+                  Ou URL de votre Page Facebook (partage assisté) :
                 </label>
                 <input
                   type="text"

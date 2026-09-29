@@ -118,13 +118,25 @@ export default function StudioResult({
     hasAppConfigured: boolean;
     profile?: { name: string };
   } | null>(null);
+  const [facebookAuth, setFacebookAuth] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    page?: { id: string; name: string };
+  } | null>(null);
   const [isPublishingLinkedInDirect, setIsPublishingLinkedInDirect] = useState(false);
+  const [isPublishingFacebookDirect, setIsPublishingFacebookDirect] = useState(false);
+  const [publishedFacebookUrl, setPublishedFacebookUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/auth/linkedin/status')
       .then((res) => res.json())
       .then((data) => setLinkedInAuth(data))
       .catch((e) => console.error('Error checking LinkedIn auth status:', e));
+
+    fetch('/api/auth/facebook/status')
+      .then((res) => res.json())
+      .then((data) => setFacebookAuth(data))
+      .catch((e) => console.error('Error checking Facebook auth status:', e));
   }, []);
 
   const handlePublishLinkedInDirect = async () => {
@@ -166,6 +178,49 @@ export default function StudioResult({
       alert(`Erreur LinkedIn : ${e.message}`);
     } finally {
       setIsPublishingLinkedInDirect(false);
+    }
+  };
+
+  const handlePublishFacebookDirect = async () => {
+    if (!facebookAuth?.connected) {
+      if (onOpenSocialAccounts) {
+        onOpenSocialAccounts();
+      } else {
+        window.location.href = '/api/auth/facebook';
+      }
+      return;
+    }
+
+    setIsPublishingFacebookDirect(true);
+    setActiveNotification(null);
+    try {
+      const res = await fetch('/api/publish/facebook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: postText,
+          targetUrl: targetUrl || undefined,
+          mediaUrl: mediaUrl || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erreur lors de la publication directe sur Facebook');
+      }
+
+      const postViewUrl = data.feedUrl || 'https://www.facebook.com';
+      setPublishedFacebookUrl(postViewUrl);
+
+      setActiveNotification({
+        title: '🎉 Publication réussie sur votre Page Facebook !',
+        message: `Votre post est en ligne sur votre Page Facebook « ${data.pageName || facebookAuth.page?.name || 'Facebook'} ».`,
+        actionUrl: postViewUrl,
+        actionLabel: '👁️ Voir mon post Facebook',
+      });
+    } catch (e: any) {
+      alert(`Erreur Facebook : ${e.message}`);
+    } finally {
+      setIsPublishingFacebookDirect(false);
     }
   };
 
@@ -231,7 +286,11 @@ export default function StudioResult({
   };
 
   const handleShareDirect = (netId: 'linkedin' | 'facebook' | 'x' | 'reddit') => {
-    navigator.clipboard.writeText(postText);
+    try {
+      navigator.clipboard.writeText(postText);
+    } catch (err) {
+      console.warn('Clipboard write error:', err);
+    }
     setCopied(true);
     setLastSharedNetwork(netId);
     setTimeout(() => {
@@ -242,15 +301,42 @@ export default function StudioResult({
     const net = NETWORKS.find((n) => n.id === netId);
     if (!net) return;
 
+    const formatUrl = (raw?: string, fallback = '') => {
+      if (!raw) return fallback;
+      const trimmed = raw.trim();
+      if (!trimmed) return fallback;
+      return trimmed.startsWith('http://') || trimmed.startsWith('https://')
+        ? trimmed
+        : `https://${trimmed}`;
+    };
+
     const url = net.getShareUrl(postText, targetUrl, {
       redditSubreddit: socialConnections?.redditUsername,
     });
+
+    const directTargetUrl = (() => {
+      if (netId === 'facebook') {
+        if (socialConnections?.facebookPageName) {
+          return formatUrl(socialConnections.facebookPageName);
+        }
+        if (targetUrl) {
+          return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(targetUrl)}`;
+        }
+        return 'https://www.facebook.com';
+      }
+      return url;
+    })();
+
+    if (typeof window !== 'undefined') {
+      window.open(directTargetUrl, '_blank', 'noopener,noreferrer');
+    }
+
     const profileOrFeedUrl = netId === 'linkedin'
-      ? (socialConnections?.linkedinProfileName || 'https://www.linkedin.com/feed/')
+      ? formatUrl(socialConnections?.linkedinProfileName, 'https://www.linkedin.com/feed/?shareActive=true')
       : netId === 'facebook'
-      ? (socialConnections?.facebookPageName || 'https://www.facebook.com')
+      ? formatUrl(socialConnections?.facebookPageName, 'https://www.facebook.com')
       : netId === 'x'
-      ? (socialConnections?.xHandle ? `https://twitter.com/${socialConnections.xHandle.replace('@', '')}` : 'https://twitter.com')
+      ? (socialConnections?.xHandle ? `https://twitter.com/${socialConnections.xHandle.replace(/^@/, '')}` : 'https://twitter.com')
       : (socialConnections?.redditUsername ? `https://www.reddit.com/r/${socialConnections.redditUsername.replace(/^[ru]\//, '')}` : 'https://www.reddit.com');
 
     setActiveNotification({
@@ -412,6 +498,70 @@ export default function StudioResult({
                 <>
                   <Sparkles className="w-3.5 h-3.5 fill-[#0A66C2]" />
                   <span>Publier sur mon LinkedIn</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* 2bis. DIRECT FACEBOOK PUBLISH (0 Clic, 100% Officiel via Meta Graph API) */}
+      {facebookAuth?.connected && (
+        <div className="bg-gradient-to-r from-[#1877F2] via-[#1565C0] to-[#0D47A1] text-white rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-[#1877F2]/20 border border-blue-400/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-white text-[#1877F2] flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+              f
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+                <span>🚀</span> Publication Directe Page Facebook
+                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono bg-blue-300/30 text-blue-100 font-bold">
+                  0 Clic
+                </span>
+              </span>
+              <span className="text-[11px] text-blue-100/80 block truncate">
+                Page : {facebookAuth.page?.name}
+              </span>
+            </div>
+          </div>
+
+          {publishedFacebookUrl ? (
+            <div className="flex items-center gap-2 shrink-0">
+              <a
+                href={publishedFacebookUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Voir mon post Facebook</span>
+              </a>
+              <button
+                type="button"
+                onClick={handlePublishFacebookDirect}
+                disabled={isPublishingFacebookDirect}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs transition cursor-pointer"
+                title="Republier"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isPublishingFacebookDirect ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePublishFacebookDirect}
+              disabled={isPublishingFacebookDirect}
+              className="px-4 py-2 bg-white hover:bg-blue-50 disabled:opacity-50 text-[#1877F2] font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer"
+            >
+              {isPublishingFacebookDirect ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1877F2]" />
+                  <span>Publication en cours...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 fill-[#1877F2]" />
+                  <span>Publier sur ma Page Facebook</span>
                 </>
               )}
             </button>
