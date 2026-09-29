@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { SocialConnections } from '@/lib/studio/types';
+import { formatTweetSafe, SocialNetworkType, NETWORK_LIMITS } from '@/lib/prompts/network-adaptation';
 import ForgeLoader from '@/components/ui/ForgeLoader';
 
 interface StudioResultProps {
@@ -68,7 +69,7 @@ const NETWORKS: NetworkConfig[] = [
     color: 'bg-black',
     hoverColor: 'hover:bg-slate-800',
     actionText: 'Tweeter sur X',
-    getShareUrl: (post) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.slice(0, 280))}`,
+    getShareUrl: (post) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(formatTweetSafe(post, 275))}`,
   },
   {
     id: 'reddit',
@@ -260,11 +261,12 @@ export default function StudioResult({
     setIsPublishingTwitterDirect(true);
     setActiveNotification(null);
     try {
+      const tweetContent = activeFormat === 'x' ? postText : (networkTexts.x || formatTweetSafe(postText, 275));
       const res = await fetch('/api/publish/twitter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          post: postText,
+          post: tweetContent,
           targetUrl: targetUrl || undefined,
         }),
       });
@@ -302,11 +304,12 @@ export default function StudioResult({
     setIsPublishingRedditDirect(true);
     setActiveNotification(null);
     try {
+      const redditContent = activeFormat === 'reddit' ? postText : (networkTexts.reddit || postText);
       const res = await fetch('/api/publish/reddit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          post: postText,
+          post: redditContent,
           subreddit: socialConnections?.redditUsername?.replace(/^[ru]\//, '').trim() || undefined,
           targetUrl: targetUrl || undefined,
         }),
@@ -334,15 +337,109 @@ export default function StudioResult({
 
 
 
+  const [activeFormat, setActiveFormat] = useState<SocialNetworkType>('linkedin');
+  const [networkTexts, setNetworkTexts] = useState<Record<SocialNetworkType, string>>({
+    linkedin: generatedPost,
+    x: '',
+    facebook: '',
+    reddit: '',
+  });
+  const [isAdapting, setIsAdapting] = useState(false);
+
   useEffect(() => {
     setPostText(generatedPost);
+    setNetworkTexts({
+      linkedin: generatedPost,
+      x: '',
+      facebook: '',
+      reddit: '',
+    });
+    setActiveFormat('linkedin');
   }, [generatedPost]);
+
+  const handleSwitchFormat = async (targetFmt: SocialNetworkType) => {
+    setActiveFormat(targetFmt);
+    if (networkTexts[targetFmt]) {
+      setPostText(networkTexts[targetFmt]);
+      return;
+    }
+
+    if (targetFmt === 'linkedin') {
+      const txt = networkTexts.linkedin || generatedPost;
+      setPostText(txt);
+      return;
+    }
+
+    // Adapt with API
+    setIsAdapting(true);
+    try {
+      const basePost = networkTexts.linkedin || generatedPost || postText;
+      const res = await fetch('/api/adapt-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: basePost,
+          network: targetFmt,
+        }),
+      });
+      const data = await res.json();
+      if (data.post) {
+        const finalTxt = targetFmt === 'x' ? formatTweetSafe(data.post, 275) : data.post;
+        setNetworkTexts((prev) => ({ ...prev, [targetFmt]: finalTxt }));
+        setPostText(finalTxt);
+      } else {
+        const fallback = targetFmt === 'x' ? formatTweetSafe(basePost, 275) : basePost;
+        setNetworkTexts((prev) => ({ ...prev, [targetFmt]: fallback }));
+        setPostText(fallback);
+      }
+    } catch (err) {
+      const basePost = networkTexts.linkedin || generatedPost || postText;
+      const fallback = targetFmt === 'x' ? formatTweetSafe(basePost, 275) : basePost;
+      setNetworkTexts((prev) => ({ ...prev, [targetFmt]: fallback }));
+      setPostText(fallback);
+    } finally {
+      setIsAdapting(false);
+    }
+  };
+
+  const handleCondenseForX = async () => {
+    setIsAdapting(true);
+    try {
+      const res = await fetch('/api/adapt-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: postText,
+          network: 'x',
+        }),
+      });
+      const data = await res.json();
+      const newText = data.post ? formatTweetSafe(data.post, 275) : formatTweetSafe(postText, 275);
+      setPostText(newText);
+      setNetworkTexts((prev) => ({ ...prev, x: newText }));
+    } catch {
+      const newText = formatTweetSafe(postText, 275);
+      setPostText(newText);
+      setNetworkTexts((prev) => ({ ...prev, x: newText }));
+    } finally {
+      setIsAdapting(false);
+    }
+  };
+
+  const handleTextChange = (val: string) => {
+    setPostText(val);
+    setNetworkTexts((prev) => ({
+      ...prev,
+      [activeFormat]: val,
+    }));
+  };
 
   const hasMedia = !!(autopilotVideoUrl || siteScreenshotUrl || siteOgImage);
   const mediaUrl = autopilotVideoUrl ? null : (siteScreenshotUrl || siteOgImage);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(postText);
+    const textToCopy = activeFormat === 'x' ? formatTweetSafe(postText, 280) : postText;
+    navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setActiveNotification({
       title: '📋 Texte copié dans votre presse-papier !',
@@ -354,8 +451,12 @@ export default function StudioResult({
   };
 
   const handleShareDirect = (netId: 'linkedin' | 'facebook' | 'x' | 'reddit') => {
+    const textToShare = netId === 'x'
+      ? (activeFormat === 'x' ? formatTweetSafe(postText, 275) : (networkTexts.x || formatTweetSafe(postText, 275)))
+      : (activeFormat === netId ? postText : (networkTexts[netId] || postText));
+
     try {
-      navigator.clipboard.writeText(postText);
+      navigator.clipboard.writeText(textToShare);
     } catch (err) {
       console.warn('Clipboard write error:', err);
     }
@@ -378,7 +479,7 @@ export default function StudioResult({
         : `https://${trimmed}`;
     };
 
-    const url = net.getShareUrl(postText, targetUrl, {
+    const url = net.getShareUrl(textToShare, targetUrl, {
       redditSubreddit: socialConnections?.redditUsername,
     });
 
@@ -859,6 +960,94 @@ export default function StudioResult({
 
       {/* 4. POST CONTENT & PREVIEW */}
       <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden shadow-2xs">
+        {/* Network Format Switcher Tabs */}
+        <div className="bg-slate-100/80 border-b border-slate-200 p-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-bold text-slate-500 mr-1 hidden sm:inline">Format Réseau :</span>
+            
+            <button
+              type="button"
+              onClick={() => handleSwitchFormat('linkedin')}
+              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition text-xs cursor-pointer ${
+                activeFormat === 'linkedin'
+                  ? 'bg-[#0A66C2] text-white shadow-xs'
+                  : 'bg-white text-slate-700 hover:bg-slate-200/70 border border-slate-200'
+              }`}
+            >
+              <span className="font-mono text-[10px]">in</span>
+              <span>LinkedIn</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSwitchFormat('x')}
+              disabled={isAdapting}
+              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition text-xs cursor-pointer ${
+                activeFormat === 'x'
+                  ? 'bg-black text-white shadow-xs'
+                  : 'bg-white text-slate-700 hover:bg-slate-200/70 border border-slate-200'
+              }`}
+            >
+              <span>𝕏</span>
+              <span>X (280 car.)</span>
+              {isAdapting && activeFormat === 'x' && <Loader2 className="w-3 h-3 animate-spin text-white" />}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSwitchFormat('facebook')}
+              disabled={isAdapting}
+              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition text-xs cursor-pointer ${
+                activeFormat === 'facebook'
+                  ? 'bg-[#1877F2] text-white shadow-xs'
+                  : 'bg-white text-slate-700 hover:bg-slate-200/70 border border-slate-200'
+              }`}
+            >
+              <span className="font-mono text-[10px]">f</span>
+              <span>Facebook</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSwitchFormat('reddit')}
+              disabled={isAdapting}
+              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition text-xs cursor-pointer ${
+                activeFormat === 'reddit'
+                  ? 'bg-[#FF4500] text-white shadow-xs'
+                  : 'bg-white text-slate-700 hover:bg-slate-200/70 border border-slate-200'
+              }`}
+            >
+              <span>🤖</span>
+              <span>Reddit</span>
+            </button>
+          </div>
+
+          {/* Real-time character limit gauge for X (Twitter) */}
+          {activeFormat === 'x' && (
+            <div className="flex items-center gap-2 ml-auto">
+              {postText.length <= 280 ? (
+                <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  ✓ {postText.length}/280 car. (Parfait pour X)
+                </span>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-0.5 rounded-full animate-pulse">
+                    ⚠️ {postText.length}/280 (+{postText.length - 280} car.)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCondenseForX}
+                    disabled={isAdapting}
+                    className="px-2.5 py-1 bg-black hover:bg-slate-800 text-white rounded-lg text-[10px] font-bold shadow-xs transition cursor-pointer"
+                  >
+                    ⚡ Ajuster à 280 car.
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Post Meta */}
         <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 text-xs">
           <div className="flex items-center gap-2">
@@ -866,7 +1055,9 @@ export default function StudioResult({
               Vous
             </div>
             <div>
-              <span className="font-bold text-slate-900 block leading-tight">Votre Publication</span>
+              <span className="font-bold text-slate-900 block leading-tight">
+                {activeFormat === 'x' ? 'Tweet X' : activeFormat === 'facebook' ? 'Post Facebook' : activeFormat === 'reddit' ? 'Post Reddit' : 'Publication LinkedIn'}
+              </span>
               <span className="text-[11px] text-slate-400 flex items-center gap-1">
                 <span>Public</span> • <Globe2 className="w-3 h-3" />
               </span>
@@ -896,8 +1087,8 @@ export default function StudioResult({
           {isEditing ? (
             <textarea
               value={postText}
-              onChange={(e) => setPostText(e.target.value)}
-              rows={12}
+              onChange={(e) => handleTextChange(e.target.value)}
+              rows={activeFormat === 'x' ? 6 : 12}
               className="w-full text-[14px] text-slate-900 leading-relaxed font-sans border border-orange-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-y"
               placeholder="Modifiez votre post ici..."
             />
