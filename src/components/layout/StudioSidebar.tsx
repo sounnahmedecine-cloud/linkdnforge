@@ -63,7 +63,7 @@ export default function StudioSidebar({
     },
   ];
 
-  const proNavItems: { id: StudioTab; label: string; icon: React.ReactNode; isPro?: boolean; badge?: string }[] = [
+  const proNavItems: { id: StudioTab; label: string; icon: React.ReactNode; isPro?: boolean }[] = [
     {
       id: 'accounts',
       label: 'Réseaux Connectés',
@@ -79,8 +79,7 @@ export default function StudioSidebar({
     {
       id: 'profile',
       label: 'Mon Profil Ghostwriter',
-      icon: <User className="w-4 h-4 text-emerald-600" />,
-      badge: ghostwriterTone ? (ghostwriterTone.charAt(0).toUpperCase() + ghostwriterTone.slice(1)) : 'Expert',
+      icon: <User className="w-4 h-4 text-slate-600" />,
     },
   ];
 
@@ -208,15 +207,6 @@ export default function StudioSidebar({
                 >
                   <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
                   {(!isCollapsed || mobileOpen) && <span className="flex-1">{item.label}</span>}
-                  {(!isCollapsed || mobileOpen) && item.badge && (
-                    <span
-                      className={`text-[10px] font-bold capitalize px-2 py-0.5 rounded-full ${
-                        isActive ? 'bg-emerald-800 text-emerald-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
                   {(!isCollapsed || mobileOpen) && item.isPro && (
                     <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">
                       PRO
