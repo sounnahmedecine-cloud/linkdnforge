@@ -94,14 +94,14 @@ export function getFacebookAuthUrl(state: string, origin?: string): string {
       appId
     )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&config_id=${encodeURIComponent(
       configId
-    )}&response_type=code`;
+    )}&auth_type=rerequest&response_type=code`;
   }
 
   const scope = encodeURIComponent('pages_show_list,pages_manage_posts,public_profile');
 
   return `https://www.facebook.com/v19.0/dialog/oauth?client_id=${encodeURIComponent(
     appId
-  )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${scope}&response_type=code`;
+  )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${scope}&auth_type=rerequest&response_type=code`;
 }
 
 export async function exchangeFacebookCode(code: string, origin?: string): Promise<{ accessToken: string; expiresIn: number }> {
