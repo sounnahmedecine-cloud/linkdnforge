@@ -26,6 +26,18 @@ export default function SocialOnboardingModal({
     page?: { id: string; name: string };
   } | null>(null);
 
+  const [twitterStatus, setTwitterStatus] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    user?: { id: string; username: string; name: string };
+  } | null>(null);
+
+  const [redditStatus, setRedditStatus] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    user?: { id: string; name: string };
+  } | null>(null);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -38,12 +50,25 @@ export default function SocialOnboardingModal({
       .then((res) => res.json())
       .then((data) => setFacebookStatus(data))
       .catch((err) => console.error('Failed to load Facebook status:', err));
+
+    fetch('/api/auth/twitter/status')
+      .then((res) => res.json())
+      .then((data) => setTwitterStatus(data))
+      .catch((err) => console.error('Failed to load Twitter status:', err));
+
+    fetch('/api/auth/reddit/status')
+      .then((res) => res.json())
+      .then((data) => setRedditStatus(data))
+      .catch((err) => console.error('Failed to load Reddit status:', err));
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const connectedCount =
-    (linkedInStatus?.connected ? 1 : 0) + (facebookStatus?.connected ? 1 : 0);
+    (linkedInStatus?.connected ? 1 : 0) +
+    (facebookStatus?.connected ? 1 : 0) +
+    (twitterStatus?.connected ? 1 : 0) +
+    (redditStatus?.connected ? 1 : 0);
 
   const handleFinish = () => {
     try {
@@ -164,66 +189,80 @@ export default function SocialOnboardingModal({
             )}
           </div>
 
-          {/* 3. X (Twitter) - Anticipated */}
-          <div className="border border-slate-200 bg-slate-50/60 rounded-2xl p-4 flex items-center justify-between gap-3 opacity-90">
+          {/* 3. X (Twitter) */}
+          <div
+            className={`border rounded-2xl p-4 flex items-center justify-between gap-3 transition ${
+              twitterStatus?.connected
+                ? 'bg-emerald-50/70 border-emerald-300 shadow-xs'
+                : 'bg-slate-50 hover:bg-slate-100/60 border-slate-200'
+            }`}
+          >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
                 𝕏
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-slate-900 truncate">X (Twitter)</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
-                    Bientôt 0 Clic
-                  </span>
-                </div>
+                <span className="font-bold text-sm text-slate-900 block truncate">X (Twitter)</span>
                 <span className="text-xs text-slate-500 block truncate">
-                  Partage 1-clic assisté & API v2
+                  {twitterStatus?.connected
+                    ? `Connecté en tant que @${twitterStatus.user?.username || 'Vous'}`
+                    : 'Compte officiel & API v2'}
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenSettings) onOpenSettings();
-                onClose();
-              }}
-              className="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs rounded-xl transition shrink-0"
-            >
-              Configurer
-            </button>
+            {twitterStatus?.connected ? (
+              <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl flex items-center gap-1 shrink-0 border border-emerald-300">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                Connecté
+              </span>
+            ) : (
+              <a
+                href="/api/auth/twitter"
+                className="px-4 py-2 bg-black hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition shrink-0 flex items-center gap-1.5"
+              >
+                <span>Lier mon compte</span>
+                <ExternalLink className="w-3 h-3 opacity-80" />
+              </a>
+            )}
           </div>
 
-          {/* 4. Reddit - Anticipated */}
-          <div className="border border-slate-200 bg-slate-50/60 rounded-2xl p-4 flex items-center justify-between gap-3 opacity-90">
+          {/* 4. Reddit */}
+          <div
+            className={`border rounded-2xl p-4 flex items-center justify-between gap-3 transition ${
+              redditStatus?.connected
+                ? 'bg-emerald-50/70 border-emerald-300 shadow-xs'
+                : 'bg-slate-50 hover:bg-orange-50/30 border-slate-200'
+            }`}
+          >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-[#FF4500] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
                 🤖
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-slate-900 truncate">Reddit</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
-                    Bientôt 0 Clic
-                  </span>
-                </div>
+                <span className="font-bold text-sm text-slate-900 block truncate">Reddit</span>
                 <span className="text-xs text-slate-500 block truncate">
-                  Publication dans vos Subreddits
+                  {redditStatus?.connected
+                    ? `Connecté en tant que u/${redditStatus.user?.name || 'Vous'}`
+                    : 'Subreddits & Profil Reddit'}
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenSettings) onOpenSettings();
-                onClose();
-              }}
-              className="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs rounded-xl transition shrink-0"
-            >
-              Configurer
-            </button>
+            {redditStatus?.connected ? (
+              <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl flex items-center gap-1 shrink-0 border border-emerald-300">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                Connecté
+              </span>
+            ) : (
+              <a
+                href="/api/auth/reddit"
+                className="px-4 py-2 bg-[#FF4500] hover:bg-[#e03d00] text-white font-bold text-xs rounded-xl shadow-xs transition shrink-0 flex items-center gap-1.5"
+              >
+                <span>Lier mon compte</span>
+                <ExternalLink className="w-3 h-3 opacity-80" />
+              </a>
+            )}
           </div>
         </div>
 

@@ -122,9 +122,23 @@ export default function StudioResult({
     hasAppConfigured: boolean;
     page?: { id: string; name: string };
   } | null>(null);
+  const [twitterAuth, setTwitterAuth] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    user?: { id: string; username: string; name: string };
+  } | null>(null);
+  const [redditAuth, setRedditAuth] = useState<{
+    connected: boolean;
+    hasAppConfigured: boolean;
+    user?: { id: string; name: string };
+  } | null>(null);
   const [isPublishingLinkedInDirect, setIsPublishingLinkedInDirect] = useState(false);
   const [isPublishingFacebookDirect, setIsPublishingFacebookDirect] = useState(false);
+  const [isPublishingTwitterDirect, setIsPublishingTwitterDirect] = useState(false);
+  const [isPublishingRedditDirect, setIsPublishingRedditDirect] = useState(false);
   const [publishedFacebookUrl, setPublishedFacebookUrl] = useState<string | null>(null);
+  const [publishedTwitterUrl, setPublishedTwitterUrl] = useState<string | null>(null);
+  const [publishedRedditUrl, setPublishedRedditUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/auth/linkedin/status')
@@ -136,6 +150,16 @@ export default function StudioResult({
       .then((res) => res.json())
       .then((data) => setFacebookAuth(data))
       .catch((e) => console.error('Error checking Facebook auth status:', e));
+
+    fetch('/api/auth/twitter/status')
+      .then((res) => res.json())
+      .then((data) => setTwitterAuth(data))
+      .catch((e) => console.error('Error checking Twitter auth status:', e));
+
+    fetch('/api/auth/reddit/status')
+      .then((res) => res.json())
+      .then((data) => setRedditAuth(data))
+      .catch((e) => console.error('Error checking Reddit auth status:', e));
   }, []);
 
   const handlePublishLinkedInDirect = async () => {
@@ -220,6 +244,91 @@ export default function StudioResult({
       alert(`Erreur Facebook : ${e.message}`);
     } finally {
       setIsPublishingFacebookDirect(false);
+    }
+  };
+
+  const handlePublishTwitterDirect = async () => {
+    if (!twitterAuth?.connected) {
+      if (onOpenSocialAccounts) {
+        onOpenSocialAccounts();
+      } else {
+        window.location.href = '/api/auth/twitter';
+      }
+      return;
+    }
+
+    setIsPublishingTwitterDirect(true);
+    setActiveNotification(null);
+    try {
+      const res = await fetch('/api/publish/twitter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: postText,
+          targetUrl: targetUrl || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erreur lors de la publication directe sur X (Twitter)');
+      }
+
+      const tweetViewUrl = data.tweetUrl || 'https://twitter.com';
+      setPublishedTwitterUrl(tweetViewUrl);
+
+      setActiveNotification({
+        title: '🎉 Tweet publié avec succès sur votre compte X !',
+        message: `Votre publication est en ligne sur @${data.username || twitterAuth.user?.username || 'votre compte'}.`,
+        actionUrl: tweetViewUrl,
+        actionLabel: '👁️ Voir mon Tweet sur X',
+      });
+    } catch (e: any) {
+      alert(`Erreur X (Twitter) : ${e.message}`);
+    } finally {
+      setIsPublishingTwitterDirect(false);
+    }
+  };
+
+  const handlePublishRedditDirect = async () => {
+    if (!redditAuth?.connected) {
+      if (onOpenSocialAccounts) {
+        onOpenSocialAccounts();
+      } else {
+        window.location.href = '/api/auth/reddit';
+      }
+      return;
+    }
+
+    setIsPublishingRedditDirect(true);
+    setActiveNotification(null);
+    try {
+      const res = await fetch('/api/publish/reddit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post: postText,
+          subreddit: socialConnections?.redditUsername?.replace(/^[ru]\//, '').trim() || undefined,
+          targetUrl: targetUrl || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erreur lors de la publication directe sur Reddit');
+      }
+
+      const postViewUrl = data.postUrl || 'https://www.reddit.com';
+      setPublishedRedditUrl(postViewUrl);
+
+      setActiveNotification({
+        title: '🎉 Post publié avec succès sur Reddit !',
+        message: `Votre publication est en ligne (${data.subreddit?.startsWith('u_') ? 'sur votre profil' : 'dans r/' + data.subreddit}).`,
+        actionUrl: postViewUrl,
+        actionLabel: '👁️ Voir mon post sur Reddit',
+      });
+    } catch (e: any) {
+      alert(`Erreur Reddit : ${e.message}`);
+    } finally {
+      setIsPublishingRedditDirect(false);
     }
   };
 
@@ -530,19 +639,150 @@ export default function StudioResult({
 
 
 
+      {/* 2ter. DIRECT X (TWITTER) PUBLISH (0 Clic, 100% Officiel via Twitter API v2) */}
+      {twitterAuth?.connected && (
+        <div className="bg-gradient-to-r from-slate-900 via-neutral-900 to-black text-white rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-black/20 border border-slate-700/50">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+              𝕏
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+                <span>🚀</span> Publication Directe Tweet X
+                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono bg-white/20 text-slate-100 font-bold">
+                  0 Clic
+                </span>
+              </span>
+              <span className="text-[11px] text-slate-300 block truncate">
+                Connecté en tant que @{twitterAuth.user?.username || 'Votre Compte X'}
+              </span>
+            </div>
+          </div>
+
+          {publishedTwitterUrl ? (
+            <div className="flex items-center gap-2 shrink-0">
+              <a
+                href={publishedTwitterUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Voir mon tweet sur X</span>
+              </a>
+              <button
+                type="button"
+                onClick={handlePublishTwitterDirect}
+                disabled={isPublishingTwitterDirect}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs transition cursor-pointer"
+                title="Republier"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isPublishingTwitterDirect ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePublishTwitterDirect}
+              disabled={isPublishingTwitterDirect}
+              className="px-4 py-2 bg-white hover:bg-slate-100 disabled:opacity-50 text-slate-900 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer"
+            >
+              {isPublishingTwitterDirect ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-900" />
+                  <span>Publication en cours...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 fill-slate-900" />
+                  <span>Publier sur mon compte X</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* 2quat. DIRECT REDDIT PUBLISH (0 Clic, 100% Officiel via Reddit API) */}
+      {redditAuth?.connected && (
+        <div className="bg-gradient-to-r from-[#FF4500] via-[#E03D00] to-[#C03500] text-white rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-[#FF4500]/20 border border-orange-400/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-white text-[#FF4500] flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+              🤖
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+                <span>🚀</span> Publication Directe Reddit
+                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono bg-white/20 text-white font-bold">
+                  0 Clic
+                </span>
+              </span>
+              <span className="text-[11px] text-orange-100 block truncate">
+                Connecté en tant que u/{redditAuth.user?.name || 'Votre Compte'} {socialConnections?.redditUsername ? `• Cible: r/${socialConnections.redditUsername.replace(/^[ru]\//, '')}` : ''}
+              </span>
+            </div>
+          </div>
+
+          {publishedRedditUrl ? (
+            <div className="flex items-center gap-2 shrink-0">
+              <a
+                href={publishedRedditUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Voir sur Reddit</span>
+              </a>
+              <button
+                type="button"
+                onClick={handlePublishRedditDirect}
+                disabled={isPublishingRedditDirect}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs transition cursor-pointer"
+                title="Republier"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isPublishingRedditDirect ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePublishRedditDirect}
+              disabled={isPublishingRedditDirect}
+              className="px-4 py-2 bg-white hover:bg-orange-50 disabled:opacity-50 text-[#FF4500] font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer"
+            >
+              {isPublishingRedditDirect ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#FF4500]" />
+                  <span>Publication en cours...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 fill-[#FF4500]" />
+                  <span>Poster sur Reddit</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* 4. INSTANT 1-CLICK SHARE BAR (Manual fallback) */}
       <div className="space-y-1.5 bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3">
         <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] px-1">
           <span className="font-bold text-slate-500 uppercase tracking-wider">
             Ouverture manuelle par réseau :
           </span>
-          {!linkedInAuth?.connected && (
-            <a
-              href="/api/auth/linkedin"
-              className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 transition"
+          {(!linkedInAuth?.connected || !facebookAuth?.connected || !twitterAuth?.connected || !redditAuth?.connected) && (
+            <button
+              type="button"
+              onClick={() => {
+                if (onOpenSocialAccounts) onOpenSocialAccounts();
+              }}
+              className="text-orange-600 hover:text-orange-700 font-semibold flex items-center gap-1 transition"
             >
-              <span>🔗 Lier LinkedIn (0 Clic)</span>
-            </a>
+              <span>🔗 Lier mes réseaux (0 Clic)</span>
+            </button>
           )}
         </div>
 
