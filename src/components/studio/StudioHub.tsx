@@ -23,44 +23,14 @@ export default function StudioHub({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Hero Welcome */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border border-slate-800">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-orange-400 text-xs font-semibold backdrop-blur mb-3 border border-white/10">
-            <Sparkles className="w-3.5 h-3.5" />
-            Studio Intelligent LinkedInForge
-          </div>
-          
-          <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight mb-2">
-            Que voulez-vous créer aujourd'hui ?
-          </h1>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Donnez ce que vous avez. L'IA analyse la matière brute, identifie la famille éditoriale et applique votre style Ghostwriter.
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-300">
-            <span className="flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              Ghostwriter actif : <strong className="text-white capitalize">{ghostwriterProfile.tone || 'Expert'}</strong>
-            </span>
-            <span>•</span>
-            <button
-              onClick={() => onSelectTab('profile')}
-              className="text-orange-400 hover:text-orange-300 underline font-semibold transition"
-            >
-              Mon profil
-            </button>
-            <span>•</span>
-            <button
-              onClick={() => onSelectTab('accounts')}
-              className="text-emerald-400 hover:text-emerald-300 underline font-semibold transition flex items-center gap-1"
-            >
-              <span>⚡</span> 4 Réseaux &amp; Passerelle Make.com
-            </button>
-          </div>
-        </div>
+      {/* Clean Airy Title (Black banner removed per user request) */}
+      <div className="space-y-1">
+        <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
+          Que voulez-vous créer aujourd'hui ?
+        </h1>
+        <p className="text-slate-500 text-sm">
+          Choisissez votre matière première pour forger votre prochain post LinkedIn dans votre style.
+        </p>
       </div>
 
       {/* 3 Main Entry Doors */}

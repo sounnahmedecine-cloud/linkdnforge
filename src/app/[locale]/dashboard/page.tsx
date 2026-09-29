@@ -91,6 +91,21 @@ export default function DashboardPage() {
   const [trialCount, setTrialCount] = useState<number>(0);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
 
+  // Collapsible sidebar state (persisted in localStorage)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('linkdnforge_sidebar_collapsed', String(next));
+      } catch (e) {
+        // ignore
+      }
+      return next;
+    });
+  };
+
   // Initial load
   useEffect(() => {
     // 1. Auth token from cookie
@@ -118,7 +133,13 @@ export default function DashboardPage() {
       if (!isNaN(parsed)) setTrialCount(parsed);
     }
 
-    // 4. Pending draft from landing generator
+    // 4. Sidebar collapsed preference
+    const savedCollapsed = localStorage.getItem('linkdnforge_sidebar_collapsed');
+    if (savedCollapsed === 'true') {
+      setIsSidebarCollapsed(true);
+    }
+
+    // 5. Pending draft from landing generator
     const pendingDraft = localStorage.getItem('linkdnforge_pending_draft');
     if (pendingDraft) {
       setGeneratedPost(pendingDraft);
@@ -275,8 +296,8 @@ export default function DashboardPage() {
       <Header variant="app" user={user} onLogout={handleLogout} logoutLabel={tNav('logout')} />
 
       {/* Main Studio Layout */}
-      <div className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="flex-1 max-w-[1560px] w-full mx-auto p-3 sm:p-5 lg:p-7">
+        <div className="flex flex-col lg:flex-row gap-5 items-start">
           {/* Left Navigation Sidebar */}
           <StudioSidebar
             currentTab={currentTab}
@@ -289,6 +310,9 @@ export default function DashboardPage() {
             onLogout={handleLogout}
             trialCount={trialCount}
             onOpenPaywall={() => setShowPaywall(true)}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+            ghostwriterTone={ghostwriterProfile.tone}
           />
 
           {/* Center / Right Content Area */}
