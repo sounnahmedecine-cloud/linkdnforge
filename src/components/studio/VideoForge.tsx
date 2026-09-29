@@ -35,13 +35,23 @@ export default function VideoForge({
   const [postObjective, setPostObjective] = useState('leads');
   const [tone, setTone] = useState(defaultTone);
 
+  const normalizeUrl = (rawUrl: string): string => {
+    let trimmed = rawUrl.trim();
+    if (!trimmed) return '';
+    if (!/^https?:\/\//i.test(trimmed)) {
+      trimmed = `https://${trimmed}`;
+    }
+    return trimmed;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!videoUrl) return;
+    const cleanUrl = showUrlField && targetUrl.trim() ? normalizeUrl(targetUrl) : undefined;
     onGenerate({
       videoUrl,
       videoMeta,
-      targetUrl: showUrlField ? targetUrl.trim() : undefined,
+      targetUrl: cleanUrl,
       editorialStyle,
       tone,
       postObjective,
@@ -108,10 +118,17 @@ export default function VideoForge({
           {showUrlField && (
             <div className="mt-3 pl-6 animate-in fade-in duration-200">
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
-                placeholder="https://dubainegoce.fr/parfum/... ou votre site"
+                onBlur={() => {
+                  const normalized = normalizeUrl(targetUrl);
+                  if (normalized && normalized !== targetUrl) {
+                    setTargetUrl(normalized);
+                  }
+                }}
+                placeholder="ex: dubainegoce.fr/parfum/... ou votre site"
                 className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500"
               />
               <p className="text-[11px] text-slate-500 mt-1">

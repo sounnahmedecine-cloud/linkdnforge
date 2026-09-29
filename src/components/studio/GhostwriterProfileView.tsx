@@ -27,15 +27,28 @@ export default function GhostwriterProfileView({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const normalizeUrl = (rawUrl: string): string => {
+    let trimmed = rawUrl.trim();
+    if (!trimmed) return '';
+    if (!/^https?:\/\//i.test(trimmed)) {
+      trimmed = `https://${trimmed}`;
+    }
+    return trimmed;
+  };
+
   const scrapeProfile = async () => {
-    if (!formData.linkedinUrl.startsWith('http')) return;
+    const cleanUrl = normalizeUrl(formData.linkedinUrl);
+    if (!cleanUrl) return;
+    if (cleanUrl !== formData.linkedinUrl) {
+      setFormData((prev) => ({ ...prev, linkedinUrl: cleanUrl }));
+    }
     setScraping(true);
     setScrapeStatus('');
     try {
       const res = await fetch('/api/scrape-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: formData.linkedinUrl }),
+        body: JSON.stringify({ url: cleanUrl }),
       });
       const data = await res.json();
       if (data.data) {
@@ -53,8 +66,10 @@ export default function GhostwriterProfileView({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    saveGhostwriterProfile(formData);
-    onUpdateProfile(formData);
+    const cleanUrl = normalizeUrl(formData.linkedinUrl);
+    const updated = { ...formData, linkedinUrl: cleanUrl };
+    saveGhostwriterProfile(updated);
+    onUpdateProfile(updated);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
   };
@@ -131,11 +146,18 @@ export default function GhostwriterProfileView({
 
           <div className="flex gap-2">
             <input
-              type="url"
+              type="text"
+              inputMode="url"
               name="linkedinUrl"
               value={formData.linkedinUrl}
               onChange={handleInputChange}
-              placeholder="https://www.linkedin.com/in/votre-nom"
+              onBlur={() => {
+                const normalized = normalizeUrl(formData.linkedinUrl);
+                if (normalized && normalized !== formData.linkedinUrl) {
+                  setFormData((prev) => ({ ...prev, linkedinUrl: normalized }));
+                }
+              }}
+              placeholder="ex: linkedin.com/in/votre-nom"
               className="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500"
             />
             <button

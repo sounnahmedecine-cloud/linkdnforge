@@ -70,9 +70,23 @@ export default function UrlForge({
 
   const hint = getUrlHint(targetUrl);
 
+  const normalizeUrl = (rawUrl: string): string => {
+    let trimmed = rawUrl.trim();
+    if (!trimmed) return '';
+    if (!/^https?:\/\//i.test(trimmed)) {
+      trimmed = `https://${trimmed}`;
+    }
+    return trimmed;
+  };
+
   const handleAnalyzeUrl = async (overrideUrl?: string) => {
-    const urlToTest = (overrideUrl || targetUrl).trim();
+    const raw = overrideUrl || targetUrl;
+    const urlToTest = normalizeUrl(raw);
     if (!urlToTest) return;
+
+    if (urlToTest !== targetUrl) {
+      setTargetUrl(urlToTest);
+    }
 
     setIsScraping(true);
     setScrapeError(null);
@@ -111,8 +125,12 @@ export default function UrlForge({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanUrl = targetUrl.trim();
+    const cleanUrl = normalizeUrl(targetUrl);
     if (!cleanUrl) return;
+
+    if (cleanUrl !== targetUrl) {
+      setTargetUrl(cleanUrl);
+    }
 
     let contentToSend = scrapedPreview?.content;
 
@@ -184,7 +202,8 @@ export default function UrlForge({
           <div className="flex gap-2">
             <div className="relative flex-1">
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 required
                 value={targetUrl}
                 onChange={(e) => {
@@ -193,11 +212,15 @@ export default function UrlForge({
                   setScrapeError(null);
                 }}
                 onBlur={() => {
-                  if (targetUrl.trim() && !scrapedPreview && !isScraping) {
-                    handleAnalyzeUrl();
+                  const normalized = normalizeUrl(targetUrl);
+                  if (normalized && normalized !== targetUrl) {
+                    setTargetUrl(normalized);
+                  }
+                  if (normalized && !scrapedPreview && !isScraping) {
+                    handleAnalyzeUrl(normalized);
                   }
                 }}
-                placeholder="https://monsite.com/produit, https://mon-application.com ou https://mon-article..."
+                placeholder="ex: linkedinforge.fr, monsite.com/produit ou https://..."
                 className="w-full bg-slate-50 border-2 border-slate-300 rounded-2xl px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white text-base shadow-xs"
               />
               <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
