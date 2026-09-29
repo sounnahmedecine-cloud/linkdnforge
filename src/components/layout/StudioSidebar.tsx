@@ -59,7 +59,7 @@ export default function StudioSidebar({
     },
   ];
 
-  const proNavItems: { id: StudioTab; label: string; icon: React.ReactNode; isPro?: boolean }[] = [
+  const proNavItems: { id: StudioTab; label: string; icon: React.ReactNode; isPro?: boolean; badge?: string }[] = [
     {
       id: 'accounts',
       label: 'Réseaux Connectés',
@@ -76,6 +76,7 @@ export default function StudioSidebar({
       id: 'profile',
       label: 'Mon Profil Ghostwriter',
       icon: <User className="w-4 h-4 text-indigo-500" />,
+      badge: ghostwriterTone ? (ghostwriterTone.charAt(0).toUpperCase() + ghostwriterTone.slice(1)) : 'Expert',
     },
   ];
 
@@ -121,60 +122,6 @@ export default function StudioSidebar({
             </button>
           )}
         </div>
-
-        {/* Ghostwriter & Distribution Status Widget (Transféré depuis le bandeau noir) */}
-        {!isCollapsed ? (
-          <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3.5 space-y-2.5 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Ghostwriter
-              </span>
-              <button
-                type="button"
-                onClick={() => onSelectTab('profile')}
-                className="text-[11px] font-bold text-orange-600 hover:text-orange-700 hover:underline capitalize"
-                title="Modifier mon profil Ghostwriter"
-              >
-                {ghostwriterTone || 'Expert'} ▾
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onSelectTab('accounts')}
-              className="w-full flex items-center justify-between py-1.5 px-2.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition"
-              title="Gérer les connexions réseaux sociaux"
-            >
-              <span className="flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-500" />
-                <span>Passerelle Réseaux</span>
-              </span>
-              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-full">
-                4 canaux
-              </span>
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2 pt-1 pb-1 border-y border-slate-100">
-            <button
-              type="button"
-              onClick={() => onSelectTab('profile')}
-              className="p-2 rounded-xl hover:bg-orange-50 text-orange-600 transition"
-              title={`Ghostwriter actif : ${ghostwriterTone || 'Expert'}`}
-            >
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onSelectTab('accounts')}
-              className="p-2 rounded-xl hover:bg-slate-100 text-amber-500 transition"
-              title="Passerelle 4 Réseaux Sociaux"
-            >
-              <Zap className="w-4 h-4" />
-            </button>
-          </div>
-        )}
 
         {/* Studio Core Section */}
         <div className="space-y-1">
@@ -239,6 +186,15 @@ export default function StudioSidebar({
                 >
                   <span className={isActive ? 'text-white' : ''}>{item.icon}</span>
                   {!isCollapsed && <span className="flex-1">{item.label}</span>}
+                  {!isCollapsed && item.badge && (
+                    <span
+                      className={`text-[10px] font-bold capitalize px-2 py-0.5 rounded-full ${
+                        isActive ? 'bg-slate-800 text-white' : 'bg-orange-50 text-orange-700 border border-orange-200'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
                   {!isCollapsed && item.isPro && (
                     <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-700 border border-orange-200">
                       PRO
