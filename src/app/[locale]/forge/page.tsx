@@ -71,34 +71,20 @@ export default function ForgePage() {
       />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-12 w-full">
-        {/* 2. Intro Section (Inspired by MoroAI Translator) */}
+        {/* 2. Intro Section */}
         <div className="text-center space-y-4 max-w-3xl mx-auto animate-rise">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold font-mono uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-orange-600" />
-            Studio IA Spécialisé LinkedIn & Omnicanal
-          </div>
-
           <h1 className="font-display font-black text-4xl sm:text-6xl text-black tracking-tight leading-tight">
             Générateur de Posts LinkedIn
           </h1>
 
           <p className="text-base sm:text-xl text-slate-600 leading-relaxed font-normal">
-            Transformez vos liens, vos vidéos brutes ou vos idées en publications captivantes, formatées pour l’algorithme LinkedIn et prêtes à poster.
+            Transformez vos liens, vos vidéos ou vos idées en publications captivantes, formatées pour l’algorithme LinkedIn et prêtes à poster.
           </p>
 
-          {/* Discovery banner (inspired by MoroAI WhatsApp banner) */}
           <div className="pt-2">
-            <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-white border border-slate-200/90 rounded-2xl px-5 py-3 shadow-sm hover:border-orange-300 transition text-sm">
-              <div className="flex items-center gap-2 text-slate-900 font-bold">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <Film className="w-4 h-4 text-orange-500" />
-                <span>Mode Autopilot Vidéo & URLs actif</span>
-              </div>
-              <span className="hidden sm:inline text-slate-300">·</span>
-              <span className="text-slate-500 text-xs sm:text-sm font-medium">
-                🎁 5 générations offertes · Sans carte bancaire
-              </span>
-            </div>
+            <span className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 text-xs sm:text-sm text-slate-700 font-semibold shadow-xs">
+              <span>🎁 5 générations offertes · Sans carte bancaire requise</span>
+            </span>
           </div>
         </div>
 

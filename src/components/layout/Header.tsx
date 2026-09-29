@@ -147,25 +147,11 @@ export default function Header({
         {/* Brand Logo */}
         <Logo />
 
-        {/* Desktop Navigation Links (MoroAI inspired) */}
-        <div className="hidden md:flex items-center gap-7">
-          <Link
-            href="/forge"
-            className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-              isForgeActive
-                ? 'text-orange-600 font-bold'
-                : 'text-slate-600 hover:text-slate-950'
-            }`}
-          >
-            <span>{resolvedGenerator}</span>
-            <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200">
-              Essai
-            </span>
-          </Link>
-
+        {/* Desktop Navigation Links */}
+        <div className="hidden md:flex items-center gap-8">
           <a
             href="/#comment-ca-marche"
-            className="text-sm font-medium text-slate-600 hover:text-slate-950 transition-colors"
+            className="text-sm font-semibold text-slate-600 hover:text-slate-950 transition-colors"
           >
             {resolvedHowItWorks}
           </a>
@@ -182,15 +168,6 @@ export default function Header({
               {resolvedPricing}
             </Link>
           )}
-
-          {/* Autopilot highlight pill (like MoroAI WhatsApp link) */}
-          <Link
-            href="/forge?mode=video"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-white hover:bg-black text-xs font-bold transition-all shadow-sm hover:shadow"
-          >
-            <Film className="w-3.5 h-3.5 text-amber-400" />
-            <span>{resolvedAutopilot}</span>
-          </Link>
         </div>
 
         {/* Right Desktop Actions */}
@@ -237,26 +214,11 @@ export default function Header({
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-4 pb-6 space-y-4 shadow-xl">
-          <div className="flex flex-col space-y-3">
-            <Link
-              href="/forge"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`px-3 py-2.5 rounded-xl text-base font-semibold flex items-center justify-between ${
-                isForgeActive
-                  ? 'bg-orange-50 text-orange-600 font-bold'
-                  : 'text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <span>{resolvedGenerator}</span>
-              <span className="text-xs font-bold uppercase px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                Essai gratuit
-              </span>
-            </Link>
-
+          <div className="flex flex-col space-y-2">
             <a
               href="/#comment-ca-marche"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50"
+              className="px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               {resolvedHowItWorks}
             </a>
@@ -265,7 +227,7 @@ export default function Header({
               <Link
                 href="/pricing"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`px-3 py-2.5 rounded-xl text-base font-semibold ${
+                className={`px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${
                   isPricingActive
                     ? 'bg-orange-50 text-orange-600 font-bold'
                     : 'text-slate-700 hover:bg-slate-50'
@@ -274,20 +236,6 @@ export default function Header({
                 {resolvedPricing}
               </Link>
             )}
-
-            <Link
-              href="/forge?mode=video"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-base font-bold bg-slate-900 text-white flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <Film className="w-4 h-4 text-amber-400" />
-                {resolvedAutopilot}
-              </span>
-              <span className="text-xs bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-md">
-                Nouveau
-              </span>
-            </Link>
           </div>
 
           {currentUser ? (
