@@ -26,7 +26,6 @@ import { Button } from '@/components/ui/Button';
 import SectionLabel from '@/components/ui/SectionLabel';
 import Header from '@/components/layout/Header';
 import HeroShowcase from '@/components/landing/HeroShowcase';
-import LandingLeadCapture from '@/components/landing/LandingLeadCapture';
 import { trackCtaClick } from '@/lib/analytics';
 
 interface Pillar {
@@ -120,27 +119,11 @@ export default function Home() {
         variant="marketing" 
         pricingLabel={tNav('pricing')} 
         ctaLabel={tNav('cta')} 
-        ctaHref="#demo" 
+        ctaHref="/forge" 
       />
 
-      {/* 2. HERO SECTION SHOWCASE : VISUEL & IMPACTANT */}
+      {/* 2. HERO SECTION */}
       <HeroShowcase />
-
-      {/* 2.1. DEMO & CAPTURE INTERACTIVE */}
-      <section id="demo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 scroll-mt-24">
-        <div className="text-center max-w-3xl mx-auto mb-8 space-y-2">
-          <SectionLabel className="justify-center bg-orange-100 text-orange-600 border-orange-200 mx-auto w-fit">
-            Générateur en direct
-          </SectionLabel>
-          <h2 className="font-display font-black text-2xl sm:text-4xl text-slate-900">
-            Testez instantanément avec vos contenus
-          </h2>
-          <p className="text-slate-600 text-sm sm:text-base">
-            Choisissez un exemple ou entrez votre propre contenu pour voir la magie opérer.
-          </p>
-        </div>
-        <LandingLeadCapture />
-      </section>
 
       {/* 3. SECTION SOMBRE : LA COMPRÉHENSION IA (LA DIFFÉRENCIATION CLÉ) */}
       <section className="py-20 bg-slate-950 text-white border-y border-slate-800">
@@ -359,12 +342,9 @@ export default function Home() {
           </p>
           <div className="pt-2">
             <Button 
-              href="#demo"
+              href="/forge"
               onClick={() => {
-                trackCtaClick('final_cta', 'landing_footer', '#demo');
-                setTimeout(() => {
-                  document.getElementById('landing-email-input')?.focus();
-                }, 100);
+                trackCtaClick('final_cta', 'landing_footer', '/forge');
               }}
               size="lg" 
               className="px-10 py-5 text-lg font-black bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition transform hover:scale-105"
