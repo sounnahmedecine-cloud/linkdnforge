@@ -30,6 +30,8 @@ import {
   getSocialConnections,
   saveSocialConnections,
   getScheduledPosts,
+  isUserFirstOnboardingDone,
+  setUserFirstOnboardingDone,
 } from '@/lib/studio/storage';
 import { ArrowLeft } from 'lucide-react';
 import PaywallModal from '@/components/studio/PaywallModal';
@@ -118,26 +120,31 @@ export default function DashboardPage() {
   // Initial load
   useEffect(() => {
     // 1. Auth token from cookie
+    let activeEmail = '';
     const cookies = document.cookie.split(';');
     const authCookie = cookies.find((c) => c.trim().startsWith('auth_token='));
     if (authCookie) {
       try {
         const userData = JSON.parse(decodeURIComponent(authCookie.split('=')[1]));
         setUser(userData);
+        activeEmail = userData?.email || '';
       } catch (e) {
         // ignore
       }
     }
 
-    // 2. Load storage
-    const loadedPosts = getRecentPosts();
+    // 2. Load storage scoped to user
+    const loadedPosts = getRecentPosts(activeEmail);
     setRecentPosts(loadedPosts);
-    setGhostwriterProfile(getGhostwriterProfile());
-    setSocialConnections(getSocialConnections());
-    setScheduledPosts(getScheduledPosts());
+    setGhostwriterProfile(getGhostwriterProfile(activeEmail));
+    setSocialConnections(getSocialConnections(activeEmail));
+    setScheduledPosts(getScheduledPosts(activeEmail));
 
     // 3. Free trials count
-    const savedTrials = localStorage.getItem('linkdnforge_free_trials_count');
+    const trialsKey = activeEmail
+      ? `linkdnforge_free_trials_count_${activeEmail.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`
+      : 'linkdnforge_free_trials_count';
+    const savedTrials = localStorage.getItem(trialsKey);
     if (savedTrials) {
       const parsed = parseInt(savedTrials, 10);
       if (!isNaN(parsed)) setTrialCount(parsed);
@@ -158,11 +165,12 @@ export default function DashboardPage() {
 
     // 6. First-time guided onboarding on Atelier arrival
     // Shows the welcome choice (Video / URL / Idea) if the user has 0 posts and hasn't finished onboarding yet
-    const isFirstOnboardingDone = localStorage.getItem('linkdnforge_first_onboarding_done');
+    const isFirstOnboardingDone = isUserFirstOnboardingDone(activeEmail);
     if (loadedPosts.length === 0 && !isFirstOnboardingDone) {
       setShowFirstTimeOnboarding(true);
     }
   }, []);
+
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -187,7 +195,7 @@ export default function DashboardPage() {
   };
 
   const handleDeleteRecentPost = (id: string) => {
-    const updated = deleteRecentPost(id);
+    const updated = deleteRecentPost(id, user?.email);
     setRecentPosts(updated);
   };
 
@@ -264,7 +272,7 @@ export default function DashboardPage() {
       setCurrentSiteScreenshotUrl(data.screenshotUrl || null);
       setCurrentSiteOgImage(data.ogImage || null);
 
-      // Save to recent posts history
+      // Save to recent posts history (scoped to user)
       saveRecentPost({
         sourceType: params.sourceType,
         title:
@@ -280,18 +288,16 @@ export default function DashboardPage() {
         mediaUrl: params.videoUrl || data.screenshotUrl || data.ogImage || undefined,
         mediaType: params.videoUrl ? 'video' : data.ogImage ? 'og' : data.screenshotUrl ? 'screenshot' : undefined,
         targetUrl: params.targetUrl,
-      });
+      }, user?.email);
 
-      setRecentPosts(getRecentPosts());
+      setRecentPosts(getRecentPosts(user?.email));
 
       // Celebration modal trigger on first successful generation ("Moment Waouh")
       const wasEmpty = recentPosts.length === 0;
       if (wasEmpty) {
         setTimeout(() => {
           setShowCelebration(true);
-          try {
-            localStorage.setItem('linkdnforge_first_onboarding_done', 'true');
-          } catch (e) {}
+          setUserFirstOnboardingDone(true, user?.email);
         }, 500);
       }
 
@@ -299,7 +305,10 @@ export default function DashboardPage() {
       if (!isAdmin) {
         const nextTrial = trialCount + 1;
         setTrialCount(nextTrial);
-        localStorage.setItem('linkdnforge_free_trials_count', String(nextTrial));
+        const trialsKey = user?.email
+          ? `linkdnforge_free_trials_count_${user.email.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`
+          : 'linkdnforge_free_trials_count';
+        localStorage.setItem(trialsKey, String(nextTrial));
         if (nextTrial >= 5) {
           // Trigger paywall modal automatically upon reaching 5th generation
           setTimeout(() => {
@@ -344,6 +353,7 @@ export default function DashboardPage() {
             onLogout={handleLogout}
             trialCount={trialCount}
             onOpenPaywall={() => setShowPaywall(true)}
+            onOpenOnboarding={() => setShowFirstTimeOnboarding(true)}
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}
             ghostwriterTone={ghostwriterProfile.tone}
@@ -367,6 +377,7 @@ export default function DashboardPage() {
                     onSelectPost={(post) => handleSelectRecentPost(post)}
                     onDeletePost={handleDeleteRecentPost}
                     ghostwriterProfile={ghostwriterProfile}
+                    onOpenOnboarding={() => setShowFirstTimeOnboarding(true)}
                   />
                 )}
 
@@ -459,6 +470,7 @@ export default function DashboardPage() {
                     connections={socialConnections}
                     onUpdateConnections={(updated) => {
                       setSocialConnections(updated);
+                      saveSocialConnections(updated, user?.email);
                     }}
                     onBack={() => setCurrentTab('hub')}
                     isAdmin={isAdmin}
@@ -481,6 +493,7 @@ export default function DashboardPage() {
                     profile={ghostwriterProfile}
                     onUpdateProfile={(updated) => {
                       setGhostwriterProfile(updated);
+                      saveGhostwriterProfile(updated, user?.email);
                     }}
                     onBack={() => setCurrentTab('hub')}
                   />
@@ -523,13 +536,12 @@ export default function DashboardPage() {
         isOpen={showFirstTimeOnboarding}
         onClose={() => {
           setShowFirstTimeOnboarding(false);
-          try {
-            localStorage.setItem('linkdnforge_first_onboarding_done', 'true');
-          } catch (e) {}
+          setUserFirstOnboardingDone(true, user?.email);
         }}
         onSelectDoor={(tab) => {
           setCurrentTab(tab);
           setShowFirstTimeOnboarding(false);
+          setUserFirstOnboardingDone(true, user?.email);
         }}
       />
 
@@ -552,3 +564,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

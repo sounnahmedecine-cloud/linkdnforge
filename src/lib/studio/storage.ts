@@ -29,10 +29,50 @@ export const DEFAULT_SOCIAL_CONNECTIONS: SocialConnections = {
   snapchatConnected: false,
 };
 
-export function getRecentPosts(): RecentPost[] {
+export function getActiveUserEmail(): string {
+  if (typeof document === 'undefined') return '';
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)auth_token=([^;]*)/);
+    if (match && match[1]) {
+      const parsed = JSON.parse(decodeURIComponent(match[1]));
+      if (parsed && typeof parsed.email === 'string') {
+        return parsed.email.toLowerCase().trim();
+      }
+    }
+  } catch (e) {}
+  return '';
+}
+
+function getScopedKey(baseKey: string, userEmail?: string): string {
+  const email = (userEmail || getActiveUserEmail()).toLowerCase().trim();
+  if (!email) return baseKey;
+  const sanitized = email.replace(/[^a-z0-9_]/g, '_');
+  return `${baseKey}_${sanitized}`;
+}
+
+export function isUserFirstOnboardingDone(userEmail?: string): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const key = getScopedKey('linkdnforge_first_onboarding_done', userEmail);
+    return localStorage.getItem(key) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
+export function setUserFirstOnboardingDone(done: boolean = true, userEmail?: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const key = getScopedKey('linkdnforge_first_onboarding_done', userEmail);
+    localStorage.setItem(key, String(done));
+  } catch (e) {}
+}
+
+export function getRecentPosts(userEmail?: string): RecentPost[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(RECENT_POSTS_KEY);
+    const key = getScopedKey(RECENT_POSTS_KEY, userEmail);
+    const raw = localStorage.getItem(key);
     if (!raw) return [];
     return JSON.parse(raw);
   } catch (e) {
@@ -41,8 +81,11 @@ export function getRecentPosts(): RecentPost[] {
   }
 }
 
-export function saveRecentPost(post: Omit<RecentPost, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): RecentPost {
-  const current = getRecentPosts();
+export function saveRecentPost(
+  post: Omit<RecentPost, 'id' | 'createdAt'> & { id?: string; createdAt?: string },
+  userEmail?: string
+): RecentPost {
+  const current = getRecentPosts(userEmail);
   const newPost: RecentPost = {
     ...post,
     id: post.id || `post_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -50,30 +93,33 @@ export function saveRecentPost(post: Omit<RecentPost, 'id' | 'createdAt'> & { id
   };
 
   // Prepend and limit to 30 most recent
-  const updated = [newPost, ...current.filter(p => p.id !== newPost.id)].slice(0, 30);
+  const updated = [newPost, ...current.filter((p) => p.id !== newPost.id)].slice(0, 30);
   try {
-    localStorage.setItem(RECENT_POSTS_KEY, JSON.stringify(updated));
+    const key = getScopedKey(RECENT_POSTS_KEY, userEmail);
+    localStorage.setItem(key, JSON.stringify(updated));
   } catch (e) {
     console.warn('Error saving recent post to storage:', e);
   }
   return newPost;
 }
 
-export function deleteRecentPost(id: string): RecentPost[] {
-  const current = getRecentPosts();
-  const updated = current.filter(p => p.id !== id);
+export function deleteRecentPost(id: string, userEmail?: string): RecentPost[] {
+  const current = getRecentPosts(userEmail);
+  const updated = current.filter((p) => p.id !== id);
   try {
-    localStorage.setItem(RECENT_POSTS_KEY, JSON.stringify(updated));
+    const key = getScopedKey(RECENT_POSTS_KEY, userEmail);
+    localStorage.setItem(key, JSON.stringify(updated));
   } catch (e) {
     console.warn('Error deleting post from storage:', e);
   }
   return updated;
 }
 
-export function getGhostwriterProfile(): GhostwriterProfile {
+export function getGhostwriterProfile(userEmail?: string): GhostwriterProfile {
   if (typeof window === 'undefined') return DEFAULT_GHOSTWRITER_PROFILE;
   try {
-    const raw = localStorage.getItem(PROFILE_KEY);
+    const key = getScopedKey(PROFILE_KEY, userEmail);
+    const raw = localStorage.getItem(key);
     if (!raw) return DEFAULT_GHOSTWRITER_PROFILE;
     const parsed = JSON.parse(raw);
     return {
@@ -90,19 +136,21 @@ export function getGhostwriterProfile(): GhostwriterProfile {
   }
 }
 
-export function saveGhostwriterProfile(profile: GhostwriterProfile): void {
+export function saveGhostwriterProfile(profile: GhostwriterProfile, userEmail?: string): void {
   try {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    const key = getScopedKey(PROFILE_KEY, userEmail);
+    localStorage.setItem(key, JSON.stringify(profile));
   } catch (e) {
     console.warn('Error saving ghostwriter profile:', e);
   }
 }
 
 // Social Connections Persistence
-export function getSocialConnections(): SocialConnections {
+export function getSocialConnections(userEmail?: string): SocialConnections {
   if (typeof window === 'undefined') return DEFAULT_SOCIAL_CONNECTIONS;
   try {
-    const raw = localStorage.getItem(SOCIAL_CONNECTIONS_KEY);
+    const key = getScopedKey(SOCIAL_CONNECTIONS_KEY, userEmail);
+    const raw = localStorage.getItem(key);
     if (!raw) return DEFAULT_SOCIAL_CONNECTIONS;
     return { ...DEFAULT_SOCIAL_CONNECTIONS, ...JSON.parse(raw) };
   } catch (e) {
@@ -111,19 +159,21 @@ export function getSocialConnections(): SocialConnections {
   }
 }
 
-export function saveSocialConnections(connections: SocialConnections): void {
+export function saveSocialConnections(connections: SocialConnections, userEmail?: string): void {
   try {
-    localStorage.setItem(SOCIAL_CONNECTIONS_KEY, JSON.stringify(connections));
+    const key = getScopedKey(SOCIAL_CONNECTIONS_KEY, userEmail);
+    localStorage.setItem(key, JSON.stringify(connections));
   } catch (e) {
     console.warn('Error saving social connections:', e);
   }
 }
 
 // Scheduled Posts Persistence (Calendar)
-export function getScheduledPosts(): ScheduledPost[] {
+export function getScheduledPosts(userEmail?: string): ScheduledPost[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(SCHEDULED_POSTS_KEY);
+    const key = getScopedKey(SCHEDULED_POSTS_KEY, userEmail);
+    const raw = localStorage.getItem(key);
     if (!raw) return [];
     return JSON.parse(raw);
   } catch (e) {
@@ -132,28 +182,34 @@ export function getScheduledPosts(): ScheduledPost[] {
   }
 }
 
-export function saveScheduledPost(post: Omit<ScheduledPost, 'id'> & { id?: string }): ScheduledPost {
-  const current = getScheduledPosts();
+export function saveScheduledPost(
+  post: Omit<ScheduledPost, 'id'> & { id?: string },
+  userEmail?: string
+): ScheduledPost {
+  const current = getScheduledPosts(userEmail);
   const newPost: ScheduledPost = {
     ...post,
     id: post.id || `sched_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
   };
-  const updated = [newPost, ...current.filter(p => p.id !== newPost.id)];
+  const updated = [newPost, ...current.filter((p) => p.id !== newPost.id)];
   try {
-    localStorage.setItem(SCHEDULED_POSTS_KEY, JSON.stringify(updated));
+    const key = getScopedKey(SCHEDULED_POSTS_KEY, userEmail);
+    localStorage.setItem(key, JSON.stringify(updated));
   } catch (e) {
     console.warn('Error saving scheduled post:', e);
   }
   return newPost;
 }
 
-export function deleteScheduledPost(id: string): ScheduledPost[] {
-  const current = getScheduledPosts();
-  const updated = current.filter(p => p.id !== id);
+export function deleteScheduledPost(id: string, userEmail?: string): ScheduledPost[] {
+  const current = getScheduledPosts(userEmail);
+  const updated = current.filter((p) => p.id !== id);
   try {
-    localStorage.setItem(SCHEDULED_POSTS_KEY, JSON.stringify(updated));
+    const key = getScopedKey(SCHEDULED_POSTS_KEY, userEmail);
+    localStorage.setItem(key, JSON.stringify(updated));
   } catch (e) {
     console.warn('Error deleting scheduled post:', e);
   }
   return updated;
 }
+

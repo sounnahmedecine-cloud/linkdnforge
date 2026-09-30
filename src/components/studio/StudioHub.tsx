@@ -10,6 +10,7 @@ interface StudioHubProps {
   onSelectPost: (post: RecentPost) => void;
   onDeletePost: (id: string) => void;
   ghostwriterProfile: GhostwriterProfile;
+  onOpenOnboarding?: () => void;
 }
 
 export default function StudioHub({
@@ -18,6 +19,7 @@ export default function StudioHub({
   onSelectPost,
   onDeletePost,
   ghostwriterProfile,
+  onOpenOnboarding,
 }: StudioHubProps) {
   const isProfileConfigured = !!ghostwriterProfile.linkedinUrl || !!ghostwriterProfile.personalExamples;
 
@@ -25,9 +27,21 @@ export default function StudioHub({
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Clean Airy Title with Atelier Positioning */}
       <div className="space-y-1.5">
-        <span className="text-[11px] font-mono font-black uppercase tracking-wider text-orange-700 bg-orange-100 border border-orange-200 px-3 py-1 rounded-full inline-block">
-          ✨ Atelier de création de contenu
-        </span>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <span className="text-[11px] font-mono font-black uppercase tracking-wider text-orange-700 bg-orange-100 border border-orange-200 px-3 py-1 rounded-full inline-block">
+            ✨ Atelier de création de contenu
+          </span>
+          {onOpenOnboarding && (
+            <button
+              type="button"
+              onClick={onOpenOnboarding}
+              className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Guide de démarrage</span>
+            </button>
+          )}
+        </div>
         <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
           Vous apportez la matière. LinkedInForge forge vos publications.
         </h1>
@@ -35,6 +49,7 @@ export default function StudioHub({
           Choisissez votre matière première pour forger votre prochain post LinkedIn dans votre style.
         </p>
       </div>
+
 
       {/* 3 Main Entry Doors */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">

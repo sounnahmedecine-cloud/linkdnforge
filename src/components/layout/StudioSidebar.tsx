@@ -28,6 +28,7 @@ interface StudioSidebarProps {
   onLogout?: () => void;
   trialCount?: number;
   onOpenPaywall?: () => void;
+  onOpenOnboarding?: () => void;
   ghostwriterTone?: string;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -44,12 +45,14 @@ export default function StudioSidebar({
   onLogout,
   trialCount = 0,
   onOpenPaywall,
+  onOpenOnboarding,
   ghostwriterTone = 'expert',
   isCollapsed = false,
   onToggleCollapse,
   mobileOpen = false,
   onCloseMobile,
 }: StudioSidebarProps) {
+
   const mainNavItems: { id: StudioTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'hub', label: 'Studio Accueil', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'video', label: 'Vidéo → Contenu', icon: <Film className="w-4 h-4 text-orange-500" /> },
@@ -215,8 +218,28 @@ export default function StudioSidebar({
                 </button>
               );
             })}
+
+            {onOpenOnboarding && (
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenOnboarding();
+                  if (onCloseMobile) onCloseMobile();
+                }}
+                title="Guide de démarrage & Onboarding"
+                className={`flex items-center rounded-xl text-xs sm:text-sm font-semibold text-orange-600 hover:bg-orange-50/80 transition-all whitespace-nowrap text-left cursor-pointer ${
+                  isCollapsed && !mobileOpen
+                    ? 'p-3 justify-center'
+                    : 'gap-3 px-3.5 py-2.5'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-orange-500" />
+                {(!isCollapsed || mobileOpen) && <span>Guide de démarrage</span>}
+              </button>
+            )}
           </nav>
         </div>
+
 
         {/* Free trial status card for non-admin */}
         {!isAdmin && onOpenPaywall && (
