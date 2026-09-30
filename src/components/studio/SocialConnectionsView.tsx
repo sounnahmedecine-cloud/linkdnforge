@@ -8,13 +8,10 @@ import {
   Save,
   CheckCircle2,
   ExternalLink,
-  Zap,
   Check,
   Send,
-  HelpCircle,
-  Loader2,
-  Sparkles,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/Button';
 
 interface SocialConnectionsViewProps {
@@ -186,10 +183,6 @@ export default function SocialConnectionsView({
           <ArrowLeft className="w-4 h-4" />
           Retour au Studio
         </button>
-        <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border border-emerald-200">
-          <Zap className="w-3.5 h-3.5 text-emerald-600 fill-current" />
-          Zéro Clé API • 100% Gratuit & Immédiat
-        </span>
       </div>
 
       <div>
@@ -197,22 +190,12 @@ export default function SocialConnectionsView({
           <span>🔗</span> Vos Profils & Réseaux Sociaux
         </h2>
         <p className="text-sm text-slate-500">
-          Enregistrez vos coordonnées pour vos 4 canaux majeurs (LinkedIn, Facebook, X et Reddit). Aucune clé API complexe n'est requise.
+          Enregistrez vos coordonnées pour vos 4 canaux majeurs (LinkedIn, Facebook, X et Reddit).
         </p>
       </div>
 
-      {/* Explication claire sur le fonctionnement */}
-      <div className="bg-orange-50/70 border border-orange-200/80 rounded-2xl p-4 sm:p-5 flex items-start gap-3 text-xs text-orange-950">
-        <HelpCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
-        <div className="space-y-1.5">
-          <strong className="block font-bold text-orange-950 text-sm">Comment fonctionne la diffusion sans API ?</strong>
-          <p className="text-orange-900 leading-relaxed">
-            Dès qu'un post est généré dans votre Studio, le bouton <strong>« Diffuser »</strong> copie instantanément l'intégralité du texte dans votre presse-papier et ouvre la boîte de publication officielle de votre réseau. Il ne vous reste qu'à faire <strong>Ctrl + V</strong> (Coller) et cliquer sur Publier.
-          </p>
-        </div>
-      </div>
-
       <form onSubmit={handleSave} className="space-y-8">
+
         {/* Connected Channels Grid */}
         <div className="space-y-4">
           <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
