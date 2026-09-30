@@ -169,7 +169,34 @@ export default function DashboardPage() {
     if (loadedPosts.length === 0 && !isFirstOnboardingDone) {
       setShowFirstTimeOnboarding(true);
     }
+
+    // 7. Chrome Extension / Deep-link capture parameters
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const extSource = urlParams.get('source');
+      const extUrl = urlParams.get('url');
+      const extText = urlParams.get('selectedText') || urlParams.get('text');
+      const extDraft = urlParams.get('draft');
+      const extTone = urlParams.get('tone');
+
+      if (extDraft) {
+        setGeneratedPost(extDraft);
+      }
+      if (extTone) {
+        setGhostwriterProfile((prev) => ({ ...prev, tone: extTone }));
+      }
+
+      if (extSource === 'extension' || extUrl || extText) {
+        if (extUrl) {
+          setCurrentTargetUrl(extUrl);
+          setCurrentTab('url');
+        } else if (extText) {
+          setCurrentTab('idea');
+        }
+      }
+    }
   }, []);
+
 
 
   const handleLogout = async () => {

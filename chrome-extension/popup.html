@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedInForge Capture</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M19 4h-3V2h-4v2H4C2.9 4 2 4.9 2 6v2c0 2.2 1.8 4 4 4h1v6c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2v-6h2c2.2 0 4-1.8 4-4V6c0-1.1-.9-2-2-2z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>LinkedInForge <span class="badge">Capture</span></h1>
+        </div>
+      </div>
+      <button id="btn-settings-toggle" class="icon-btn" title="Paramètres" aria-label="Paramètres">
+        ⚙️
+      </button>
+    </header>
+
+    <!-- Settings Drawer (Dev / Prod toggle) -->
+    <div id="settings-drawer" class="settings-drawer hidden">
+      <label for="input-api-url" class="field-label">URL de l'API LinkedInForge :</label>
+      <input type="text" id="input-api-url" class="text-input text-xs" value="https://linkedinforge.fr" />
+      <div class="settings-actions">
+        <button id="btn-save-settings" class="btn btn-secondary btn-sm">Enregistrer</button>
+      </div>
+    </div>
+
+    <!-- Capture View -->
+    <main id="view-capture" class="view">
+      <!-- Detected Context Card -->
+      <div class="card context-card">
+        <div class="field-group">
+          <label class="field-label">📄 Page détectée :</label>
+          <input type="text" id="input-page-title" class="text-input" placeholder="Titre de la page..." />
+        </div>
+
+        <div class="field-group">
+          <div class="url-badge">
+            <span class="url-icon">🔗</span>
+            <span id="label-page-url" class="url-text">Chargement de l'URL...</span>
+          </div>
+        </div>
+
+        <div id="container-selected-text" class="field-group hidden">
+          <label class="field-label">✍️ Extrait sélectionné :</label>
+          <div class="quote-box">
+            <p id="label-selected-text"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tone Selector -->
+      <div class="field-group">
+        <label class="field-label">🎯 Style et tonalité du post :</label>
+        <div class="tone-grid">
+          <button type="button" class="tone-btn active" data-tone="authority">
+            <span class="tone-emoji">👑</span>
+            <span>Autorité</span>
+          </button>
+          <button type="button" class="tone-btn" data-tone="storytelling">
+            <span class="tone-emoji">📖</span>
+            <span>Storytelling</span>
+          </button>
+          <button type="button" class="tone-btn" data-tone="educational">
+            <span class="tone-emoji">💡</span>
+            <span>Éducatif</span>
+          </button>
+          <button type="button" class="tone-btn" data-tone="direct">
+            <span class="tone-emoji">⚡</span>
+            <span>Direct</span>
+          </button>
+          <button type="button" class="tone-btn" data-tone="conversational">
+            <span class="tone-emoji">💬</span>
+            <span>Discussion</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Actions -->
+      <div class="actions-group">
+        <button id="btn-forge-post" class="btn btn-primary">
+          <span class="btn-icon">⚡</span>
+          <span>Forger un post (IA)</span>
+        </button>
+
+        <button id="btn-open-studio" class="btn btn-secondary">
+          <span>Ouvrir dans l'Atelier LinkedInForge</span>
+          <span class="btn-icon">↗</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Loading State -->
+    <div id="view-loading" class="view hidden text-center">
+      <div class="spinner"></div>
+      <h3 class="loading-title">Forgage du post en cours...</h3>
+      <p class="loading-sub">L'IA extrait les pépites et rédige votre brouillon LinkedIn.</p>
+    </div>
+
+    <!-- Result View -->
+    <main id="view-result" class="view hidden">
+      <div class="result-header">
+        <span class="result-badge">✨ Brouillon forgé</span>
+        <button id="btn-back-capture" class="text-link">← Modifier la source</button>
+      </div>
+
+      <!-- Generated Post Editor -->
+      <div class="card result-card">
+        <textarea id="output-post-content" class="post-textarea" rows="8"></textarea>
+      </div>
+
+      <!-- Alternative Hooks Section -->
+      <div class="hooks-section">
+        <label class="field-label">🎣 Variantes de Hooks (cliquez pour remplacer la 1ère ligne) :</label>
+        <div id="hooks-container" class="hooks-list">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Result Actions -->
+      <div class="actions-group">
+        <button id="btn-copy-post" class="btn btn-primary btn-copy">
+          <span id="copy-icon">📋</span>
+          <span id="copy-label">Copier le post</span>
+        </button>
+
+        <div class="btn-row">
+          <button id="btn-regenerate" class="btn btn-secondary flex-1">
+            <span>🔄 Régénérer</span>
+          </button>
+          <button id="btn-open-studio-result" class="btn btn-secondary flex-1">
+            <span>Ouvrir dans le Studio ↗</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>LinkedInForge · Human in the loop</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

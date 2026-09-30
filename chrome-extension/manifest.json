@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedInForge Capture",
+  "version": "1.0.0",
+  "description": "Transformez n'importe quelle page, vidéo ou idée en brouillon LinkedIn percutant prêt à publier.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Forger un post LinkedIn"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "contextMenus",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://linkedinforge.fr/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
