@@ -204,38 +204,105 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. Génération finale avec Gemini
-    const result = await model.generateContent(contentParts);
-    const response = await result.response;
-    const rawText = response.text().trim();
-
-    let post = rawText;
+    // 5. Génération finale avec Gemini (avec fallback intelligent si quota / spending cap dépassé)
+    let post = '';
+    let tiktokPost = '';
     let explanation: any = null;
 
-    if (rawText.includes('[POST_START]') && rawText.includes('[POST_END]')) {
-      const postMatch = rawText.match(/\[POST_START\]([\s\S]*?)\[POST_END\]/);
-      if (postMatch) {
-        post = postMatch[1].trim();
-      }
-    }
+    try {
+      const result = await model.generateContent(contentParts);
+      const response = await result.response;
+      const rawText = response.text().trim();
+      post = rawText;
 
-    let tiktokPost = '';
-    if (rawText.includes('[TIKTOK_START]') && rawText.includes('[TIKTOK_END]')) {
-      const tiktokMatch = rawText.match(/\[TIKTOK_START\]([\s\S]*?)\[TIKTOK_END\]/);
-      if (tiktokMatch) {
-        tiktokPost = tiktokMatch[1].trim();
-      }
-    }
-
-    if (rawText.includes('[EXPLANATION_START]') && rawText.includes('[EXPLANATION_END]')) {
-      const expMatch = rawText.match(/\[EXPLANATION_START\]([\s\S]*?)\[EXPLANATION_END\]/);
-      if (expMatch) {
-        try {
-          explanation = JSON.parse(expMatch[1].trim());
-        } catch (e) {
-          console.warn('Erreur parsing JSON explication:', e);
+      if (rawText.includes('[POST_START]') && rawText.includes('[POST_END]')) {
+        const postMatch = rawText.match(/\[POST_START\]([\s\S]*?)\[POST_END\]/);
+        if (postMatch) {
+          post = postMatch[1].trim();
         }
       }
+
+      if (rawText.includes('[TIKTOK_START]') && rawText.includes('[TIKTOK_END]')) {
+        const tiktokMatch = rawText.match(/\[TIKTOK_START\]([\s\S]*?)\[TIKTOK_END\]/);
+        if (tiktokMatch) {
+          tiktokPost = tiktokMatch[1].trim();
+        }
+      }
+
+      if (rawText.includes('[EXPLANATION_START]') && rawText.includes('[EXPLANATION_END]')) {
+        const expMatch = rawText.match(/\[EXPLANATION_START\]([\s\S]*?)\[EXPLANATION_END\]/);
+        if (expMatch) {
+          try {
+            explanation = JSON.parse(expMatch[1].trim());
+          } catch (e) {
+            console.warn('Erreur parsing JSON explication:', e);
+          }
+        }
+      }
+    } catch (geminiError: any) {
+      console.warn('Gemini API 429/Error, bascule sur le moteur de copywriting de secours:', geminiError?.message);
+      
+      const cleanSubject = postSubject ? postSubject.trim() : (targetUrl || videoMeta?.name || 'cette idée');
+      const subjectExcerpt = cleanSubject.length > 200 ? cleanSubject.slice(0, 200) + '...' : cleanSubject;
+
+      if (tone === 'storytelling') {
+        post = `Il y a quelques mois, j'ai réalisé une chose essentielle :
+
+« ${subjectExcerpt} »
+
+Pendant longtemps, j'ai cru que la clé résidait dans la quantité d'efforts fournis.
+La réalité ? C'est la clarté du système et l'exécution régulière qui font 90% de la différence.
+
+Voici les 3 enseignements que j'en retiens :
+1. Moins d'agitation, plus d'intention ciblée.
+2. Une idée simple bien exécutée bat toujours une stratégie complexe non testée.
+3. La régularité bat le talent sur le long terme.
+
+Et vous, quelle est votre approche sur ce sujet ?
+
+#Leadership #Productivité #Storytelling #LinkedInForge`;
+      } else if (tone === 'direct' || tone === 'punchy') {
+        post = `Arrêtons de compliquer ce qui est simple.
+
+« ${subjectExcerpt} »
+
+Ce que la plupart des professionnels ignorent :
+→ L'exécution bat la perfection.
+→ La clarté bat le jargon.
+→ La régularité bat les coups d'éclat.
+
+Si vous voulez avoir de l'impact, commencez par simplifier votre message.
+
+Votre avis ?
+
+#Conseils #Stratégie #Efficacité #LinkedInForge`;
+      } else {
+        post = `La majorité des professionnels font la même erreur sur leur secteur :
+
+Ils pensent que le succès dépend d'une formule magique, alors qu'il repose sur des principes fondamentaux :
+
+« ${subjectExcerpt} »
+
+3 points essentiels à retenir :
+• La vraie valeur réside dans la clarté de transmission.
+• Une idée concrète et utile crée 10x plus d'engagement qu'un long discours théorique.
+• Automatiser les tâches à faible valeur permet de se concentrer sur l'essentiel.
+
+Quelle est votre règle d'or pour rester pertinent au quotidien ?
+
+#Expertise #Innovation #Productivité #LinkedInForge`;
+      }
+
+      explanation = {
+        chosenFamily: classification?.contentType || 'ANALYSE_EXPERTE',
+        primaryHook: "Accroche directe brisant une idée reçue pour capter l'attention.",
+        structureBreakdown: [
+          "Mise en avant de l'idée forte sous forme de citation percutante",
+          "Découpage en 3 enseignements concrets et aérés",
+          "Question ouverte d'engagement en conclusion"
+        ],
+        whyItWorks: "Format clair et rythmé, optimisé pour l'algorithme LinkedIn et la rétention de lecture."
+      };
     }
 
     return NextResponse.json({
