@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { StudioTab } from '@/lib/studio/types';
 import {
   LayoutDashboard,
@@ -18,6 +19,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import Logo, { AnvilMark } from '@/components/ui/Logo';
+import ChromeExtensionModal from '@/components/extension/ChromeExtensionModal';
 
 interface StudioSidebarProps {
   currentTab: StudioTab;
@@ -52,6 +54,7 @@ export default function StudioSidebar({
   mobileOpen = false,
   onCloseMobile,
 }: StudioSidebarProps) {
+  const [showExtensionModal, setShowExtensionModal] = useState(false);
 
   const mainNavItems: { id: StudioTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'hub', label: 'Studio Accueil', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -237,6 +240,29 @@ export default function StudioSidebar({
                 {(!isCollapsed || mobileOpen) && <span>Guide de démarrage</span>}
               </button>
             )}
+
+            {/* Extension Chrome shortcut button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowExtensionModal(true);
+                if (onCloseMobile) onCloseMobile();
+              }}
+              title="Extension Chrome Capture"
+              className={`flex items-center rounded-xl text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-all whitespace-nowrap text-left cursor-pointer ${
+                isCollapsed && !mobileOpen ? 'p-3 justify-center' : 'gap-3 px-3.5 py-2.5'
+              }`}
+            >
+              <span className="text-orange-500 font-bold">⚡</span>
+              {(!isCollapsed || mobileOpen) && (
+                <span className="flex-1 flex items-center justify-between">
+                  <span>Extension Chrome</span>
+                  <span className="text-[9px] bg-orange-100 text-orange-800 font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                    Gratuit
+                  </span>
+                </span>
+              )}
+            </button>
           </nav>
         </div>
 
@@ -336,6 +362,11 @@ export default function StudioSidebar({
           </div>
         </div>
       )}
+
+      <ChromeExtensionModal 
+        isOpen={showExtensionModal} 
+        onClose={() => setShowExtensionModal(false)} 
+      />
     </>
   );
 }

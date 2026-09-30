@@ -1,15 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ArrowRight,
   CheckCircle2
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import SectionLabel from '@/components/ui/SectionLabel';
+import ChromeExtensionModal from '@/components/extension/ChromeExtensionModal';
 import { trackCtaClick } from '@/lib/analytics';
 
 export default function HeroShowcase() {
+  const [showExtensionModal, setShowExtensionModal] = useState(false);
+
   return (
     <section className="relative w-full pt-8 pb-16 sm:pt-16 sm:pb-24 overflow-hidden bg-gradient-to-b from-slate-50/80 via-white to-slate-50/30">
       {/* Grille de fond subtile */}
@@ -27,10 +30,20 @@ export default function HeroShowcase() {
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center space-y-6 animate-rise">
         
-        {/* Badge */}
-        <SectionLabel className="justify-center bg-orange-100 text-orange-700 border-orange-200 mx-auto w-fit font-bold">
-          ✨ Studio de Création de Contenu IA
-        </SectionLabel>
+        {/* Chrome Extension Pill Badge */}
+        <button
+          type="button"
+          onClick={() => setShowExtensionModal(true)}
+          className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100 border border-orange-200/80 text-orange-950 text-xs font-semibold shadow-2xs transition hover:scale-[1.02] cursor-pointer"
+        >
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+          </span>
+          <span className="font-bold text-orange-600">⚡ Nouveau</span>
+          <span className="text-slate-700">Extension Chrome LinkedInForge Capture disponible !</span>
+          <ArrowRight className="w-3.5 h-3.5 text-orange-500 group-hover:translate-x-0.5 transition-transform" />
+        </button>
 
         {/* Titre Ultra-Direct */}
         <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl leading-[1.08] tracking-tight text-slate-950">
@@ -76,6 +89,11 @@ export default function HeroShowcase() {
         </div>
 
       </div>
+
+      <ChromeExtensionModal 
+        isOpen={showExtensionModal} 
+        onClose={() => setShowExtensionModal(false)} 
+      />
     </section>
   );
 }
