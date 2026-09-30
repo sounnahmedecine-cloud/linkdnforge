@@ -34,6 +34,8 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import PaywallModal from '@/components/studio/PaywallModal';
 import SocialOnboardingModal from '@/components/studio/SocialOnboardingModal';
+import FirstTimeOnboardingModal from '@/components/studio/FirstTimeOnboardingModal';
+import FirstPostCelebrationModal from '@/components/studio/FirstPostCelebrationModal';
 import { trackPaywallViewed } from '@/lib/analytics';
 
 interface User {
@@ -93,6 +95,10 @@ export default function DashboardPage() {
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
   const [showSocialOnboarding, setShowSocialOnboarding] = useState<boolean>(false);
 
+  // First-time interactive guided onboarding & celebration states
+  const [showFirstTimeOnboarding, setShowFirstTimeOnboarding] = useState<boolean>(false);
+  const [showCelebration, setShowCelebration] = useState<boolean>(false);
+
   // Collapsible sidebar & mobile drawer state
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
@@ -124,7 +130,8 @@ export default function DashboardPage() {
     }
 
     // 2. Load storage
-    setRecentPosts(getRecentPosts());
+    const loadedPosts = getRecentPosts();
+    setRecentPosts(loadedPosts);
     setGhostwriterProfile(getGhostwriterProfile());
     setSocialConnections(getSocialConnections());
     setScheduledPosts(getScheduledPosts());
@@ -149,10 +156,11 @@ export default function DashboardPage() {
       localStorage.removeItem('linkdnforge_pending_draft');
     }
 
-    // 6. Check Social Onboarding (shows until user completes onboarding or clicks to enter studio)
-    const isOnboarded = localStorage.getItem('linkdnforge_social_onboarded');
-    if (!isOnboarded) {
-      setShowSocialOnboarding(true);
+    // 6. First-time guided onboarding on Atelier arrival
+    // Shows the welcome choice (Video / URL / Idea) if the user has 0 posts and hasn't finished onboarding yet
+    const isFirstOnboardingDone = localStorage.getItem('linkdnforge_first_onboarding_done');
+    if (loadedPosts.length === 0 && !isFirstOnboardingDone) {
+      setShowFirstTimeOnboarding(true);
     }
   }, []);
 
@@ -275,6 +283,17 @@ export default function DashboardPage() {
       });
 
       setRecentPosts(getRecentPosts());
+
+      // Celebration modal trigger on first successful generation ("Moment Waouh")
+      const wasEmpty = recentPosts.length === 0;
+      if (wasEmpty) {
+        setTimeout(() => {
+          setShowCelebration(true);
+          try {
+            localStorage.setItem('linkdnforge_first_onboarding_done', 'true');
+          } catch (e) {}
+        }, 500);
+      }
 
       // Free trial quota tracking (5 free generations)
       if (!isAdmin) {
@@ -499,7 +518,32 @@ export default function DashboardPage() {
         userEmail={user?.email}
       />
 
-      {/* Social Onboarding 1-Click modal on first arrival */}
+      {/* First Time Guided Onboarding Modal (Step 1: Pick raw material door) */}
+      <FirstTimeOnboardingModal
+        isOpen={showFirstTimeOnboarding}
+        onClose={() => {
+          setShowFirstTimeOnboarding(false);
+          try {
+            localStorage.setItem('linkdnforge_first_onboarding_done', 'true');
+          } catch (e) {}
+        }}
+        onSelectDoor={(tab) => {
+          setCurrentTab(tab);
+          setShowFirstTimeOnboarding(false);
+        }}
+      />
+
+      {/* First Post Forged Celebration Modal ("Moment Waouh" -> Ghostwriter setup) */}
+      <FirstPostCelebrationModal
+        isOpen={showCelebration}
+        onClose={() => setShowCelebration(false)}
+        onGoToGhostwriter={() => {
+          setCurrentTab('profile');
+          setShowCelebration(false);
+        }}
+      />
+
+      {/* Social Onboarding 1-Click modal (accessible via settings or pro upsell) */}
       <SocialOnboardingModal
         isOpen={showSocialOnboarding}
         onClose={() => setShowSocialOnboarding(false)}

@@ -23,10 +23,13 @@ export default function StudioHub({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Clean Airy Title (Black banner removed per user request) */}
-      <div className="space-y-1">
+      {/* Clean Airy Title with Atelier Positioning */}
+      <div className="space-y-1.5">
+        <span className="text-[11px] font-mono font-black uppercase tracking-wider text-orange-700 bg-orange-100 border border-orange-200 px-3 py-1 rounded-full inline-block">
+          ✨ Atelier de création de contenu
+        </span>
         <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
-          Que voulez-vous créer aujourd'hui ?
+          Vous apportez la matière. LinkedInForge forge vos publications.
         </h1>
         <p className="text-slate-500 text-sm">
           Choisissez votre matière première pour forger votre prochain post LinkedIn dans votre style.
