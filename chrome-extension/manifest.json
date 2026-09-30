@@ -15,8 +15,12 @@
   ],
   "host_permissions": [
     "https://linkedinforge.fr/*",
-    "http://localhost:3000/*"
+    "https://*.woosenteur.fr/*",
+    "https://linkedinforge.woosenteur.fr/*",
+    "http://localhost:3000/*",
+    "https://*/*"
   ],
+
   "background": {
     "service_worker": "background.js",
     "type": "module"

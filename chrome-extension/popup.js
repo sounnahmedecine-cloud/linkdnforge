@@ -196,63 +196,136 @@ async function handleForgePost() {
 
   switchView('loading');
 
-  try {
-    const response = await fetch(`${saasBaseUrl}/api/extension/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: currentCapture.url,
-        title: currentCapture.title,
-        selectedText: currentCapture.selectedText,
-        tone: selectedTone,
-        locale: 'fr',
-      }),
-    });
+  const payload = {
+    url: currentCapture.url,
+    title: currentCapture.title,
+    selectedText: currentCapture.selectedText,
+    tone: selectedTone,
+    locale: 'fr',
+  };
 
-    if (!response.ok) {
-      const errJson = await response.json().catch(() => ({}));
-      throw new Error(errJson.error || `Erreur serveur (${response.status})`);
+  const endpointsToTry = [
+    `${saasBaseUrl}/api/extension/generate`,
+    'https://linkedinforge.woosenteur.fr/api/extension/generate',
+    'https://linkedinforge.fr/api/extension/generate',
+    'http://localhost:3000/api/extension/generate',
+  ].filter((v, i, a) => a.indexOf(v) === i);
+
+  let successData = null;
+
+  for (const endpoint of endpointsToTry) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        successData = await response.json();
+        break;
+      }
+    } catch (e) {
+      console.warn(`Failed fetching from ${endpoint}:`, e);
     }
-
-    generatedData = await response.json();
-    renderResultUI(generatedData);
-    switchView('result');
-  } catch (error) {
-    console.warn('Network or API Error, using resilient client generator:', error);
-    generatedData = generateClientFallbackDraft(currentCapture, selectedTone);
-    renderResultUI(generatedData);
-    switchView('result');
   }
+
+  if (successData && successData.post) {
+    generatedData = successData;
+  } else {
+    console.warn('Using client copywriting engine fallback');
+    generatedData = generateClientFallbackDraft(currentCapture, selectedTone);
+  }
+
+  renderResultUI(generatedData);
+  switchView('result');
 }
 
 function generateClientFallbackDraft(capture, tone) {
-  const contentSubject = capture.selectedText || capture.title || 'cette idée clé';
+  const cleanTitle = (capture.title || 'cette innovation').replace(/—.*$/, '').trim();
+  const quote = capture.selectedText ? `« ${capture.selectedText.trim()} »` : '';
+
+  if (tone === 'storytelling') {
+    return {
+      title: capture.title || 'Post Storytelling',
+      post: `Il y a 6 mois, je perdais un temps fou à réinventer la roue sur chaque publication.
+
+Puis j'ai découvert une façon radicalement différente d'aborder la création :
+
+${quote ? `${quote}\n\n` : ''}Au lieu de partir d'une page blanche :
+→ Je pars d'une vraie matière brute (un lien, une vidéo, une idée forte)
+→ J'extrais l'essence et les enseignements clés
+→ Je structure le message pour qu'il apporte une valeur immédiate au lecteur
+
+Résultat ?
+Moins d'efforts, plus de clarté, et un impact démultiplié.
+
+La régularité n'est pas une question de motivation. C'est une question de système.
+
+Et vous, quel est le plus gros obstacle qui vous empêche d'être régulier ?
+
+${capture.url ? `🔗 Pour creuser le sujet : ${capture.url}\n\n` : ''}#CréationDeContenu #Productivité #Storytelling #LinkedIn`,
+      hooks: [
+        `J'ai testé des dizaines de méthodes pour créer du contenu. Voici la seule qui fonctionne :`,
+        `Le jour où j'ai arrêté de chercher l'inspiration sur une page blanche, tout a changé :`,
+        `Pourquoi 90% des créateurs s'épuisent au bout de 3 semaines :`
+      ]
+    };
+  }
+
+  if (tone === 'educational' || tone === 'educatif') {
+    return {
+      title: capture.title || 'Post Éducatif',
+      post: `Comment transformer n'importe quelle idée brute en contenu à fort impact en 3 étapes :
+
+${quote ? `${quote}\n\n` : ''}1️⃣ **Capter la matière première** :
+Ne partez jamais de zéro. Un bon post repose sur une observation concrète ou une ressource existante.
+
+2️⃣ **Extraire le déclencheur clé** :
+Quel est le vrai problème résolu ? Pourquoi le lecteur doit s'y intéresser maintenant ?
+
+3️⃣ **Simplifier la transmission** :
+Supprimez le superflu, structurez avec des listes aérées et terminez par une action concrète.
+
+Ce n'est pas le volume d'heures qui fait la qualité d'un post, mais la clarté du message.
+
+Quelle étape vous prend le plus de temps aujourd'hui ?
+
+${capture.url ? `🔗 Source et détails : ${capture.url}\n\n` : ''}#Conseils #Méthode #LinkedIn #Expertise`,
+      hooks: [
+        `3 étapes simples pour ne plus jamais bloquer devant une page blanche :`,
+        `Le guide express pour forger un post LinkedIn à forte valeur en 2 minutes :`,
+        `Si vous voulez maximiser la portée de vos idées, suivez cette structure :`
+      ]
+    };
+  }
+
+  // Default: Expert / Autorité
   return {
-    title: capture.title || 'Brouillon capturé',
-    post: `J'ai lu ceci récemment, et impossible de ne pas le partager :
+    title: capture.title || 'Post Expert',
+    post: `La majorité des professionnels font la même erreur sur LinkedIn :
 
-« ${contentSubject} »
+Ils pensent qu'il faut être plus créatif, alors qu'il faut simplement être plus structuré.
 
-Voici les 3 enseignements majeurs que vous devriez en retenir dès aujourd'hui :
+${quote ? `${quote}\n\n` : ''}Ce que démontre ${cleanTitle} :
 
-1️⃣ Ce qui semblait complexe devient un levier stratégique quand on l'applique avec clarté.
-2️⃣ La plupart des professionnels passent à côté en cherchant la complication.
-3️⃣ L'exécution régulière bat toujours le plan parfait non testé.
+• La vraie valeur réside dans la clarté, pas dans la complexité.
+• Une idée bien découpée bat toujours un long texte indigeste.
+• L'exécution régulière avec un bon système bat n'importe quel coup d'éclat ponctuel.
 
-💡 Votre avis sur la question ? Comment intégrez-vous cette approche dans votre quotidien ?
+Arrêtez de passer 2 heures par post. Mettez en place un flux de travail éprouvé.
 
-${capture.url ? `(Source : ${capture.url})` : ''}
+Quel est votre rituel pour partager vos apprentissages sur votre secteur ?
 
-#Leadership #Productivité #Innovation #LinkedInForge`,
+${capture.url ? `🔗 Découvrir l'outil : ${capture.url}\n\n` : ''}#Leadership #Stratégie #Productivité #LinkedInForge`,
     hooks: [
-      `La plupart des professionnels ignorent ce principe simple. Voici pourquoi :`,
-      `En appliquant cette méthode, vous gagnez 6 mois d'avance sur vos concurrents :`,
-      `Est-ce que vous faites aussi cette erreur sans vous en rendre compte ?`
+      `La majorité des créateurs font fausse route sur LinkedIn. Voici pourquoi :`,
+      `Comment forger des posts qui marquent les esprits sans y passer des heures :`,
+      `Si vous deviez retenir une seule règle de copywriting aujourd'hui :`
     ]
   };
 }
+
 
 
 // Render Result UI
