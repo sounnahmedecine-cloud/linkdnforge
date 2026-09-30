@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, ArrowLeft, Loader2, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -14,6 +14,7 @@ interface IdeaForgeProps {
   }) => Promise<void>;
   isGenerating: boolean;
   defaultTone?: string;
+  initialSubject?: string;
 }
 
 const IDEA_CHIPS = [
@@ -29,12 +30,19 @@ export default function IdeaForge({
   onGenerate,
   isGenerating,
   defaultTone = 'expert',
+  initialSubject = '',
 }: IdeaForgeProps) {
-  const [postSubject, setPostSubject] = useState('');
+  const [postSubject, setPostSubject] = useState(initialSubject);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [editorialStyle, setEditorialStyle] = useState('auto');
   const [postObjective, setPostObjective] = useState('authority');
   const [tone, setTone] = useState(defaultTone);
+
+  useEffect(() => {
+    if (initialSubject) {
+      setPostSubject(initialSubject);
+    }
+  }, [initialSubject]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

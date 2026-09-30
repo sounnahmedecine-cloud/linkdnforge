@@ -37,7 +37,12 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     targetUrl.searchParams.set('source', 'extension');
     if (pageUrl) targetUrl.searchParams.set('url', pageUrl);
     if (pageTitle) targetUrl.searchParams.set('title', pageTitle.slice(0, 150));
-    if (selectedText) targetUrl.searchParams.set('selectedText', selectedText.slice(0, 500));
+    if (selectedText) {
+      targetUrl.searchParams.set('selectedText', selectedText.slice(0, 500));
+      targetUrl.searchParams.set('tab', 'idea');
+    } else if (pageUrl) {
+      targetUrl.searchParams.set('tab', 'url');
+    }
 
     // Open Atelier in a new tab
     chrome.tabs.create({ url: targetUrl.toString() });

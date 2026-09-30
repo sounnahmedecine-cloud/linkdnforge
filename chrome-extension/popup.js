@@ -396,7 +396,12 @@ function openStudio(draftContent = '') {
   targetUrl.searchParams.set('source', 'extension');
   if (currentCapture.url) targetUrl.searchParams.set('url', currentCapture.url);
   if (currentCapture.title) targetUrl.searchParams.set('title', currentCapture.title);
-  if (currentCapture.selectedText) targetUrl.searchParams.set('selectedText', currentCapture.selectedText);
+  if (currentCapture.selectedText) {
+    targetUrl.searchParams.set('selectedText', currentCapture.selectedText);
+    targetUrl.searchParams.set('tab', 'idea');
+  } else if (currentCapture.url) {
+    targetUrl.searchParams.set('tab', 'url');
+  }
   if (selectedTone) targetUrl.searchParams.set('tone', selectedTone);
   if (draftContent) targetUrl.searchParams.set('draft', draftContent);
 

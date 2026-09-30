@@ -91,6 +91,7 @@ export default function DashboardPage() {
   const [currentSiteScreenshotUrl, setCurrentSiteScreenshotUrl] = useState<string | null>(null);
   const [currentSiteOgImage, setCurrentSiteOgImage] = useState<string | null>(null);
   const [currentTargetUrl, setCurrentTargetUrl] = useState<string>('');
+  const [initialIdeaSubject, setInitialIdeaSubject] = useState<string>('');
 
   // Paywall & trial state (5 free generations)
   const [trialCount, setTrialCount] = useState<number>(0);
@@ -178,6 +179,7 @@ export default function DashboardPage() {
       const extText = urlParams.get('selectedText') || urlParams.get('text');
       const extDraft = urlParams.get('draft');
       const extTone = urlParams.get('tone');
+      const extTab = urlParams.get('tab');
 
       if (extDraft) {
         setGeneratedPost(extDraft);
@@ -185,14 +187,19 @@ export default function DashboardPage() {
       if (extTone) {
         setGhostwriterProfile((prev) => ({ ...prev, tone: extTone }));
       }
+      if (extText) {
+        setInitialIdeaSubject(extText);
+      }
+      if (extUrl) {
+        setCurrentTargetUrl(extUrl);
+      }
 
-      if (extSource === 'extension' || extUrl || extText) {
-        if (extUrl) {
-          setCurrentTargetUrl(extUrl);
-          setCurrentTab('url');
-        } else if (extText) {
-          setCurrentTab('idea');
-        }
+      if (extTab === 'idea' || extText) {
+        setCurrentTab('idea');
+      } else if (extTab === 'url' || (extUrl && !extText)) {
+        setCurrentTab('url');
+      } else if (extTab === 'video') {
+        setCurrentTab('video');
       }
     }
   }, []);
@@ -451,6 +458,7 @@ export default function DashboardPage() {
                     onBack={() => setCurrentTab('hub')}
                     isGenerating={isGenerating}
                     defaultTone={ghostwriterProfile.tone}
+                    initialSubject={initialIdeaSubject}
                     onGenerate={async (data) => {
                       await handleGenerate({
                         sourceType: 'idea',
