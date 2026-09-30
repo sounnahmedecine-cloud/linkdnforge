@@ -477,7 +477,7 @@ export default function PricingPage() {
       <footer className="border-t border-slate-200 py-12 mt-12 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <div className="flex justify-center items-center gap-6 text-sm text-slate-500 font-medium">
-            <Link href="/forge" className="hover:text-slate-900 transition">Générateur</Link>
+            <Link href="/#demo" className="hover:text-slate-900 transition">Générateur</Link>
             <Link href="/pricing" className="hover:text-slate-900 transition font-bold text-slate-900">Tarifs</Link>
             <Link href="/login" className="hover:text-slate-900 transition">Connexion</Link>
           </div>

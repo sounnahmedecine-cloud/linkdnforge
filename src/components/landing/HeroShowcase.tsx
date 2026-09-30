@@ -44,14 +44,19 @@ export default function HeroShowcase() {
 
         {/* CTA Principal Immédiat */}
         <div className="pt-2 w-full flex flex-col items-center">
-          <Link
-            href="/forge"
-            onClick={() => trackCtaClick('hero_cta_primary', 'landing_hero', '/forge')}
+          <a
+            href="#demo"
+            onClick={() => {
+              trackCtaClick('hero_cta_primary', 'landing_hero', '#demo');
+              setTimeout(() => {
+                document.getElementById('landing-email-input')?.focus();
+              }, 100);
+            }}
             className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 sm:px-10 sm:py-5 rounded-2xl font-display font-black text-lg sm:text-xl text-white bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 hover:scale-[1.02] active:scale-[0.98] transition duration-300 shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 cursor-pointer"
           >
             <span>CRÉER MON PREMIER POST</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
-          </Link>
+          </a>
 
           {/* Micro-réassurance en 3 points sous le CTA */}
           <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm font-semibold text-slate-600">

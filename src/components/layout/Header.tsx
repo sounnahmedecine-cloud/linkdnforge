@@ -37,7 +37,7 @@ export default function Header({
   autopilotLabel,
   showPricingLink = true,
   ctaLabel,
-  ctaHref = '/forge',
+  ctaHref = '/#demo',
   user,
   onLogout,
   logoutLabel = 'Déconnexion',

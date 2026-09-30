@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/Button';
 import SectionLabel from '@/components/ui/SectionLabel';
 import Header from '@/components/layout/Header';
 import HeroShowcase from '@/components/landing/HeroShowcase';
+import LandingLeadCapture from '@/components/landing/LandingLeadCapture';
 import { trackCtaClick } from '@/lib/analytics';
 
 interface Pillar {
@@ -119,11 +120,16 @@ export default function Home() {
         variant="marketing" 
         pricingLabel={tNav('pricing')} 
         ctaLabel={tNav('cta')} 
-        ctaHref="/forge" 
+        ctaHref="#demo" 
       />
 
       {/* 2. HERO SECTION */}
       <HeroShowcase />
+
+      {/* 2.5 ATELIER / GÉNÉRATEUR DIRECT SUR L'ACCUEIL */}
+      <section id="demo" className="relative scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <LandingLeadCapture />
+      </section>
 
       {/* 3. SECTION SOMBRE : LA COMPRÉHENSION IA (LA DIFFÉRENCIATION CLÉ) */}
       <section className="py-20 bg-slate-950 text-white border-y border-slate-800">
@@ -342,9 +348,12 @@ export default function Home() {
           </p>
           <div className="pt-2">
             <Button 
-              href="/forge"
+              href="#demo"
               onClick={() => {
-                trackCtaClick('final_cta', 'landing_footer', '/forge');
+                trackCtaClick('final_cta', 'landing_footer', '#demo');
+                setTimeout(() => {
+                  document.getElementById('landing-email-input')?.focus();
+                }, 100);
               }}
               size="lg" 
               className="px-10 py-5 text-lg font-black bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 transition transform hover:scale-105"
@@ -370,7 +379,7 @@ export default function Home() {
                 {t('footer.product')}
               </h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/forge" className="text-slate-500 hover:text-slate-900 transition font-medium">Générateur IA</Link></li>
+                <li><a href="#demo" className="text-slate-500 hover:text-slate-900 transition font-medium">Générateur IA</a></li>
                 <li><a href="#comment-ca-marche" className="text-slate-500 hover:text-slate-900 transition">{t('footer.features')}</a></li>
                 <li><Link href="/pricing" className="text-slate-500 hover:text-slate-900 transition">{t('footer.pricing')}</Link></li>
               </ul>
