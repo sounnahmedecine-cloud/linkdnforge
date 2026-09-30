@@ -99,30 +99,31 @@ FORMAT DE RÉPONSE OBLIGATOIRE (JSON strict, aucun texte avant ou après le JSON
   "title": "${(data.title || 'Post Forgé').replace(/"/g, "'")}"
 }`;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: 2500,
-          temperature: 0.85,
-          responseMimeType: 'application/json',
-        },
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Erreur Gemini: ${response.statusText}`);
-  }
-
-  const resJson = await response.json();
-  const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{}';
-
   try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: 2500,
+            temperature: 0.85,
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`Gemini API returned ${response.status} (${response.statusText}). Activating resilient fallback.`);
+      return generateMockExtensionPost(data);
+    }
+
+    const resJson = await response.json();
+    const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{}';
+
     const parsed = JSON.parse(text);
     return {
       post: parsed.post || text,
@@ -134,17 +135,11 @@ FORMAT DE RÉPONSE OBLIGATOIRE (JSON strict, aucun texte avant ou après le JSON
       title: parsed.title || data.title || 'Brouillon capturé',
     };
   } catch (e) {
-    return {
-      post: text,
-      hooks: [
-        'Voici une perspective intéressante découverte récemment :',
-        'Ce passage a complètement changé ma façon de voir les choses :',
-        'Une réflexion essentielle pour votre secteur aujourd’hui :'
-      ],
-      title: data.title || 'Brouillon capturé',
-    };
+    console.warn('Gemini generation error or parse error, fallback:', e);
+    return generateMockExtensionPost(data);
   }
 }
+
 
 function generateMockExtensionPost(data: { url?: string; title?: string; selectedText?: string; tone?: string; locale?: string }) {
   const contentSubject = data.selectedText || data.title || 'cette idée clé';
