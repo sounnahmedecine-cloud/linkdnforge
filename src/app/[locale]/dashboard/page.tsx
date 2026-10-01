@@ -141,14 +141,21 @@ export default function DashboardPage() {
     setSocialConnections(getSocialConnections(activeEmail));
     setScheduledPosts(getScheduledPosts(activeEmail));
 
-    // 3. Free trials count
-    const trialsKey = activeEmail
+    // 3. Free trials count (sync between scoped and global storage)
+    const userTrialsKey = activeEmail
       ? `linkdnforge_free_trials_count_${activeEmail.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`
-      : 'linkdnforge_free_trials_count';
-    const savedTrials = localStorage.getItem(trialsKey);
-    if (savedTrials) {
-      const parsed = parseInt(savedTrials, 10);
-      if (!isNaN(parsed)) setTrialCount(parsed);
+      : null;
+    const userSaved = userTrialsKey ? localStorage.getItem(userTrialsKey) : null;
+    const globalSaved = localStorage.getItem('linkdnforge_free_trials_count');
+    const userParsed = userSaved ? parseInt(userSaved, 10) : 0;
+    const globalParsed = globalSaved ? parseInt(globalSaved, 10) : 0;
+    const effectiveCount = Math.max(
+      isNaN(userParsed) ? 0 : userParsed,
+      isNaN(globalParsed) ? 0 : globalParsed
+    );
+    setTrialCount(effectiveCount);
+    if (userTrialsKey && effectiveCount > 0) {
+      localStorage.setItem(userTrialsKey, String(effectiveCount));
     }
 
     // 4. Sidebar collapsed preference
@@ -339,10 +346,13 @@ export default function DashboardPage() {
       if (!isAdmin) {
         const nextTrial = trialCount + 1;
         setTrialCount(nextTrial);
-        const trialsKey = user?.email
+        const userKey = user?.email
           ? `linkdnforge_free_trials_count_${user.email.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`
-          : 'linkdnforge_free_trials_count';
-        localStorage.setItem(trialsKey, String(nextTrial));
+          : null;
+        if (userKey) {
+          localStorage.setItem(userKey, String(nextTrial));
+        }
+        localStorage.setItem('linkdnforge_free_trials_count', String(nextTrial));
         if (nextTrial >= 5) {
           // Trigger paywall modal automatically upon reaching 5th generation
           setTimeout(() => {

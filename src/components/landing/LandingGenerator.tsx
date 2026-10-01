@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import ForgeLoader from '@/components/ui/ForgeLoader';
+import PaywallModal from '@/components/studio/PaywallModal';
 import {
   trackGeneratePostStart,
   trackGeneratePostSuccess,
@@ -251,7 +252,14 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
         postLength: data.post?.length || 0,
       });
 
-      localStorage.setItem('linkdnforge_free_trials_count', (trialCount + 1).toString());
+      const nextTrial = trialCount + 1;
+      localStorage.setItem('linkdnforge_free_trials_count', nextTrial.toString());
+      if (nextTrial >= 5) {
+        setTimeout(() => {
+          setShowPaywall(true);
+          trackPaywallViewed(nextTrial);
+        }, 1500);
+      }
     } catch (error: any) {
       console.error(error);
       trackGeneratePostError({
@@ -272,87 +280,6 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
     trackPostCopied(selectedNetworkView, textToCopy.length);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  if (showPaywall) {
-    return (
-      <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-2xl shadow-slate-200/50 max-w-4xl mx-auto text-center space-y-8 animate-in fade-in zoom-in duration-300">
-        <span className="bg-orange-100 text-orange-600 text-sm font-bold px-4 py-1.5 rounded-full inline-block">
-          Vos 5 générations gratuites sont prêtes
-        </span>
-        <h2 className="font-display font-bold text-3xl sm:text-4xl text-black">
-          Passez à la vitesse supérieure avec l'offre Pro
-        </h2>
-        <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto">
-          Débloquez les posts illimités, la transformation de vidéos et liens web, la capture d'images HD et les scripts pour vos réseaux.
-        </p>
-        
-        <div className="flex justify-center items-center gap-4 mt-6">
-          <span className={`text-sm font-bold transition-colors ${!isYearly ? 'text-black' : 'text-slate-400'}`}>Mensuel</span>
-          <button 
-            onClick={() => setIsYearly(!isYearly)}
-            className="relative inline-flex h-8 w-16 items-center rounded-full bg-orange-500 transition-colors focus:outline-none shadow-inner"
-          >
-            <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-md ${isYearly ? 'translate-x-9' : 'translate-x-1'}`} />
-          </button>
-          <span className={`text-sm font-bold transition-colors ${isYearly ? 'text-black' : 'text-slate-400'} flex items-center gap-2`}>
-            Annuel <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-md shadow-sm">PROMO -45%</span>
-          </span>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-8 mt-8 text-left max-w-3xl mx-auto">
-          {plans.filter(p => p.desc.includes('an') === isYearly).map((plan, index) => (
-             <div
-               key={plan.name + index}
-               className={`relative rounded-[1.5rem] p-8 border-2 transition-all duration-300 bg-white ${
-                 plan.popular
-                   ? 'border-orange-500 shadow-xl shadow-orange-500/10 scale-105 z-10'
-                   : 'border-slate-200 hover:border-orange-300'
-               }`}
-             >
-               {plan.popular && (
-                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
-                   {tLanding('pricingTeaser.popular')}
-                 </div>
-               )}
-               <h3 className="text-2xl font-display font-bold mb-2 text-black text-center">{plan.name}</h3>
-               <p className="font-mono text-4xl sm:text-5xl font-black mb-1 text-center mt-4">
-                 <span className={plan.popular ? 'text-orange-500' : 'text-black'}>{plan.price}</span>
-               </p>
-               <p className="text-xs text-slate-500 mb-6 font-medium text-center">/mois</p>
-               
-               <ul className="space-y-4 mb-8">
-                 {plan.features.map((f: string) => (
-                   <li key={f} className="flex gap-3 text-sm text-slate-700 font-medium">
-                     <span className="text-orange-500 font-black flex items-center justify-center w-5">✓</span>
-                     <span>{f}</span>
-                   </li>
-                 ))}
-               </ul>
-
-               <Button 
-                 href={`/api/stripe/checkout?plan=${plan.name.toLowerCase().includes('pro') ? 'pro' : 'starter'}&billing=${isYearly ? 'yearly' : 'monthly'}`}
-                  onClick={() => {
-                    const isPro = plan.name.toLowerCase().includes('pro');
-                    trackBeginCheckout({
-                      planId: isPro ? 'pro' : 'starter',
-                      billing: isYearly ? 'yearly' : 'monthly',
-                      value: isYearly ? (isPro ? 190 : 140) : (isPro ? 29 : 19),
-                    });
-                  }} 
-                 className={`w-full py-3 text-sm font-bold rounded-xl transition-transform hover:scale-105 ${
-                   plan.popular 
-                     ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25' 
-                     : 'bg-black hover:bg-slate-800 text-white'
-                 }`}
-               >
-                 {tLanding('pricingTeaser.cta')}
-               </Button>
-             </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   const hasInput = !!videoFile || inputText.trim().length > 0;
 
@@ -754,6 +681,12 @@ export default function LandingGenerator({ plans }: LandingGeneratorProps) {
           )}
         </div>
       )}
+
+      {/* Paywall Modal when 5 free generations are reached */}
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+      />
     </div>
   );
 }

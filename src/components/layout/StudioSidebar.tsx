@@ -308,6 +308,41 @@ export default function StudioSidebar({
             </div>
           )
         )}
+
+        {/* Admin Unlimited Status & Paywall Preview Trigger */}
+        {isAdmin && onOpenPaywall && (
+          isCollapsed && !mobileOpen ? (
+            <div className="flex flex-col items-center pt-2">
+              <button
+                type="button"
+                onClick={onOpenPaywall}
+                title="Accès Admin Illimité (Cliquez pour tester le Paywall Modal)"
+                className="p-2.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-purple-600 transition cursor-pointer"
+              >
+                <Crown className="w-4 h-4 text-purple-600" />
+              </button>
+            </div>
+          ) : (
+            <div className="bg-purple-50/70 border border-purple-200 rounded-2xl p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-purple-900 flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5 text-purple-600" />
+                  Accès Administrateur
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-200/70 text-purple-800 rounded-full">
+                  Illimité
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenPaywall}
+                className="w-full py-1.5 px-2.5 bg-white hover:bg-purple-100 border border-purple-200 text-purple-900 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>👁️ Tester le Pop-up Paywall</span>
+              </button>
+            </div>
+          )
+        )}
       </div>
 
       {/* User footer */}
