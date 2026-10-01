@@ -107,23 +107,23 @@ export default function Header({
   if (variant === 'app') {
     return (
       <>
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs" suppressHydrationWarning>
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs" suppressHydrationWarning>
           <div className="flex items-center gap-3">
             {onOpenMobileMenu && (
               <button
                 type="button"
                 onClick={onOpenMobileMenu}
-                className="lg:hidden p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="lg:hidden p-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                 aria-label="Ouvrir le menu de navigation"
               >
-                <Menu className="w-5 h-5 text-slate-900" />
+                <Menu className="w-5 h-5 text-stone-900" />
                 <span className="text-xs font-bold hidden sm:inline">Menu</span>
               </button>
             )}
             <Logo />
             {user?.role === 'admin' && (
-              <span className="text-[10px] bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full border border-purple-200">
-                👑 Admin
+              <span className="text-[10px] font-mono bg-stone-100 text-stone-700 font-bold px-2 py-0.5 rounded-full border border-stone-200">
+                Admin
               </span>
             )}
           </div>
@@ -131,14 +131,14 @@ export default function Header({
             <button
               type="button"
               onClick={() => setShowExtensionModal(true)}
-              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-orange-600 bg-slate-50 hover:bg-orange-50 px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-orange-200 transition cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-stone-700 hover:text-stone-950 bg-stone-50 hover:bg-stone-100 px-2.5 py-1.5 rounded-xl border border-stone-200 transition cursor-pointer"
               title="Installer l'extension Chrome"
             >
-              <span className="text-orange-500 font-bold">⚡</span>
+              <span className="text-stone-500 font-bold">⚡</span>
               <span>Extension Chrome</span>
             </button>
             {user?.email && (
-              <span className="hidden md:inline text-xs font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+              <span className="hidden md:inline text-xs font-medium text-stone-500 bg-stone-50 px-2.5 py-1 rounded-lg border border-stone-200 font-mono">
                 {user.email}
               </span>
             )}
@@ -146,7 +146,7 @@ export default function Header({
             {onLogout && (
               <button
                 onClick={onLogout}
-                className="px-3 py-1.5 border border-slate-200 text-slate-700 hover:text-rose-600 hover:border-rose-200 rounded-xl hover:bg-rose-50 transition text-xs font-bold cursor-pointer"
+                className="px-3 py-1.5 border border-stone-200 text-stone-700 hover:text-rose-600 hover:border-rose-200 rounded-xl hover:bg-rose-50 transition text-xs font-semibold cursor-pointer"
               >
                 {logoutLabel}
               </button>

@@ -402,7 +402,7 @@ export default function DashboardPage() {
   const showResultPanel = !!generatedPost || isGenerating;
 
   return (
-    <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F7F5F0] text-iron-950 flex flex-col font-sans">
       {/* Top Navbar */}
       <Header
         variant="app"
