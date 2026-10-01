@@ -5,6 +5,7 @@ import { GhostwriterProfile } from '@/lib/studio/types';
 import { saveGhostwriterProfile } from '@/lib/studio/storage';
 import { ArrowLeft, Save, Sparkles, Check, CheckCircle2, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { trackGhostwriterConfigured } from '@/lib/analytics';
 
 interface GhostwriterProfileViewProps {
   profile: GhostwriterProfile;
@@ -70,6 +71,12 @@ export default function GhostwriterProfileView({
     const updated = { ...formData, linkedinUrl: cleanUrl };
     saveGhostwriterProfile(updated);
     onUpdateProfile(updated);
+    trackGhostwriterConfigured({
+      tone: updated.tone || 'expert',
+      hasLinkedin: Boolean(updated.linkedinUrl || updated.linkedinProfile),
+      hasExamples: Boolean(updated.personalExamples),
+      editorialStyle: updated.editorialStyle || 'auto',
+    });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
   };

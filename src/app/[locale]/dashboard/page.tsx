@@ -38,7 +38,13 @@ import PaywallModal from '@/components/studio/PaywallModal';
 import SocialOnboardingModal from '@/components/studio/SocialOnboardingModal';
 import FirstTimeOnboardingModal from '@/components/studio/FirstTimeOnboardingModal';
 import FirstPostCelebrationModal from '@/components/studio/FirstPostCelebrationModal';
-import { trackPaywallViewed } from '@/lib/analytics';
+import {
+  trackPaywallViewed,
+  trackStudioView,
+  trackGeneratePostStart,
+  trackGeneratePostSuccess,
+  trackGeneratePostError,
+} from '@/lib/analytics';
 
 interface User {
   email: string;
@@ -209,6 +215,9 @@ export default function DashboardPage() {
         setCurrentTab('video');
       }
     }
+
+    // 8. Track Studio View Analytics
+    trackStudioView('hub', loadedPosts.length);
   }, []);
 
 
@@ -270,6 +279,14 @@ export default function DashboardPage() {
       return;
     }
 
+    const startTime = Date.now();
+    trackGeneratePostStart({
+      inputType: params.sourceType,
+      editorialStyle: params.editorialStyle || ghostwriterProfile.editorialStyle,
+      hasVideo: Boolean(params.videoUrl),
+      hasUrl: Boolean(params.targetUrl),
+    });
+
     setIsGenerating(true);
     setGeneratedPost('');
     setTiktokPost('');
@@ -312,6 +329,15 @@ export default function DashboardPage() {
       setDetectedClassification(data.classification || null);
       setCurrentSiteScreenshotUrl(data.screenshotUrl || null);
       setCurrentSiteOgImage(data.ogImage || null);
+
+      // Track Generation Completed with latency & metadata
+      trackGeneratePostSuccess({
+        inputType: params.sourceType,
+        hasTiktok: Boolean(data.tiktokPost),
+        hasScreenshot: Boolean(data.screenshotUrl || data.ogImage),
+        postLength: data.post?.length || 0,
+        durationMs: Date.now() - startTime,
+      });
 
       // Save to recent posts history (scoped to user)
       saveRecentPost({
@@ -363,6 +389,10 @@ export default function DashboardPage() {
       }
     } catch (error: any) {
       console.error('Erreur génération:', error);
+      trackGeneratePostError({
+        errorMessage: error?.message || 'Erreur inconnue',
+        inputType: params.sourceType,
+      });
       alert(error.message || 'Erreur lors de la génération.');
     } finally {
       setIsGenerating(false);
@@ -421,6 +451,8 @@ export default function DashboardPage() {
                     onSelectPost={(post) => handleSelectRecentPost(post)}
                     onDeletePost={handleDeleteRecentPost}
                     ghostwriterProfile={ghostwriterProfile}
+                    socialConnections={socialConnections}
+                    scheduledPosts={scheduledPosts}
                     onOpenOnboarding={() => setShowFirstTimeOnboarding(true)}
                   />
                 )}

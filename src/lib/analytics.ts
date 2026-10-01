@@ -77,7 +77,16 @@ export async function trackEvent(eventName: string, params: Record<string, any> 
   }
 }
 
-// === Événements Spécifiques Fortement Typés ===
+// === Événements Spécifiques Fortement Typés (Cycle de vie & Activation) ===
+
+/** Visite de l'Atelier / Studio */
+export function trackStudioView(currentTab: string = 'hub', postCount: number = 0) {
+  trackEvent('studio_view', {
+    current_tab: currentTab,
+    post_count: postCount,
+    is_new_user: postCount === 0,
+  });
+}
 
 /** Clic sur un bouton d'action clé (CTA) */
 export function trackCtaClick(ctaName: string, location: string, targetUrl?: string) {
@@ -90,31 +99,33 @@ export function trackCtaClick(ctaName: string, location: string, targetUrl?: str
 
 /** Début de génération d'un post (démo ou studio) */
 export function trackGeneratePostStart(params: {
-  inputType: 'topic' | 'url' | 'video';
+  inputType: 'topic' | 'url' | 'video' | 'idea';
   editorialStyle?: string;
   hasVideo?: boolean;
   hasUrl?: boolean;
 }) {
-  trackEvent('generate_post_start', {
-    input_type: params.inputType,
+  trackEvent('generation_started', {
+    source_type: params.inputType,
     editorial_style: params.editorialStyle || 'auto',
     has_video: Boolean(params.hasVideo),
     has_url: Boolean(params.hasUrl),
   });
 }
 
-/** Succès de génération d'un post (conversion d'activation) */
+/** Succès de génération d'un post (conversion d'activation clé) */
 export function trackGeneratePostSuccess(params: {
-  inputType: 'topic' | 'url' | 'video';
+  inputType: 'topic' | 'url' | 'video' | 'idea';
   hasTiktok?: boolean;
   hasScreenshot?: boolean;
   postLength?: number;
+  durationMs?: number;
 }) {
-  trackEvent('generate_post_success', {
-    input_type: params.inputType,
+  trackEvent('generation_completed', {
+    source_type: params.inputType,
     has_tiktok: Boolean(params.hasTiktok),
     has_screenshot: Boolean(params.hasScreenshot),
     post_length: params.postLength || 0,
+    duration_ms: params.durationMs || 0,
   });
 }
 
@@ -123,17 +134,68 @@ export function trackGeneratePostError(params: {
   errorMessage: string;
   inputType?: string;
 }) {
-  trackEvent('generate_post_error', {
+  trackEvent('generation_failed', {
     error_message: params.errorMessage.slice(0, 150),
-    input_type: params.inputType || 'unknown',
+    source_type: params.inputType || 'unknown',
   });
 }
 
-/** Copie du texte généré (action d'engagement forte) */
-export function trackPostCopied(network: 'linkedin' | 'tiktok', postLength: number) {
-  trackEvent('post_copied', {
+/** Copie du texte généré (action d'activation forte) */
+export function trackPostCopied(network: string = 'linkedin', postLength: number = 0) {
+  trackEvent('content_copied', {
     network,
     post_length: postLength,
+  });
+}
+
+/** Publication directe sur un réseau social */
+export function trackDirectPublish(network: 'linkedin' | 'facebook' | 'twitter' | 'reddit', isSuccess: boolean, postLength: number = 0) {
+  trackEvent('direct_published', {
+    network,
+    status: isSuccess ? 'success' : 'failed',
+    post_length: postLength,
+  });
+}
+
+/** Configuration du profil Ghostwriter */
+export function trackGhostwriterConfigured(params: {
+  tone: string;
+  hasLinkedin: boolean;
+  hasExamples: boolean;
+  editorialStyle: string;
+}) {
+  trackEvent('ghostwriter_configured', {
+    tone: params.tone,
+    has_linkedin: params.hasLinkedin,
+    has_examples: params.hasExamples,
+    editorial_style: params.editorialStyle,
+  });
+}
+
+/** Connexion d'un compte réseau social */
+export function trackSocialConnected(network: string) {
+  trackEvent('social_connected', {
+    network,
+  });
+}
+
+/** Planification dans le calendrier */
+export function trackCalendarScheduled(params: {
+  date: string;
+  network?: string;
+}) {
+  trackEvent('calendar_scheduled', {
+    date: params.date,
+    network: params.network || 'linkedin',
+  });
+}
+
+/** Progression de la checklist d'activation */
+export function trackOnboardingChecklistStep(stepName: string, stepNumber: number, progressPct: number) {
+  trackEvent('onboarding_step_completed', {
+    step_name: stepName,
+    step_number: stepNumber,
+    progress_percentage: progressPct,
   });
 }
 

@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { trackCalendarScheduled } from '@/lib/analytics';
 
 interface ContentCalendarViewProps {
   scheduledPosts: ScheduledPost[];
@@ -77,6 +78,10 @@ export default function ContentCalendarView({
     });
 
     onUpdateScheduledPosts([newScheduled, ...scheduledPosts]);
+    trackCalendarScheduled({
+      date: `${scheduledDate}T${scheduledTime}`,
+      network: selectedNetworks.join(','),
+    });
     setShowModal(false);
   };
 

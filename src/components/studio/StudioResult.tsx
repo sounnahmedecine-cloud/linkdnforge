@@ -16,6 +16,7 @@ import {
 import { SocialConnections } from '@/lib/studio/types';
 import { formatTweetSafe, SocialNetworkType, NETWORK_LIMITS } from '@/lib/prompts/network-adaptation';
 import ForgeLoader from '@/components/ui/ForgeLoader';
+import { trackPostCopied, trackDirectPublish } from '@/lib/analytics';
 
 interface StudioResultProps {
   generatedPost: string;
@@ -191,6 +192,7 @@ export default function StudioResult({
 
       const postViewUrl = data.feedUrl || 'https://www.linkedin.com/feed/';
       setPublishedPostUrl(postViewUrl);
+      trackDirectPublish('linkedin', true, postText.length);
 
       setActiveNotification({
         title: '🎉 Publication réussie sur votre profil LinkedIn !',
@@ -199,6 +201,7 @@ export default function StudioResult({
         actionLabel: '👁️ Voir mon post sur LinkedIn',
       });
     } catch (e: any) {
+      trackDirectPublish('linkedin', false, postText.length);
       alert(`Erreur LinkedIn : ${e.message}`);
     } finally {
       setIsPublishingLinkedInDirect(false);
@@ -234,6 +237,7 @@ export default function StudioResult({
 
       const postViewUrl = data.feedUrl || 'https://www.facebook.com';
       setPublishedFacebookUrl(postViewUrl);
+      trackDirectPublish('facebook', true, postText.length);
 
       setActiveNotification({
         title: '🎉 Publication réussie sur votre Page Facebook !',
@@ -242,6 +246,7 @@ export default function StudioResult({
         actionLabel: '👁️ Voir mon post Facebook',
       });
     } catch (e: any) {
+      trackDirectPublish('facebook', false, postText.length);
       alert(`Erreur Facebook : ${e.message}`);
     } finally {
       setIsPublishingFacebookDirect(false);
@@ -277,6 +282,7 @@ export default function StudioResult({
 
       const tweetViewUrl = data.tweetUrl || 'https://twitter.com';
       setPublishedTwitterUrl(tweetViewUrl);
+      trackDirectPublish('twitter', true, tweetContent.length);
 
       setActiveNotification({
         title: '🎉 Tweet publié avec succès sur votre compte X !',
@@ -285,6 +291,7 @@ export default function StudioResult({
         actionLabel: '👁️ Voir mon Tweet sur X',
       });
     } catch (e: any) {
+      trackDirectPublish('twitter', false, postText.length);
       alert(`Erreur X (Twitter) : ${e.message}`);
     } finally {
       setIsPublishingTwitterDirect(false);
@@ -321,6 +328,7 @@ export default function StudioResult({
 
       const postViewUrl = data.postUrl || 'https://www.reddit.com';
       setPublishedRedditUrl(postViewUrl);
+      trackDirectPublish('reddit', true, redditContent.length);
 
       setActiveNotification({
         title: '🎉 Post publié avec succès sur Reddit !',
@@ -329,6 +337,7 @@ export default function StudioResult({
         actionLabel: '👁️ Voir mon post sur Reddit',
       });
     } catch (e: any) {
+      trackDirectPublish('reddit', false, postText.length);
       alert(`Erreur Reddit : ${e.message}`);
     } finally {
       setIsPublishingRedditDirect(false);

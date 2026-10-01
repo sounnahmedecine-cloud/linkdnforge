@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
+import { trackSocialConnected } from '@/lib/analytics';
 
 interface SocialConnectionsViewProps {
   connections: SocialConnections;
@@ -53,22 +54,34 @@ export default function SocialConnectionsView({
   useEffect(() => {
     fetch('/api/auth/linkedin/status')
       .then((res) => res.json())
-      .then((data) => setLinkedInStatus(data))
+      .then((data) => {
+        setLinkedInStatus(data);
+        if (data.connected) trackSocialConnected('linkedin');
+      })
       .catch((err) => console.error('Failed to load LinkedIn status:', err));
 
     fetch('/api/auth/facebook/status')
       .then((res) => res.json())
-      .then((data) => setFacebookStatus(data))
+      .then((data) => {
+        setFacebookStatus(data);
+        if (data.connected) trackSocialConnected('facebook');
+      })
       .catch((err) => console.error('Failed to load Facebook status:', err));
 
     fetch('/api/auth/twitter/status')
       .then((res) => res.json())
-      .then((data) => setTwitterStatus(data))
+      .then((data) => {
+        setTwitterStatus(data);
+        if (data.connected) trackSocialConnected('twitter');
+      })
       .catch((err) => console.error('Failed to load Twitter status:', err));
 
     fetch('/api/auth/reddit/status')
       .then((res) => res.json())
-      .then((data) => setRedditStatus(data))
+      .then((data) => {
+        setRedditStatus(data);
+        if (data.connected) trackSocialConnected('reddit');
+      })
       .catch((err) => console.error('Failed to load Reddit status:', err));
   }, []);
 
@@ -83,7 +96,7 @@ export default function SocialConnectionsView({
   };
 
   const handleDisconnectFacebook = async () => {
-    if (!window.confirm('Voulez-vous déconnecter votre Page Facebook ?')) return;
+    if (!window.confirm('Voulez-vous déconnecter votre page Facebook ?')) return;
     try {
       await fetch('/api/auth/facebook/status', { method: 'DELETE' });
       setFacebookStatus({ connected: false, hasAppConfigured: true });
@@ -132,6 +145,7 @@ export default function SocialConnectionsView({
     setFormData(cleaned);
     saveSocialConnections(cleaned);
     onUpdateConnections(cleaned);
+    trackSocialConnected('custom_links');
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 4000);
   };
