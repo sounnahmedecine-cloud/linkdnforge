@@ -35,6 +35,30 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
+    // Persist user to Firestore if adminDb is available
+    try {
+      const { adminDb } = await import('@/lib/firebase-admin');
+      if (adminDb) {
+        const userRef = adminDb.collection('users').doc(cleanEmail.toLowerCase());
+        const existing = await userRef.get();
+        if (!existing.exists) {
+          await userRef.set({
+            email: cleanEmail,
+            role: adminData ? 'admin' : 'user',
+            plan: 'free',
+            createdAt: new Date(),
+            lastLogin: new Date(),
+          });
+        } else {
+          await userRef.update({
+            lastLogin: new Date(),
+          });
+        }
+      }
+    } catch (dbErr) {
+      console.warn('Firestore user persist non bloquant:', dbErr);
+    }
+
     // Set auth cookie
     const response = NextResponse.json({
       message: isSignUp ? 'Compte créé avec succès' : 'Connecté',
