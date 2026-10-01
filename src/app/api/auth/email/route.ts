@@ -26,23 +26,36 @@ export async function POST(request: NextRequest) {
       (admin: any) => admin.email.toLowerCase() === cleanEmail.toLowerCase()
     );
 
-    // Mock authentication user
-    const mockUser = {
-      uid: `user_${Date.now()}`,
-      email: cleanEmail,
-      role: adminData ? 'admin' : 'user',
-      unlimited: adminData?.unlimited || false,
-      createdAt: new Date().toISOString()
-    };
+    let firebaseUid = `user_${Date.now()}`;
 
-    // Persist user to Firestore if adminDb is available
+    // 1. Create or fetch user in Firebase Authentication & Firestore
     try {
-      const { adminDb } = await import('@/lib/firebase-admin');
+      const { adminAuth, adminDb } = await import('@/lib/firebase-admin');
+      
+      // Firebase Authentication creation
+      if (adminAuth) {
+        try {
+          const existingUser = await adminAuth.getUserByEmail(cleanEmail.toLowerCase());
+          firebaseUid = existingUser.uid;
+        } catch (notFoundError) {
+          const newUser = await adminAuth.createUser({
+            email: cleanEmail.toLowerCase(),
+            emailVerified: false,
+            password: password || 'GuestAutoUser123!',
+            displayName: cleanEmail.split('@')[0],
+          });
+          firebaseUid = newUser.uid;
+          console.log(`[Firebase Auth] Utilisateur créé avec succès: ${cleanEmail} (${newUser.uid})`);
+        }
+      }
+
+      // Firestore Database profile persistence
       if (adminDb) {
         const userRef = adminDb.collection('users').doc(cleanEmail.toLowerCase());
         const existing = await userRef.get();
         if (!existing.exists) {
           await userRef.set({
+            uid: firebaseUid,
             email: cleanEmail,
             role: adminData ? 'admin' : 'user',
             plan: 'free',
@@ -51,13 +64,22 @@ export async function POST(request: NextRequest) {
           });
         } else {
           await userRef.update({
+            uid: firebaseUid,
             lastLogin: new Date(),
           });
         }
       }
-    } catch (dbErr) {
-      console.warn('Firestore user persist non bloquant:', dbErr);
+    } catch (fbErr) {
+      console.warn('Firebase user sync non bloquant:', fbErr);
     }
+
+    const mockUser = {
+      uid: firebaseUid,
+      email: cleanEmail,
+      role: adminData ? 'admin' : 'user',
+      unlimited: adminData?.unlimited || false,
+      createdAt: new Date().toISOString()
+    };
 
     // Set auth cookie
     const response = NextResponse.json({
