@@ -37,7 +37,11 @@
     "switchToSignIn": "Se connecter",
     "switchToSignUp": "S'inscrire",
     "termsPrefix": "En continuant, vous acceptez nos",
-    "termsLink": "Conditions d'utilisation"
+    "termsLink": "Conditions d'utilisation",
+    "googleButton": "Continuer avec Google",
+    "orDivider": "ou",
+    "googleError": "La connexion Google a échoué. Réessayez.",
+    "googlePopupBlocked": "La fenêtre Google a été bloquée. Autorisez les popups puis réessayez."
   },
   "onboarding": {
     "stepLabel": "Étape {step} sur 3",

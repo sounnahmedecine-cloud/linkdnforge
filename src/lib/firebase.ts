@@ -38,10 +38,10 @@ export const getAnalyticsSafe = async (): Promise<ReturnType<typeof getAnalytics
   return analyticsPromise;
 };
 
-// Eagerly start initialization in browser
-if (typeof window !== "undefined") {
-  getAnalyticsSafe();
-}
+// Pas d'initialisation anticipée : getAnalytics() envoie automatiquement
+// page_view / session_start / first_visit dès son appel, bots compris.
+// L'init est déclenchée par <FirebaseAnalytics /> une fois le visiteur
+// vérifié comme humain (ou par trackEvent, qui a son propre filtre anti-bot).
 
 // Helper for guest login
 export const loginAsGuest = async () => {

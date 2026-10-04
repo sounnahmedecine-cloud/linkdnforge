@@ -37,7 +37,11 @@
     "switchToSignIn": "Iniciar sesión",
     "switchToSignUp": "Registrarse",
     "termsPrefix": "Al continuar, aceptas nuestros",
-    "termsLink": "Términos de servicio"
+    "termsLink": "Términos de servicio",
+    "googleButton": "Continuar con Google",
+    "orDivider": "o",
+    "googleError": "El inicio de sesión con Google falló. Inténtalo de nuevo.",
+    "googlePopupBlocked": "La ventana de Google fue bloqueada. Permite las ventanas emergentes e inténtalo de nuevo."
   },
   "onboarding": {
     "stepLabel": "Paso {step} de 3",

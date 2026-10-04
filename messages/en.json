@@ -37,7 +37,11 @@
     "switchToSignIn": "Sign in",
     "switchToSignUp": "Sign up",
     "termsPrefix": "By continuing, you agree to our",
-    "termsLink": "Terms of Service"
+    "termsLink": "Terms of Service",
+    "googleButton": "Continue with Google",
+    "orDivider": "or",
+    "googleError": "Google sign-in failed. Please try again.",
+    "googlePopupBlocked": "The Google window was blocked. Allow pop-ups and try again."
   },
   "onboarding": {
     "stepLabel": "Step {step} of 3",

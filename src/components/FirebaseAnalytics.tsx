@@ -50,9 +50,9 @@ export function FirebaseAnalytics() {
         const an = await getAnalyticsSafe();
         if (!an) return;
 
-        // Pas de page_view manuel ici : getAnalytics() envoie déjà page_view
-        // automatiquement (y compris lors des navigations côté client).
-        // L'envoyer une seconde fois gonflait les vues dans GA4.
+        // Analytics n'est initialisé qu'ici (plus d'init anticipée dans lib/firebase) :
+        // getAnalytics() envoie alors lui-même le page_view de la page courante,
+        // puis ceux des navigations côté client. Pas de page_view manuel.
         logEvent(an, 'human_verified_session', {
           page_path: currentPath,
           user_agent: userAgent.slice(0, 100),
