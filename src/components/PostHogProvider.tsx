@@ -4,6 +4,7 @@ import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { isInternalTraffic } from '@/lib/firebase';
 
 const DEFAULT_POSTHOG_TOKEN = 'phc_tCtVFr38mF6zoRaDVaiQgGWWe6GhzoPbctxKdbNWDgbr';
 const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
@@ -51,6 +52,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         capture_pageview: false, // Captured manually via PostHogPageView for accurate SPA tracking
         capture_pageleave: true,
         loaded: (ph) => {
+          if (isInternalTraffic()) {
+            ph.opt_out_capturing();
+            return;
+          }
+          if (ph.has_opted_out_capturing()) ph.opt_in_capturing();
           ph.capture('$pageview');
         },
       });

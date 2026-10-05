@@ -24,10 +24,10 @@ let analytics: ReturnType<typeof getAnalytics> | null = null;
 let analyticsPromise: Promise<ReturnType<typeof getAnalytics> | null> | null = null;
 
 // Exclusion du trafic interne : visiter le site avec ?lf_internal=1 marque
-// ce navigateur comme interne (plus aucune donnée GA4), ?lf_internal=0 annule.
+// ce navigateur comme interne (plus aucune donnée GA4 ni PostHog), ?lf_internal=0 annule.
 const INTERNAL_KEY = "lf_internal";
 
-const isInternalTraffic = (): boolean => {
+export const isInternalTraffic = (): boolean => {
   try {
     const flag = new URLSearchParams(window.location.search).get(INTERNAL_KEY);
     if (flag === "1") localStorage.setItem(INTERNAL_KEY, "1");
