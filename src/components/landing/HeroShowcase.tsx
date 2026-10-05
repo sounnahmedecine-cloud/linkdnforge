@@ -52,7 +52,7 @@ export default function HeroShowcase() {
 
         {/* Sous-titre Bénéfice Clair */}
         <p className="text-xl sm:text-2xl text-slate-700 leading-snug max-w-2xl mx-auto font-medium">
-          Une idée → plusieurs contenus. LinkedInForge s'occupe du reste.
+          Vidéos, URLs, idées : LinkedInForge les transforme en contenus prêts à publier, dans votre style.
         </p>
 
         {/* CTA Principal Immédiat */}
