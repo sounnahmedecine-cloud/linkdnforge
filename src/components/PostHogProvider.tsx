@@ -21,7 +21,9 @@ function PostHogPageView() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (pathname && typeof window !== 'undefined' && getPostHogToken()) {
+    // Avant l'init, le pageview initial est envoyé par le callback `loaded` :
+    // le capturer aussi ici le comptait en double.
+    if (pathname && typeof window !== 'undefined' && posthog.__loaded) {
       let url = window.origin + pathname;
       const searchString = searchParams?.toString();
       if (searchString) {

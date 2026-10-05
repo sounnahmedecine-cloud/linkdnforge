@@ -15,6 +15,18 @@ import {
 import { Button } from '@/components/ui/Button';
 import { trackSocialConnected } from '@/lib/analytics';
 
+// social_connected ne doit partir qu'au retour du callback OAuth
+// (?<réseau>_connected=true), pas à chaque affichage d'un compte déjà lié.
+function trackJustConnected(network: 'linkedin' | 'facebook' | 'twitter' | 'reddit') {
+  if (new URLSearchParams(window.location.search).get(`${network}_connected`) !== 'true') return;
+  const key = `lf_tracked_${network}_connected`;
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+  } catch {}
+  trackSocialConnected(network);
+}
+
 interface SocialConnectionsViewProps {
   connections: SocialConnections;
   onUpdateConnections: (updated: SocialConnections) => void;
@@ -56,7 +68,7 @@ export default function SocialConnectionsView({
       .then((res) => res.json())
       .then((data) => {
         setLinkedInStatus(data);
-        if (data.connected) trackSocialConnected('linkedin');
+        if (data.connected) trackJustConnected('linkedin');
       })
       .catch((err) => console.error('Failed to load LinkedIn status:', err));
 
@@ -64,7 +76,7 @@ export default function SocialConnectionsView({
       .then((res) => res.json())
       .then((data) => {
         setFacebookStatus(data);
-        if (data.connected) trackSocialConnected('facebook');
+        if (data.connected) trackJustConnected('facebook');
       })
       .catch((err) => console.error('Failed to load Facebook status:', err));
 
@@ -72,7 +84,7 @@ export default function SocialConnectionsView({
       .then((res) => res.json())
       .then((data) => {
         setTwitterStatus(data);
-        if (data.connected) trackSocialConnected('twitter');
+        if (data.connected) trackJustConnected('twitter');
       })
       .catch((err) => console.error('Failed to load Twitter status:', err));
 
@@ -80,7 +92,7 @@ export default function SocialConnectionsView({
       .then((res) => res.json())
       .then((data) => {
         setRedditStatus(data);
-        if (data.connected) trackSocialConnected('reddit');
+        if (data.connected) trackJustConnected('reddit');
       })
       .catch((err) => console.error('Failed to load Reddit status:', err));
   }, []);
