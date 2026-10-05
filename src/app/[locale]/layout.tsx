@@ -81,10 +81,14 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
+      // Le site est déjà localisé (fr/en/es) : la traduction auto du navigateur
+      // déformait la marque (« forged » → « falsifiées »).
+      translate="no"
       className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
+        <meta name="google" content="notranslate" />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8287820739614627"

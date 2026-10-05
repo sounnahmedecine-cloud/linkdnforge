@@ -23,9 +23,25 @@ const storage = getStorage(app);
 let analytics: ReturnType<typeof getAnalytics> | null = null;
 let analyticsPromise: Promise<ReturnType<typeof getAnalytics> | null> | null = null;
 
+// Exclusion du trafic interne : visiter le site avec ?lf_internal=1 marque
+// ce navigateur comme interne (plus aucune donnée GA4), ?lf_internal=0 annule.
+const INTERNAL_KEY = "lf_internal";
+
+const isInternalTraffic = (): boolean => {
+  try {
+    const flag = new URLSearchParams(window.location.search).get(INTERNAL_KEY);
+    if (flag === "1") localStorage.setItem(INTERNAL_KEY, "1");
+    if (flag === "0") localStorage.removeItem(INTERNAL_KEY);
+    return localStorage.getItem(INTERNAL_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
 export const getAnalyticsSafe = async (): Promise<ReturnType<typeof getAnalytics> | null> => {
   if (typeof window === "undefined") return null;
   if (analytics) return analytics;
+  if (isInternalTraffic()) return null;
   if (!analyticsPromise) {
     analyticsPromise = isSupported().then((supported) => {
       if (supported) {
