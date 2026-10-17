@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers';
+import { getServerSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { adminDb } from '@/lib/firebase-admin';
 import { getTranslations } from 'next-intl/server';
@@ -6,32 +6,14 @@ import { getTranslations } from 'next-intl/server';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard({ params: { locale } }: { params: { locale: string } }) {
-  const cookieStore = cookies();
-  const authToken = cookieStore.get('auth_token')?.value;
+  // Session vérifiée côté serveur (firebase-admin), rôle calculé depuis admins.json
+  const user = await getServerSession();
 
-  if (!authToken) {
+  if (!user) {
     redirect(`/${locale}/login`);
   }
 
-  let user;
-  try {
-    user = JSON.parse(authToken);
-  } catch (err) {
-    try {
-      user = JSON.parse(decodeURIComponent(authToken));
-    } catch {
-      redirect(`/${locale}/login`);
-    }
-  }
-
-  const ADMIN_EMAILS = [
-    'sounnahmedecine@gmail.com',
-    'abderelmalki@gmail.com',
-    'contact@woosenteur.fr',
-    'baba@woosenteur.fr',
-  ];
-
-  if (!user?.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+  if (user.role !== 'admin') {
     return (
       <div className="min-h-screen bg-white text-slate-900 flex flex-col">
         <div className="flex-1 flex items-center justify-center">

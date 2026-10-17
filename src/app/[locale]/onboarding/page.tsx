@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import StampNumber from '@/components/ui/StampNumber';
 import ForgeLoader from '@/components/ui/ForgeLoader';
 import Header from '@/components/layout/Header';
+import { fetchSessionUser } from '@/lib/auth/client';
 import {
   THEME_SLUGS,
   TONE_VALUES,
@@ -57,17 +58,10 @@ export default function OnboardingPage() {
   const [scrapeStatus, setScrapeStatus] = useState<{ linkedin: string; facebook: string }>({ linkedin: '', facebook: '' });
 
   useEffect(() => {
-    // Get user info from cookie
-    const cookies = document.cookie.split(';');
-    const authCookie = cookies.find(c => c.trim().startsWith('auth_token='));
-    if (authCookie) {
-      try {
-        const userData = JSON.parse(decodeURIComponent(authCookie.split('=')[1]));
-        setUser(userData);
-      } catch (e) {
-        // Cookie parsing failed
-      }
-    }
+    // Utilisateur de la session vérifiée côté serveur
+    fetchSessionUser().then((verified) => {
+      if (verified) setUser(verified);
+    });
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

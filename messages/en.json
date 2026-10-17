@@ -41,7 +41,20 @@
     "googleButton": "Continue with Google",
     "orDivider": "or",
     "googleError": "Google sign-in failed. Please try again.",
-    "googlePopupBlocked": "The Google window was blocked. Allow pop-ups and try again."
+    "googlePopupBlocked": "The Google window was blocked. Allow pop-ups and try again.",
+    "magicLinkSubmit": "Email me a sign-in link",
+    "magicLinkHint": "No password: we send you a secure sign-in link. It creates your account if needed.",
+    "magicLinkError": "We couldn’t send the link. Check the address and try again.",
+    "magicLinkSentTitle": "Check your inbox",
+    "magicLinkSentBody": "We sent a sign-in link to {email}. Open it on this device to reach your studio.",
+    "magicLinkChangeEmail": "Use a different address",
+    "finishTitle": "Signing you in",
+    "finishConfirmEmail": "Confirm the email address that received the link",
+    "finishSubmit": "Sign in",
+    "finishError": "This link is invalid or has expired. Request a new one.",
+    "finishEmailMismatch": "This address doesn’t match the link you received.",
+    "finishInvalidLink": "This sign-in link isn’t valid.",
+    "finishBackToLogin": "Back to sign in"
   },
   "onboarding": {
     "stepLabel": "Step {step} of 3",

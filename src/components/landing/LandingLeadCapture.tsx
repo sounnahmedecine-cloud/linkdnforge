@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { 
   Sparkles, 
@@ -17,9 +17,12 @@ import {
   Zap,
   TrendingUp,
   PenLine,
+  MailCheck,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { trackAuth, trackCtaClick, trackLandingStep } from '@/lib/analytics';
+import { getClientProfile, sendMagicLink, signInWithGoogle } from '@/lib/auth/client';
+import { GoogleIcon } from '@/components/auth/GoogleIcon';
 import {
   btnGhost,
   btnPrimary,
@@ -90,6 +93,9 @@ export default function LandingLeadCapture() {
   const locale = useLocale();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [sentTo, setSentTo] = useState('');
+  const [signedInEmail, setSignedInEmail] = useState('');
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -124,6 +130,51 @@ export default function LandingLeadCapture() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Déjà connecté : l'étape 3 mène directement au studio (la session est revérifiée côté serveur)
+  useEffect(() => {
+    setSignedInEmail(getClientProfile()?.email || '');
+  }, []);
+
+  // Le studio reprend cette saisie et génère le post dès l'arrivée (après Google ou le lien magique)
+  const storeAutostart = () => {
+    try {
+      const preset: FlowAutostart = {
+        sourceText: isUrl ? normalizeUrl(trimmedSource) : trimmedSource,
+        tone,
+        objective: isUrl ? 'leads' : 'authority',
+      };
+      if (preset.sourceText) localStorage.setItem(FLOW_AUTOSTART_KEY, JSON.stringify(preset));
+    } catch {
+      // stockage indisponible : l'utilisateur ressaisira dans le studio
+    }
+  };
+
+  const handleGoogle = async () => {
+    if (isLoading || isGoogleLoading) return;
+    setError('');
+    setIsGoogleLoading(true);
+    try {
+      trackCtaClick('lead_capture_hero', 'landing_hero', '/dashboard');
+      trackLandingStep(3, 'email', { source_type: isUrl ? 'url' : 'idea', tone, method: 'google' });
+      storeAutostart();
+      const { isNewUser } = await signInWithGoogle();
+      try {
+        trackAuth('google', isNewUser);
+      } catch (trackErr) {
+        console.warn('Analytics tracking error:', trackErr);
+      }
+      window.location.assign(`/${locale}/dashboard`);
+    } catch (err: any) {
+      const code = err?.code as string | undefined;
+      if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
+        setError(code === 'auth/popup-blocked'
+          ? 'La fenêtre Google a été bloquée. Autorisez les popups puis réessayez.'
+          : 'La connexion Google a échoué. Réessayez.');
+      }
+      setIsGoogleLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
@@ -139,47 +190,24 @@ export default function LandingLeadCapture() {
 
     try {
       trackCtaClick('lead_capture_hero', 'landing_hero', '/dashboard');
-      trackLandingStep(3, 'email', { source_type: isUrl ? 'url' : 'idea', tone });
-
-      const response = await fetch('/api/auth/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: trimmed,
-          password: 'GuestAutoUser123!',
-          isSignUp: true,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création de la session');
-      }
-
-      try {
-        trackAuth('email', true);
-      } catch (trackErr) {
-        console.warn('Analytics tracking error:', trackErr);
-      }
-
-      // Le studio reprend cette saisie et génère le post dès l'arrivée
-      try {
-        const preset: FlowAutostart = {
-          sourceText: isUrl ? normalizeUrl(trimmedSource) : trimmedSource,
-          tone,
-          objective: isUrl ? 'leads' : 'authority',
-        };
-        if (preset.sourceText) localStorage.setItem(FLOW_AUTOSTART_KEY, JSON.stringify(preset));
-      } catch {
-        // stockage indisponible : l'utilisateur ressaisira dans le studio
-      }
-
-      window.location.assign(`/${locale}/dashboard`);
+      trackLandingStep(3, 'email', { source_type: isUrl ? 'url' : 'idea', tone, method: 'email_link' });
+      storeAutostart();
+      // Pas de mot de passe : lien magique Firebase, qui ramène au studio une fois ouvert
+      await sendMagicLink(trimmed.toLowerCase(), locale);
+      setSentTo(trimmed.toLowerCase());
     } catch (err: any) {
-      setError(err?.message || 'Une erreur est survenue. Veuillez réessayer.');
+      console.warn('Magic link error:', err);
+      setError('Impossible d’envoyer le lien. Vérifiez l’adresse et réessayez.');
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleContinueSignedIn = () => {
+    trackCtaClick('lead_capture_hero', 'landing_hero', '/dashboard');
+    trackLandingStep(3, 'email', { source_type: isUrl ? 'url' : 'idea', tone, method: 'session' });
+    storeAutostart();
+    window.location.assign(`/${locale}/dashboard`);
   };
 
   return (
@@ -333,15 +361,65 @@ export default function LandingLeadCapture() {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 3 && sentTo && (
+            <div className="animate-rise space-y-3">
+              <div className="flex items-start gap-3">
+                <MailCheck className="mt-0.5 h-6 w-6 shrink-0 text-orange-500" />
+                <div>
+                  <h3 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                    Vérifiez votre boîte mail
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Lien de connexion envoyé à <strong className="text-slate-700">{sentTo}</strong>. Ouvrez-le sur cet appareil : votre post s’écrit dès votre arrivée dans le studio.
+                  </p>
+                </div>
+              </div>
+              <button type="button" onClick={() => setSentTo('')} className={btnGhost}>
+                Utiliser une autre adresse
+              </button>
+            </div>
+          )}
+
+          {step === 3 && !sentTo && signedInEmail && (
+            <div className="animate-rise space-y-4">
+              <div>
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                  Votre post est prêt à être rédigé
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Connecté en tant que {signedInEmail} : le post s’écrit dès votre arrivée dans le studio.
+                </p>
+              </div>
+              <button type="button" onClick={handleContinueSignedIn} className={btnPrimary}>
+                Générer mon post
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
+          {step === 3 && !sentTo && !signedInEmail && (
             <form onSubmit={handleSubmit} className="animate-rise space-y-4">
               <div>
                 <h3 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
                   Votre post est prêt à être rédigé
                 </h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  Entrez votre e-mail pour créer votre accès gratuit : le post s’écrit dès votre arrivée.
+                  Créez votre accès gratuit, sans mot de passe : le post s’écrit dès votre arrivée.
                 </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleGoogle}
+                disabled={isLoading || isGoogleLoading}
+                className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-[15px] font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isGoogleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                Continuer avec Google
+              </button>
+              <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-slate-400">
+                <div className="h-px flex-1 bg-slate-200" />
+                <span>ou par e-mail</span>
+                <div className="h-px flex-1 bg-slate-200" />
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
@@ -352,18 +430,18 @@ export default function LandingLeadCapture() {
                   placeholder="vous@exemple.com"
                   autoComplete="email"
                   required
-                  disabled={isLoading}
+                  disabled={isLoading || isGoogleLoading}
                   className="h-12 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 placeholder:text-slate-400 transition focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-500/10"
                 />
-                <button type="submit" disabled={isLoading} className={twMerge(btnPrimary, 'shrink-0')}>
+                <button type="submit" disabled={isLoading || isGoogleLoading} className={twMerge(btnPrimary, 'shrink-0')}>
                   {isLoading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Création de votre accès…
+                      Envoi du lien…
                     </>
                   ) : (
                     <>
-                      Générer mon post
+                      Recevoir mon lien
                       <ArrowRight className="h-4 w-4" />
                     </>
                   )}

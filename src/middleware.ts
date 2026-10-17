@@ -1,29 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { hasValidEdgeSession, SESSION_COOKIE } from './lib/auth/edge-session';
 
 const handleI18nRouting = createMiddleware(routing);
 
 // Liste des scrapers agressifs, frameworks de scraping et bots de datacenters
 const BAD_BOT_REGEX = /headlesschrome|puppeteer|selenium|playwright|phantomjs|python-requests|aiohttp|httpx|go-http-client|curl\/|wget\/|scrapy|bytespider|semrushbot|ahrefsbot|dotbot|mj12bot|petalbot|zoominfobot|dataforseobot|seekport|megaindex|censysinspect|zgrab|nmap/i;
 
-function hasValidSession(request: NextRequest): boolean {
-  const authToken = request.cookies.get('auth_token');
-  if (!authToken?.value) return false;
-  try {
-    const user = JSON.parse(authToken.value);
-    return typeof user?.email === 'string' && user.email.length > 0;
-  } catch {
-    try {
-      const user = JSON.parse(decodeURIComponent(authToken.value));
-      return typeof user?.email === 'string' && user.email.length > 0;
-    } catch {
-      return false;
-    }
-  }
+// Signature du cookie de session Firebase vérifiée (certificats Google) :
+// un cookie forgé à la main n'est plus accepté. Les handlers revérifient
+// ensuite avec firebase-admin (révocation, rôle).
+function hasValidSession(request: NextRequest): Promise<boolean> {
+  return hasValidEdgeSession(request.cookies.get(SESSION_COOKIE)?.value);
 }
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const userAgent = request.headers.get('user-agent') || '';
 
@@ -40,7 +32,7 @@ export default function middleware(request: NextRequest) {
 
   // 2. Protection des routes API
   if (pathname.startsWith('/api/')) {
-    if (hasValidSession(request)) {
+    if (await hasValidSession(request)) {
       return NextResponse.next();
     }
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -60,7 +52,7 @@ export default function middleware(request: NextRequest) {
 
   // 4. Protection des routes app privées
   const protectedMatch = pathname.match(/^\/(fr|en|es)\/(dashboard|setup|admin)(\/|$)/);
-  if (protectedMatch && !hasValidSession(request)) {
+  if (protectedMatch && !(await hasValidSession(request))) {
     const locale = protectedMatch[1];
     return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
@@ -71,8 +63,8 @@ export default function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/((?!api|_next|_vercel|.*\\..*).*)',
-    '/api/forge-post',
-    '/api/generate-visual',
-    '/api/generate-variants',
+    // Toutes les routes API sauf l'authentification, le webhook Stripe (signé)
+    // et l'extension Chrome (CORS, sans cookie)
+    '/api/((?!auth/|stripe/webhook|extension/).*)',
   ],
 };

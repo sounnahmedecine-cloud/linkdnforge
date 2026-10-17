@@ -41,7 +41,20 @@
     "googleButton": "Continuar con Google",
     "orDivider": "o",
     "googleError": "El inicio de sesión con Google falló. Inténtalo de nuevo.",
-    "googlePopupBlocked": "La ventana de Google fue bloqueada. Permite las ventanas emergentes e inténtalo de nuevo."
+    "googlePopupBlocked": "La ventana de Google fue bloqueada. Permite las ventanas emergentes e inténtalo de nuevo.",
+    "magicLinkSubmit": "Recibir mi enlace de acceso",
+    "magicLinkHint": "Sin contraseña: te enviamos un enlace de acceso seguro. Crea tu cuenta si hace falta.",
+    "magicLinkError": "No se pudo enviar el enlace. Revisa la dirección e inténtalo de nuevo.",
+    "magicLinkSentTitle": "Revisa tu correo",
+    "magicLinkSentBody": "Hemos enviado un enlace de acceso a {email}. Ábrelo en este dispositivo para entrar en tu estudio.",
+    "magicLinkChangeEmail": "Usar otra dirección",
+    "finishTitle": "Iniciando sesión",
+    "finishConfirmEmail": "Confirma la dirección de correo que recibió el enlace",
+    "finishSubmit": "Iniciar sesión",
+    "finishError": "Este enlace no es válido o ha caducado. Solicita uno nuevo.",
+    "finishEmailMismatch": "Esta dirección no coincide con el enlace recibido.",
+    "finishInvalidLink": "Este enlace de acceso no es válido.",
+    "finishBackToLogin": "Volver a iniciar sesión"
   },
   "onboarding": {
     "stepLabel": "Paso {step} de 3",

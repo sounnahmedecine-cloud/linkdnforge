@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildForgePostPrompt } from '@/lib/prompts/forge-post';
+import { requireSession } from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   try {
     const formData = await request.json();
 
-    // Check user authentication and quota
-    const authToken = request.cookies.get('auth_token');
-    let isAdmin = false;
-    let unlimited = false;
-
-    if (authToken?.value) {
-      try {
-        const user = JSON.parse(authToken.value);
-        isAdmin = user.role === 'admin';
-        unlimited = user.unlimited === true;
-      } catch (e) {
-        // Token parsing failed, continue as guest
-      }
-    }
+    // Quota : rôle et accès illimité issus de la session vérifiée côté serveur
+    const unlimited = sessionUser.unlimited;
 
     // For non-admin users, implement quota checking here
     if (!unlimited) {

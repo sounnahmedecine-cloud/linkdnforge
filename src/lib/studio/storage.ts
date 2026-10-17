@@ -1,4 +1,5 @@
 import { RecentPost, GhostwriterProfile, SocialConnections, ScheduledPost } from './types';
+import { getClientProfile } from '@/lib/auth/profile';
 
 const RECENT_POSTS_KEY = 'linkedinforge_recent_posts';
 const PROFILE_KEY = 'user_setup_profile';
@@ -30,17 +31,7 @@ export const DEFAULT_SOCIAL_CONNECTIONS: SocialConnections = {
 };
 
 export function getActiveUserEmail(): string {
-  if (typeof document === 'undefined') return '';
-  try {
-    const match = document.cookie.match(/(?:^|;\s*)auth_token=([^;]*)/);
-    if (match && match[1]) {
-      const parsed = JSON.parse(decodeURIComponent(match[1]));
-      if (parsed && typeof parsed.email === 'string') {
-        return parsed.email.toLowerCase().trim();
-      }
-    }
-  } catch (e) {}
-  return '';
+  return getClientProfile()?.email || '';
 }
 
 function getScopedKey(baseKey: string, userEmail?: string): string {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Film, Menu, X, Sparkles, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { getClientProfile } from '@/lib/auth/profile';
 import Logo from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -57,19 +58,9 @@ export default function Header({
       setCurrentUser(user);
       return;
     }
-    if (typeof document !== 'undefined') {
-      try {
-        const match = document.cookie.match(/(?:^|;\s*)auth_token=([^;]*)/);
-        if (match && match[1]) {
-          const parsed = JSON.parse(decodeURIComponent(match[1]));
-          if (parsed && typeof parsed.email === 'string' && parsed.email.length > 0) {
-            setCurrentUser(parsed);
-          }
-        }
-      } catch (e) {
-        // ignore cookie parse error
-      }
-    }
+    // Affichage seulement : le cookie de profil ne donne aucun droit
+    const profile = getClientProfile();
+    if (profile) setCurrentUser({ email: profile.email, role: 'user' });
   }, [user]);
 
   const resolvedGenerator = generatorLabel || tNav('generator') || 'Générateur';

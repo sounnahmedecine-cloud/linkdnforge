@@ -34,6 +34,7 @@ import {
   isUserFirstOnboardingDone,
   setUserFirstOnboardingDone,
 } from '@/lib/studio/storage';
+import { fetchSessionUser, getClientProfile } from '@/lib/auth/client';
 import { ArrowLeft, BookOpen, LayoutGrid, UserRound } from 'lucide-react';
 import PaywallModal from '@/components/studio/PaywallModal';
 import SocialOnboardingModal from '@/components/studio/SocialOnboardingModal';
@@ -53,20 +54,14 @@ interface User {
   unlimited: boolean;
 }
 
-const ADMIN_EMAILS = [
-  'sounnahmedecine@gmail.com',
-  'abderelmalki@gmail.com',
-  'contact@woosenteur.fr',
-  'baba@woosenteur.fr',
-];
-
 export default function DashboardPage() {
   const router = useRouter();
   const locale = useLocale();
   const tNav = useTranslations('nav');
 
   const [user, setUser] = useState<User | null>(null);
-  const isAdmin = user?.role === 'admin' || (!!user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
+  // Rôle fourni par le serveur après vérification du cookie de session (GET /api/auth/session)
+  const isAdmin = user?.role === 'admin';
 
   // Studio navigation state
   const [currentTab, setCurrentTab] = useState<StudioTab>('hub');
@@ -131,19 +126,16 @@ export default function DashboardPage() {
 
   // Initial load
   useEffect(() => {
-    // 1. Auth token from cookie
-    let activeEmail = '';
-    const cookies = document.cookie.split(';');
-    const authCookie = cookies.find((c) => c.trim().startsWith('auth_token='));
-    if (authCookie) {
-      try {
-        const userData = JSON.parse(decodeURIComponent(authCookie.split('=')[1]));
-        setUser(userData);
-        activeEmail = userData?.email || '';
-      } catch (e) {
-        // ignore
+    // 1. E-mail d'affichage (portée du stockage local), puis session vérifiée côté serveur
+    const activeEmail = getClientProfile()?.email || '';
+    if (activeEmail) setUser({ email: activeEmail, role: 'user', unlimited: false });
+    fetchSessionUser().then((verified) => {
+      if (verified) {
+        setUser({ email: verified.email, role: verified.role, unlimited: verified.unlimited });
+      } else {
+        window.location.assign(`/${locale}/login`);
       }
-    }
+    });
 
     // 2. Load storage scoped to user
     const loadedPosts = getRecentPosts(activeEmail);

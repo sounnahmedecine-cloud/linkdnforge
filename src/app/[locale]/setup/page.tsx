@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import Header from '@/components/layout/Header';
 import { Check, ArrowRight, Zap } from 'lucide-react';
 import { trackPurchase } from '@/lib/analytics';
+import { fetchSessionUser } from '@/lib/auth/client';
 
 export default function SetupPage() {
   const router = useRouter();
@@ -39,13 +40,9 @@ export default function SetupPage() {
   }, []);
 
   useEffect(() => {
-    const cookies = document.cookie.split(';');
-    const authCookie = cookies.find(c => c.trim().startsWith('auth_token='));
-    if (authCookie) {
-      try {
-        setUser(JSON.parse(decodeURIComponent(authCookie.split('=')[1])));
-      } catch (e) {}
-    }
+    fetchSessionUser().then((verified) => {
+      if (verified) setUser(verified as any);
+    });
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

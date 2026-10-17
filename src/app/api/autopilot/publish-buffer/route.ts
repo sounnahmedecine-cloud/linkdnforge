@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import adminsConfig from '@/config/admins.json';
-
-const ADMIN_EMAILS = [
-  'sounnahmedecine@gmail.com',
-  'abderelmalki@gmail.com',
-  'contact@woosenteur.fr',
-  'baba@woosenteur.fr',
-  ...(adminsConfig?.admins?.map((a: any) => a.email.toLowerCase()) || [])
-];
+import { requireSession } from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   try {
     const body = await request.json();
     const { 
@@ -21,27 +16,8 @@ export async function POST(request: NextRequest) {
       customChannelId 
     } = body;
 
-    // Check user authentication from cookie
-    const authToken = request.cookies.get('auth_token');
-    let isAdmin = false;
-    let userEmail = '';
-
-    if (authToken?.value) {
-      try {
-        const user = JSON.parse(decodeURIComponent(authToken.value));
-        userEmail = (user.email || '').toLowerCase();
-        isAdmin = user.role === 'admin' || ADMIN_EMAILS.includes(userEmail);
-      } catch (e) {
-        // Fallback to plain JSON parse if decodeURIComponent fails
-        try {
-          const user = JSON.parse(authToken.value);
-          userEmail = (user.email || '').toLowerCase();
-          isAdmin = user.role === 'admin' || ADMIN_EMAILS.includes(userEmail);
-        } catch {
-          // Token parsing error
-        }
-      }
-    }
+    // Rôle déterminé côté serveur à partir de la session vérifiée
+    const isAdmin = sessionUser.role === 'admin';
 
     // MULTI-TENANT ISOLATION:
     // If not admin and no personal customBufferToken provided, forbid publication

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSession } from '@/lib/auth/session';
 import { publishToLinkedInFeed } from '@/lib/linkedin/client';
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   try {
     const cookieValue = request.cookies.get('linkedin_user_token')?.value;
 

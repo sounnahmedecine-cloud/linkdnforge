@@ -1,41 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import adminsConfig from '@/config/admins.json';
-
-const ADMIN_EMAILS = [
-  'sounnahmedecine@gmail.com',
-  'abderelmalki@gmail.com',
-  'contact@woosenteur.fr',
-  'baba@woosenteur.fr',
-  ...(adminsConfig?.admins?.map((a: any) => a.email.toLowerCase()) || []),
-];
+import { requireSession } from '@/lib/auth/session';
 
 const DEFAULT_BUFFER_TOKEN = process.env.BUFFER_MCP_TOKEN || '5I7pCkpokAIuLqJX-Mn6o4AK0g41_yq5xBbEjy0EpTS';
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   try {
     const body = await request.json().catch(() => ({}));
     const { customBufferToken } = body;
 
-    // Check user authentication from cookie
-    const authToken = request.cookies.get('auth_token');
-    let isAdmin = false;
-    let userEmail = '';
-
-    if (authToken?.value) {
-      try {
-        const user = JSON.parse(decodeURIComponent(authToken.value));
-        userEmail = (user.email || '').toLowerCase();
-        isAdmin = user.role === 'admin' || ADMIN_EMAILS.includes(userEmail);
-      } catch (e) {
-        try {
-          const user = JSON.parse(authToken.value);
-          userEmail = (user.email || '').toLowerCase();
-          isAdmin = user.role === 'admin' || ADMIN_EMAILS.includes(userEmail);
-        } catch {
-          // Token parse error
-        }
-      }
-    }
+    // Rôle déterminé côté serveur à partir de la session vérifiée
+    const isAdmin = sessionUser.role === 'admin';
 
     const token = customBufferToken || (isAdmin ? DEFAULT_BUFFER_TOKEN : null);
 

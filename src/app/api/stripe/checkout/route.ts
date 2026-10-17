@@ -1,9 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getRequestSession } from '@/lib/auth/session';
 import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic'; // Prevent static generation during build
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  // Lien de navigation (PaywallModal) : sans session, retour à la connexion
+  const sessionUser = await getRequestSession(request);
+  if (!sessionUser) {
+    return NextResponse.redirect(new URL('/fr/login', request.url), 303);
+  }
+
   // Initialize Stripe inside the handler to avoid build-time errors if ENV is missing
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy', {
     apiVersion: '2023-10-16' as any,
@@ -64,8 +71,12 @@ export async function GET(request: Request) {
         subscription_data: {
           trial_period_days: 7,
         },
+        // E-mail issu de la session vérifiée (jamais du paramètre ?email=)
+        customer_email: sessionUser.email,
+        client_reference_id: sessionUser.uid,
         metadata: {
           plan: plan || 'starter',
+          uid: sessionUser.uid,
         },
         success_url: `${origin}/fr/setup?success=true`,
         cancel_url: `${origin}/fr/pricing?canceled=true`,

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSession } from '@/lib/auth/session';
 import { buildNetworkAdaptationPrompt, formatTweetSafe, SocialNetworkType } from '@/lib/prompts/network-adaptation';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   try {
     const { post, network = 'x', locale = 'fr' } = await request.json();
 

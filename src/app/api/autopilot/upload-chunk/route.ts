@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSession } from '@/lib/auth/session';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import fs from 'fs';
 import path from 'path';
@@ -7,6 +8,9 @@ import os from 'os';
 export const maxDuration = 120; // 2 minutes max for processing large video assembly and Google AI registration
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   let fileId = '';
   let chunkIndex = 0;
   let totalChunks = 1;

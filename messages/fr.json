@@ -41,7 +41,20 @@
     "googleButton": "Continuer avec Google",
     "orDivider": "ou",
     "googleError": "La connexion Google a échoué. Réessayez.",
-    "googlePopupBlocked": "La fenêtre Google a été bloquée. Autorisez les popups puis réessayez."
+    "googlePopupBlocked": "La fenêtre Google a été bloquée. Autorisez les popups puis réessayez.",
+    "magicLinkSubmit": "Recevoir mon lien de connexion",
+    "magicLinkHint": "Pas de mot de passe : nous vous envoyons un lien de connexion sécurisé. Il crée votre compte si besoin.",
+    "magicLinkError": "Impossible d’envoyer le lien. Vérifiez l’adresse et réessayez.",
+    "magicLinkSentTitle": "Vérifiez votre boîte mail",
+    "magicLinkSentBody": "Nous avons envoyé un lien de connexion à {email}. Ouvrez-le sur cet appareil pour accéder à votre atelier.",
+    "magicLinkChangeEmail": "Utiliser une autre adresse",
+    "finishTitle": "Connexion en cours",
+    "finishConfirmEmail": "Confirmez l’adresse e-mail qui a reçu le lien",
+    "finishSubmit": "Me connecter",
+    "finishError": "Ce lien est invalide ou a expiré. Demandez-en un nouveau.",
+    "finishEmailMismatch": "Cette adresse ne correspond pas au lien reçu.",
+    "finishInvalidLink": "Ce lien de connexion n’est pas valide.",
+    "finishBackToLogin": "Retour à la connexion"
   },
   "onboarding": {
     "stepLabel": "Étape {step} sur 3",

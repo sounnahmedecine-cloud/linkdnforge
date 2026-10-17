@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSession } from '@/lib/auth/session';
 import { localizeThemes, resolveLocale, type PromptLocale } from '@/lib/prompts/themes';
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   try {
     const { post, visualType, themes, locale: rawLocale } = await request.json();
     const locale = resolveLocale(rawLocale);

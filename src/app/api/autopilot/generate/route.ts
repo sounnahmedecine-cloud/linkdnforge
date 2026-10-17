@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSession } from '@/lib/auth/session';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { buildVideoPostPrompt } from '@/lib/prompts/video-post-prompt';
@@ -15,6 +16,9 @@ import os from 'os';
 export const maxDuration = 60; // Allow maximum timeout for multimodal analysis
 
 export async function POST(request: NextRequest) {
+  const sessionUser = await requireSession(request);
+  if (sessionUser instanceof NextResponse) return sessionUser;
+
   try {
     const body = await request.json();
     const {
