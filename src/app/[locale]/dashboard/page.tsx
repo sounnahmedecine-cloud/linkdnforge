@@ -10,6 +10,7 @@ import VideoForge from '@/components/studio/VideoForge';
 import UrlForge from '@/components/studio/UrlForge';
 import IdeaForge from '@/components/studio/IdeaForge';
 import StudioResult from '@/components/studio/StudioResult';
+import GuidedFlow, { type FlowGenerateParams } from '@/components/studio/GuidedFlow';
 import GhostwriterProfileView from '@/components/studio/GhostwriterProfileView';
 import RecentPostsList from '@/components/studio/RecentPostsList';
 import SocialConnectionsView from '@/components/studio/SocialConnectionsView';
@@ -33,7 +34,7 @@ import {
   isUserFirstOnboardingDone,
   setUserFirstOnboardingDone,
 } from '@/lib/studio/storage';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BookOpen, LayoutGrid, UserRound } from 'lucide-react';
 import PaywallModal from '@/components/studio/PaywallModal';
 import SocialOnboardingModal from '@/components/studio/SocialOnboardingModal';
 import FirstTimeOnboardingModal from '@/components/studio/FirstTimeOnboardingModal';
@@ -69,6 +70,9 @@ export default function DashboardPage() {
 
   // Studio navigation state
   const [currentTab, setCurrentTab] = useState<StudioTab>('hub');
+  // 'flow' : parcours guidé en 4 étapes (par défaut) · 'advanced' : studio complet avec barre latérale
+  const [studioMode, setStudioMode] = useState<'flow' | 'advanced'>('flow');
+  const [flowInitialPost, setFlowInitialPost] = useState('');
 
   // Persistence state
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
@@ -164,7 +168,12 @@ export default function DashboardPage() {
       localStorage.setItem(userTrialsKey, String(effectiveCount));
     }
 
-    // 4. Sidebar collapsed preference
+    // 4. Studio mode & sidebar collapsed preferences
+    const savedMode = localStorage.getItem('linkdnforge_studio_mode');
+    const isAdvancedMode = savedMode === 'advanced';
+    if (isAdvancedMode) {
+      setStudioMode('advanced');
+    }
     const savedCollapsed = localStorage.getItem('linkdnforge_sidebar_collapsed');
     if (savedCollapsed === 'true') {
       setIsSidebarCollapsed(true);
@@ -174,13 +183,14 @@ export default function DashboardPage() {
     const pendingDraft = localStorage.getItem('linkdnforge_pending_draft');
     if (pendingDraft) {
       setGeneratedPost(pendingDraft);
+      setFlowInitialPost(pendingDraft);
       localStorage.removeItem('linkdnforge_pending_draft');
     }
 
     // 6. First-time guided onboarding on Atelier arrival
     // Shows the welcome choice (Video / URL / Idea) if the user has 0 posts and hasn't finished onboarding yet
     const isFirstOnboardingDone = isUserFirstOnboardingDone(activeEmail);
-    if (loadedPosts.length === 0 && !isFirstOnboardingDone) {
+    if (isAdvancedMode && loadedPosts.length === 0 && !isFirstOnboardingDone) {
       setShowFirstTimeOnboarding(true);
     }
 
@@ -196,6 +206,7 @@ export default function DashboardPage() {
 
       if (extDraft) {
         setGeneratedPost(extDraft);
+        setFlowInitialPost(extDraft);
       }
       if (extTone) {
         setGhostwriterProfile((prev) => ({ ...prev, tone: extTone }));
@@ -221,6 +232,17 @@ export default function DashboardPage() {
   }, []);
 
 
+
+  const switchStudioMode = (mode: 'flow' | 'advanced', tab: StudioTab = 'hub') => {
+    setStudioMode(mode);
+    setCurrentTab(tab);
+    try {
+      localStorage.setItem('linkdnforge_studio_mode', mode);
+    } catch (e) {
+      // ignore
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -271,12 +293,12 @@ export default function DashboardPage() {
     editorialStyle?: string;
     tone?: string;
     postObjective?: string;
-  }) => {
+  }): Promise<{ post?: string; error?: string }> => {
     // Enforce 5 free generations paywall for non-admin users
     if (!isAdmin && trialCount >= 5) {
       setShowPaywall(true);
       trackPaywallViewed(trialCount);
-      return;
+      return { error: 'Vos 5 générations gratuites sont utilisées. Passez à une offre pour continuer.' };
     }
 
     const startTime = Date.now();
@@ -360,8 +382,9 @@ export default function DashboardPage() {
       setRecentPosts(getRecentPosts(user?.email));
 
       // Celebration modal trigger on first successful generation ("Moment Waouh")
+      // Le parcours guidé a son propre écran de fin : pas de modale qui interrompt
       const wasEmpty = recentPosts.length === 0;
-      if (wasEmpty) {
+      if (wasEmpty && studioMode === 'advanced') {
         setTimeout(() => {
           setShowCelebration(true);
           setUserFirstOnboardingDone(true, user?.email);
@@ -387,13 +410,17 @@ export default function DashboardPage() {
           }, 1500);
         }
       }
+      return { post: data.post };
     } catch (error: any) {
       console.error('Erreur génération:', error);
       trackGeneratePostError({
         errorMessage: error?.message || 'Erreur inconnue',
         inputType: params.sourceType,
       });
-      alert(error.message || 'Erreur lors de la génération.');
+      if (studioMode === 'advanced') {
+        alert(error.message || 'Erreur lors de la génération.');
+      }
+      return { error: error?.message || 'Erreur lors de la génération.' };
     } finally {
       setIsGenerating(false);
     }
@@ -409,10 +436,66 @@ export default function DashboardPage() {
         user={user}
         onLogout={handleLogout}
         logoutLabel={tNav('logout')}
-        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+        onOpenMobileMenu={studioMode === 'advanced' ? () => setIsMobileMenuOpen(true) : undefined}
       />
 
-      {/* Main Studio Layout */}
+      {studioMode === 'flow' ? (
+        <div className="flex-1 w-full px-4 pt-6 sm:px-6 sm:pt-10">
+          <div className="mx-auto mb-8 flex w-full max-w-3xl flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">Nouveau post</h1>
+              <p className="mt-1 text-sm text-slate-500">Quatre étapes, environ une minute.</p>
+            </div>
+            <div className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 sm:mx-0 sm:px-0">
+              <button
+                type="button"
+                onClick={() => switchStudioMode('advanced', 'history')}
+                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 transition hover:bg-white hover:text-slate-900"
+              >
+                <BookOpen className="h-4 w-4" />
+                Mes posts
+                {recentPosts.length > 0 && (
+                  <span className="rounded-full bg-slate-200/70 px-1.5 text-xs tabular-nums text-slate-600">
+                    {recentPosts.length}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => switchStudioMode('advanced', 'profile')}
+                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 transition hover:bg-white hover:text-slate-900"
+              >
+                <UserRound className="h-4 w-4" />
+                Mon style
+              </button>
+              <button
+                type="button"
+                onClick={() => switchStudioMode('advanced')}
+                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-[0_1px_2px_rgba(16,24,40,0.05)] transition hover:border-slate-300"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Mode avancé
+              </button>
+            </div>
+          </div>
+
+          <GuidedFlow
+            userEmail={user?.email}
+            defaultTone={ghostwriterProfile.tone}
+            initialText={initialIdeaSubject || currentTargetUrl}
+            initialPost={flowInitialPost}
+            isGenerating={isGenerating}
+            trialCount={trialCount}
+            isAdmin={isAdmin}
+            onGenerate={(params: FlowGenerateParams) => handleGenerate(params)}
+            onOpenAdvanced={(post) => {
+              if (post) setGeneratedPost(post);
+              switchStudioMode('advanced');
+            }}
+          />
+        </div>
+      ) : (
+      /* Main Studio Layout */
       <div className="flex-1 max-w-[1560px] w-full mx-auto p-3 sm:p-5 lg:p-7">
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Navigation Sidebar (Desktop fixed + Mobile slide-over drawer) */}
@@ -437,6 +520,21 @@ export default function DashboardPage() {
 
           {/* Center / Right Content Area */}
           <main className="flex-1 w-full min-w-0">
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-orange-200/70 bg-orange-50/60 px-4 py-3">
+              <p className="text-sm text-slate-700">
+                <span className="font-semibold text-slate-900">Mode avancé.</span> Pour créer un post pas à pas, utilisez le parcours guidé.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  handleResetCurrentPost();
+                  switchStudioMode('flow');
+                }}
+                className="inline-flex h-9 shrink-0 items-center rounded-lg bg-orange-500 px-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_6px_16px_-8px_rgba(249,115,22,0.7)] transition hover:bg-orange-600"
+              >
+                Parcours guidé
+              </button>
+            </div>
             <div
               className={`grid grid-cols-1 ${
                 showResultPanel ? 'lg:grid-cols-12 gap-6 items-start' : 'gap-6'
@@ -600,6 +698,7 @@ export default function DashboardPage() {
           </main>
         </div>
       </div>
+      )}
 
       {/* Paywall modal when free generations are exhausted */}
       <PaywallModal

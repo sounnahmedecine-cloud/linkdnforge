@@ -199,6 +199,15 @@ export function trackOnboardingChecklistStep(stepName: string, stepNumber: numbe
   });
 }
 
+/** Étape franchie dans le parcours guidé du studio (source → style → post → publication) */
+export function trackFlowStep(stepNumber: 1 | 2 | 3 | 4, stepName: string, params: Record<string, any> = {}) {
+  trackEvent('flow_step_completed', {
+    step_number: stepNumber,
+    step_name: stepName,
+    ...params,
+  });
+}
+
 /** Changement d'onglet d'aperçu (LinkedIn <-> TikTok) */
 export function trackNetworkTabSwitched(network: 'linkedin' | 'tiktok') {
   trackEvent('network_tab_switched', {
