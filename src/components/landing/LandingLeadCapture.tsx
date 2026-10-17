@@ -15,9 +15,22 @@ import {
   Copy,
   Share2,
   Zap,
-  TrendingUp
+  TrendingUp,
+  PenLine,
 } from 'lucide-react';
-import { trackAuth, trackCtaClick } from '@/lib/analytics';
+import { twMerge } from 'tailwind-merge';
+import { trackAuth, trackCtaClick, trackLandingStep } from '@/lib/analytics';
+import {
+  btnGhost,
+  btnPrimary,
+  Chip,
+  FLOW_AUTOSTART_KEY,
+  IDEA_STARTERS,
+  normalizeUrl,
+  TONES,
+  URL_PATTERN,
+  type FlowAutostart,
+} from '@/components/ui/flow';
 
 const PREVIEW_DEMOS = [
   {
@@ -81,6 +94,27 @@ export default function LandingLeadCapture() {
   const [activeTab, setActiveTab] = useState(0);
   const [copied, setCopied] = useState(false);
 
+  // Mini-parcours : 1 source → 2 ton → 3 e-mail, puis génération automatique dans le studio
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [sourceText, setSourceText] = useState('');
+  const [tone, setTone] = useState('expert');
+
+  const trimmedSource = sourceText.trim();
+  const isUrl = URL_PATTERN.test(trimmedSource);
+
+  const handleSourceContinue = () => {
+    if (trimmedSource.length < 3) return;
+    if (isUrl) setSourceText(normalizeUrl(trimmedSource));
+    trackLandingStep(1, 'source', { source_type: isUrl ? 'url' : 'idea' });
+    setStep(2);
+  };
+
+  const handleToneContinue = () => {
+    trackLandingStep(2, 'tone', { tone });
+    setStep(3);
+    setTimeout(() => document.getElementById('landing-signup-email')?.focus({ preventScroll: true }), 50);
+  };
+
   const demo = PREVIEW_DEMOS[activeTab];
 
   const handleCopy = () => {
@@ -105,6 +139,7 @@ export default function LandingLeadCapture() {
 
     try {
       trackCtaClick('lead_capture_hero', 'landing_hero', '/dashboard');
+      trackLandingStep(3, 'email', { source_type: isUrl ? 'url' : 'idea', tone });
 
       const response = await fetch('/api/auth/email', {
         method: 'POST',
@@ -128,6 +163,18 @@ export default function LandingLeadCapture() {
         console.warn('Analytics tracking error:', trackErr);
       }
 
+      // Le studio reprend cette saisie et génère le post dès l'arrivée
+      try {
+        const preset: FlowAutostart = {
+          sourceText: isUrl ? normalizeUrl(trimmedSource) : trimmedSource,
+          tone,
+          objective: isUrl ? 'leads' : 'authority',
+        };
+        if (preset.sourceText) localStorage.setItem(FLOW_AUTOSTART_KEY, JSON.stringify(preset));
+      } catch {
+        // stockage indisponible : l'utilisateur ressaisira dans le studio
+      }
+
       window.location.assign(`/${locale}/dashboard`);
     } catch (err: any) {
       setError(err?.message || 'Une erreur est survenue. Veuillez réessayer.');
@@ -137,76 +184,209 @@ export default function LandingLeadCapture() {
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in zoom-in duration-300">
-      {/* 1. Fast Action Input Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-2xl shadow-orange-500/5 relative overflow-hidden text-left">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-orange-400/10 to-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Mini-parcours : source → ton → e-mail */}
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-[0_1px_2px_rgba(16,24,40,0.04),0_24px_60px_-28px_rgba(249,115,22,0.35)]">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-400/10 blur-3xl" />
 
-        <div className="relative z-10 space-y-5">
+        <div className="relative space-y-6 p-6 sm:p-8">
+          {/* En-tête + progression */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-700 text-xs font-black uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-orange-600" />
-              Générateur Immédiat · 5 crédits offerts
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-200">
+              <Sparkles className="h-3.5 w-3.5" />
+              Essai gratuit · 5 posts offerts
             </span>
-            <span className="text-xs text-slate-500 font-semibold flex items-center gap-1">
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              Sans carte bancaire requise
-            </span>
+            <ol className="flex items-center gap-2" aria-label="Progression">
+              {[1, 2, 3].map((n) => (
+                <li key={n} className="flex items-center gap-2">
+                  <span
+                    className={twMerge(
+                      'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold transition-colors',
+                      n === step && 'bg-orange-500 text-white',
+                      n < step && 'bg-orange-100 text-orange-600',
+                      n > step && 'bg-slate-100 text-slate-400'
+                    )}
+                  >
+                    {n < step ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : n}
+                  </span>
+                  {n < 3 && (
+                    <span className="h-0.5 w-6 overflow-hidden rounded-full bg-slate-100 sm:w-10">
+                      <span
+                        className={twMerge(
+                          'block h-full rounded-full bg-orange-500 transition-all duration-500',
+                          step > n ? 'w-full' : 'w-0'
+                        )}
+                      />
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex flex-col sm:flex-row items-stretch gap-3">
-              <div className="relative flex-1">
+          {/* Récapitulatif des étapes franchies, cliquable pour revenir en arrière */}
+          {step > 1 && (
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="inline-flex max-w-full items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-slate-600 ring-1 ring-slate-200 transition hover:ring-orange-300"
+              >
+                {isUrl ? <Globe2 className="h-3.5 w-3.5 text-orange-500" /> : <Lightbulb className="h-3.5 w-3.5 text-orange-500" />}
+                <span className="max-w-[16rem] truncate sm:max-w-md">{trimmedSource.replace(/^https?:\/\//, '')}</span>
+                <PenLine className="h-3 w-3 text-slate-400" />
+              </button>
+              {step > 2 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-slate-600 ring-1 ring-slate-200 transition hover:ring-orange-300"
+                >
+                  Ton : {TONES.find((t) => t.value === tone)?.label}
+                  <PenLine className="h-3 w-3 text-slate-400" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {step === 1 && (
+            <div className="animate-rise space-y-4">
+              <div>
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                  De quoi voulez-vous parler ?
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">Collez un lien ou écrivez votre idée en quelques mots.</p>
+              </div>
+              <div className="relative rounded-2xl border border-slate-200 bg-slate-50/60 transition focus-within:border-orange-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-500/10">
+                <textarea
+                  id="landing-source-input"
+                  rows={3}
+                  value={sourceText}
+                  onChange={(e) => setSourceText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSourceContinue();
+                    }
+                  }}
+                  placeholder="https://votre-article.com  —  ou  —  « La semaine dernière, un client m’a dit… »"
+                  className="block w-full resize-none bg-transparent px-5 pt-4 pb-11 text-[15px] leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+                {trimmedSource && (
+                  <span className="absolute bottom-3 left-4 inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
+                    {isUrl ? <Globe2 className="h-3.5 w-3.5 text-orange-500" /> : <Lightbulb className="h-3.5 w-3.5 text-orange-500" />}
+                    {isUrl ? 'Lien détecté' : 'Idée'}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {IDEA_STARTERS.slice(0, 2).map((idea) => (
+                    <button
+                      key={idea}
+                      type="button"
+                      onClick={() => setSourceText(`${idea} : `)}
+                      className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition hover:text-orange-700 hover:ring-orange-300"
+                    >
+                      {idea}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSourceContinue}
+                  disabled={trimmedSource.length < 3}
+                  className={twMerge(btnPrimary, 'shrink-0')}
+                >
+                  Continuer
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+              <p className="flex items-center gap-1.5 text-xs text-slate-400">
+                <Film className="h-3.5 w-3.5" />
+                Vous partez d’une vidéo ? Vous pourrez l’importer dans le studio.
+              </p>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="animate-rise space-y-5">
+              <div>
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Quel ton pour votre post ?</h3>
+                <p className="mt-1 text-sm text-slate-500">Vous pourrez le changer à tout moment.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {TONES.map((t) => (
+                  <Chip key={t.value} selected={tone === t.value} onClick={() => setTone(t.value)}>
+                    {t.label}
+                  </Chip>
+                ))}
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <button type="button" onClick={() => setStep(1)} className={twMerge(btnGhost, '-ml-3')}>
+                  Retour
+                </button>
+                <button type="button" onClick={handleToneContinue} className={btnPrimary}>
+                  Continuer
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <form onSubmit={handleSubmit} className="animate-rise space-y-4">
+              <div>
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                  Votre post est prêt à être rédigé
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Entrez votre e-mail pour créer votre accès gratuit : le post s’écrit dès votre arrivée.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
-                  id="landing-email-input"
+                  id="landing-signup-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Entrez votre email pour générer votre premier post..."
+                  placeholder="vous@exemple.com"
                   autoComplete="email"
                   required
                   disabled={isLoading}
-                  className="w-full h-14 pl-4 pr-4 bg-slate-50 border border-slate-300 rounded-2xl text-slate-900 text-base font-medium placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-500/10 transition shadow-inner"
+                  className="h-12 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 placeholder:text-slate-400 transition focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-500/10"
                 />
+                <button type="submit" disabled={isLoading} className={twMerge(btnPrimary, 'shrink-0')}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Création de votre accès…
+                    </>
+                  ) : (
+                    <>
+                      Générer mon post
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
               </div>
+              {error && (
+                <p className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 ring-1 ring-rose-200">{error}</p>
+              )}
+            </form>
+          )}
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="h-14 px-8 rounded-2xl font-display font-black text-base bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2.5 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shrink-0"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Création de votre accès...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Générer mon premier post</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-
-            {error && (
-              <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl">
-                {error}
-              </p>
-            )}
-          </form>
-
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-500 pt-1 border-t border-slate-100">
-            <span className="flex items-center gap-1.5 text-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              5 générations complètes offertes
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 pt-4 text-xs font-medium text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              Sans carte bancaire
             </span>
-            <span className="flex items-center gap-1.5 text-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              Accès immédiat à l'Atelier
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              5 posts offerts
             </span>
-            <span className="flex items-center gap-1.5 text-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              100% sans engagement
+            <span className="flex items-center gap-1.5">
+              <Lock className="h-3.5 w-3.5 text-emerald-600" />
+              Sans engagement
             </span>
           </div>
         </div>

@@ -208,6 +208,15 @@ export function trackFlowStep(stepNumber: 1 | 2 | 3 | 4, stepName: string, param
   });
 }
 
+/** Étape franchie dans le mini-parcours de la page d'accueil (source → ton → e-mail) */
+export function trackLandingStep(stepNumber: 1 | 2 | 3, stepName: string, params: Record<string, any> = {}) {
+  trackEvent('landing_flow_step', {
+    step_number: stepNumber,
+    step_name: stepName,
+    ...params,
+  });
+}
+
 /** Changement d'onglet d'aperçu (LinkedIn <-> TikTok) */
 export function trackNetworkTabSwitched(network: 'linkedin' | 'tiktok') {
   trackEvent('network_tab_switched', {

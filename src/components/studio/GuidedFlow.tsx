@@ -19,6 +19,19 @@ import {
 import { twMerge } from 'tailwind-merge';
 import VideoDropzone from '@/components/autopilot/VideoDropzone';
 import { trackDirectPublish, trackFlowStep, trackPostCopied } from '@/lib/analytics';
+import {
+  btnGhost,
+  btnPrimary,
+  btnSecondary,
+  Chip,
+  FLOW_AUTOSTART_KEY,
+  IDEA_STARTERS,
+  normalizeUrl,
+  OBJECTIVES,
+  TONES,
+  URL_PATTERN,
+  type FlowAutostart,
+} from '@/components/ui/flow';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -43,6 +56,8 @@ interface GuidedFlowProps {
   isGenerating: boolean;
   trialCount: number;
   isAdmin: boolean;
+  // Vrai une fois l'utilisateur et son quota chargés : condition pour lancer une génération automatique
+  isReady: boolean;
   onGenerate: (params: FlowGenerateParams) => Promise<{ post?: string; error?: string }>;
   onOpenAdvanced: (post?: string) => void;
 }
@@ -56,28 +71,6 @@ const STEPS: { index: StepIndex; label: string }[] = [
   { index: 4, label: 'Publication' },
 ];
 
-const TONES = [
-  { value: 'expert', label: 'Expert' },
-  { value: 'pedagogique', label: 'Pédagogique' },
-  { value: 'inspirant', label: 'Inspirant' },
-  { value: 'direct', label: 'Direct' },
-  { value: 'chaleureux', label: 'Chaleureux' },
-  { value: 'humour', label: 'Avec humour' },
-];
-
-const OBJECTIVES = [
-  { value: 'authority', label: 'Asseoir mon expertise' },
-  { value: 'engagement', label: 'Faire réagir' },
-  { value: 'leads', label: 'Attirer des clients' },
-  { value: 'traffic', label: 'Envoyer vers mon site' },
-];
-
-const IDEA_STARTERS = [
-  'Une erreur qui m’a appris quelque chose',
-  'Mon avis à contre-courant sur mon métier',
-  'Comment j’ai résolu le problème d’un client',
-];
-
 const LOADING_MESSAGES = [
   'Lecture de votre source…',
   'Recherche du meilleur angle…',
@@ -89,37 +82,7 @@ const FREE_GENERATIONS = 5;
 const LINKEDIN_MAX = 3000;
 const DRAFT_KEY = 'linkdnforge_flow_draft';
 
-// Une saisie sans espace qui ressemble à un domaine est traitée comme un lien
-const URL_PATTERN = /^(https?:\/\/)?([\w-]+\.)+[a-z]{2,}(:\d+)?(\/\S*)?$/i;
-
-const normalizeUrl = (raw: string) => {
-  const trimmed = raw.trim();
-  if (!trimmed) return '';
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-};
-
 // ─── Primitives visuelles ────────────────────────────────────────────────
-
-const btnBase =
-  'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150 select-none disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4';
-
-const btnPrimary = twMerge(
-  btnBase,
-  'h-12 px-6 rounded-xl text-[15px] text-white bg-orange-500 hover:bg-orange-600 active:translate-y-px',
-  'shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_-10px_rgba(249,115,22,0.7)]',
-  'focus-visible:ring-orange-500/25 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none'
-);
-
-const btnSecondary = twMerge(
-  btnBase,
-  'h-12 px-5 rounded-xl text-[15px] text-slate-800 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 active:translate-y-px',
-  'shadow-[0_1px_2px_rgba(16,24,40,0.05)] focus-visible:ring-slate-400/20 disabled:opacity-50'
-);
-
-const btnGhost = twMerge(
-  btnBase,
-  'h-9 px-3 rounded-lg text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-400/20'
-);
 
 function LinkedInMark({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -130,32 +93,6 @@ function LinkedInMark({ className = 'w-5 h-5' }: { className?: string }) {
         d="M7.1 9.6h-2.4V18h2.4V9.6Zm-1.2-3.9a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8ZM19.3 13.2c0-2.3-1.2-3.8-3.3-3.8-1.1 0-1.9.6-2.3 1.2V9.6h-2.3V18h2.4v-4.3c0-1.1.4-2 1.5-2s1.5.9 1.5 2V18h2.5v-4.8Z"
       />
     </svg>
-  );
-}
-
-function Chip({
-  selected,
-  onClick,
-  children,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={selected}
-      className={twMerge(
-        'h-9 px-3.5 rounded-full border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-500/20',
-        selected
-          ? 'border-orange-500 bg-orange-50 text-orange-700 ring-1 ring-orange-500'
-          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
-      )}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -252,6 +189,7 @@ export default function GuidedFlow({
   isGenerating,
   trialCount,
   isAdmin,
+  isReady,
   onGenerate,
   onOpenAdvanced,
 }: GuidedFlowProps) {
@@ -284,6 +222,7 @@ export default function GuidedFlow({
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const isFirstRender = useRef(true);
   const sourceFocused = useRef(false);
+  const autostartDone = useRef(false);
 
   const trimmedSource = sourceText.trim();
   const isUrl = !video && URL_PATTERN.test(trimmedSource);
@@ -323,6 +262,29 @@ export default function GuidedFlow({
   useEffect(() => {
     if (initialText) setSourceText(initialText);
   }, [initialText]);
+
+  // Saisie faite sur la page d'accueil avant l'inscription : on génère directement
+  useEffect(() => {
+    if (!isReady || autostartDone.current) return;
+    autostartDone.current = true;
+    let preset: FlowAutostart | null = null;
+    try {
+      const saved = localStorage.getItem(FLOW_AUTOSTART_KEY);
+      if (saved) {
+        localStorage.removeItem(FLOW_AUTOSTART_KEY);
+        preset = JSON.parse(saved) as FlowAutostart;
+      }
+    } catch {
+      preset = null;
+    }
+    if (!preset?.sourceText?.trim()) return;
+    setSourceText(preset.sourceText);
+    setTone(preset.tone || defaultTone);
+    setObjective(preset.objective || 'authority');
+    setReachedStep(3);
+    handleGenerate(preset);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady]);
 
   // Défilement automatique vers l'étape qui s'ouvre
   useEffect(() => {
@@ -375,24 +337,30 @@ export default function GuidedFlow({
     goTo(2);
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (preset?: FlowAutostart) => {
     setError(null);
     goTo(3);
 
+    // preset : saisie reprise de la page d'accueil, avant que l'état local soit à jour
+    const src = (preset ? preset.sourceText : sourceText).trim();
+    const genTone = preset?.tone || tone;
+    const genObjective = preset?.objective || objective;
+    const genType: SourceType = !preset && video ? 'video' : URL_PATTERN.test(src) ? 'url' : 'idea';
+
     const params: FlowGenerateParams = {
-      sourceType,
-      tone,
-      postObjective: objective,
+      sourceType: genType,
+      tone: genTone,
+      postObjective: genObjective,
       postSubject: angle.trim() || undefined,
     };
 
-    if (sourceType === 'video' && video) {
+    if (genType === 'video' && video) {
       params.videoUrl = video.url;
       params.videoMeta = video.meta;
-      if (URL_PATTERN.test(trimmedSource)) params.targetUrl = normalizeUrl(trimmedSource);
-      else if (trimmedSource) params.postSubject = [trimmedSource, angle.trim()].filter(Boolean).join('\n');
-    } else if (sourceType === 'url') {
-      const url = normalizeUrl(trimmedSource);
+      if (URL_PATTERN.test(src)) params.targetUrl = normalizeUrl(src);
+      else if (src) params.postSubject = [src, angle.trim()].filter(Boolean).join('\n');
+    } else if (genType === 'url') {
+      const url = normalizeUrl(src);
       params.targetUrl = url;
       setIsPreparing(true);
       try {
@@ -411,10 +379,15 @@ export default function GuidedFlow({
         setIsPreparing(false);
       }
     } else {
-      params.postSubject = [trimmedSource, angle.trim()].filter(Boolean).join('\n\nAngle souhaité : ');
+      params.postSubject = [src, angle.trim()].filter(Boolean).join('\n\nAngle souhaité : ');
     }
 
-    trackFlowStep(2, 'style', { source_type: sourceType, tone, objective });
+    trackFlowStep(2, 'style', {
+      source_type: genType,
+      tone: genTone,
+      objective: genObjective,
+      from_landing: Boolean(preset),
+    });
     const result = await onGenerate(params);
 
     if (result.post) {
@@ -711,7 +684,7 @@ export default function GuidedFlow({
               ) : (
                 <span />
               )}
-              <button type="button" onClick={handleGenerate} disabled={busy} className={btnPrimary}>
+              <button type="button" onClick={() => handleGenerate()} disabled={busy} className={btnPrimary}>
                 <Sparkles className="h-4 w-4" />
                 Générer mon post
               </button>
@@ -752,7 +725,7 @@ export default function GuidedFlow({
             <div className="rounded-2xl border border-red-200 bg-red-50/60 p-5">
               <p className="text-sm font-medium text-red-800">{error}</p>
               <div className="mt-4 flex gap-2">
-                <button type="button" onClick={handleGenerate} className={btnSecondary}>
+                <button type="button" onClick={() => handleGenerate()} className={btnSecondary}>
                   <RefreshCw className="h-4 w-4" />
                   Réessayer
                 </button>
@@ -793,7 +766,7 @@ export default function GuidedFlow({
                       {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
                       {copied ? 'Copié' : 'Copier'}
                     </button>
-                    <button type="button" onClick={handleGenerate} className={btnGhost}>
+                    <button type="button" onClick={() => handleGenerate()} className={btnGhost}>
                       <RefreshCw className="h-4 w-4" />
                       Régénérer
                     </button>

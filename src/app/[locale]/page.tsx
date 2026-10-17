@@ -352,7 +352,7 @@ export default function Home() {
               onClick={() => {
                 trackCtaClick('final_cta', 'landing_footer', '#demo');
                 setTimeout(() => {
-                  document.getElementById('landing-email-input')?.focus();
+                  document.getElementById('landing-source-input')?.focus();
                 }, 100);
               }}
               size="lg" 

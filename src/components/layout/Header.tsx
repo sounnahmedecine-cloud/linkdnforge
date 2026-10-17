@@ -87,7 +87,7 @@ export default function Header({
   const handleCtaClick = () => {
     if (ctaHref.includes('#demo') || ctaHref === '#demo') {
       setTimeout(() => {
-        const el = document.getElementById('landing-email-input');
+        const el = document.getElementById('landing-source-input');
         el?.focus();
       }, 150);
     }

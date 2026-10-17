@@ -73,6 +73,7 @@ export default function DashboardPage() {
   // 'flow' : parcours guidé en 4 étapes (par défaut) · 'advanced' : studio complet avec barre latérale
   const [studioMode, setStudioMode] = useState<'flow' | 'advanced'>('flow');
   const [flowInitialPost, setFlowInitialPost] = useState('');
+  const [isStudioReady, setIsStudioReady] = useState(false);
 
   // Persistence state
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
@@ -229,6 +230,7 @@ export default function DashboardPage() {
 
     // 8. Track Studio View Analytics
     trackStudioView('hub', loadedPosts.length);
+    setIsStudioReady(true);
   }, []);
 
 
@@ -487,6 +489,7 @@ export default function DashboardPage() {
             isGenerating={isGenerating}
             trialCount={trialCount}
             isAdmin={isAdmin}
+            isReady={isStudioReady}
             onGenerate={(params: FlowGenerateParams) => handleGenerate(params)}
             onOpenAdvanced={(post) => {
               if (post) setGeneratedPost(post);

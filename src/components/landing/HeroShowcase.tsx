@@ -62,7 +62,7 @@ export default function HeroShowcase() {
             onClick={() => {
               trackCtaClick('hero_cta_primary', 'landing_hero', '#demo');
               setTimeout(() => {
-                document.getElementById('landing-email-input')?.focus();
+                document.getElementById('landing-source-input')?.focus();
               }, 100);
             }}
             className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 sm:px-10 sm:py-5 rounded-2xl font-display font-black text-lg sm:text-xl text-white bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 hover:scale-[1.02] active:scale-[0.98] transition duration-300 shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 cursor-pointer"
