@@ -51,10 +51,27 @@ export async function verifySessionValue(value: string | undefined): Promise<Ses
   try {
     const decoded = await adminAuth.verifySessionCookie(value, true);
     return toSessionUser(decoded);
-  } catch {
-    return null;
+  } catch (err: any) {
+    // Le contrôle de révocation appelle l'API Admin (getUser). Si c'est cet appel
+    // qui échoue (droits IAM, réseau) et non le cookie, on retombe sur la seule
+    // vérification de signature plutôt que de déconnecter tout le monde.
+    if (TOKEN_REJECTIONS.has(err?.code)) return null;
+    console.warn('[Session] Contrôle de révocation indisponible:', err?.code, err?.message);
+    try {
+      return toSessionUser(await adminAuth.verifySessionCookie(value, false));
+    } catch {
+      return null;
+    }
   }
 }
+
+const TOKEN_REJECTIONS = new Set([
+  'auth/session-cookie-revoked',
+  'auth/session-cookie-expired',
+  'auth/argument-error',
+  'auth/user-disabled',
+  'auth/user-not-found',
+]);
 
 /** Session de la requête (routes API). */
 export function getRequestSession(request: NextRequest): Promise<SessionUser | null> {
@@ -102,11 +119,14 @@ export async function createSessionFromIdToken(idToken: string) {
     throw new SessionError('Authentification indisponible', 503);
   }
 
+  // Jeton tout juste émis : la vérification de signature suffit (pas d'appel
+  // à l'API Admin, donc pas de dépendance aux droits IAM du serveur).
   let decoded;
   try {
-    decoded = await adminAuth.verifyIdToken(idToken, true);
-  } catch {
-    throw new SessionError('Jeton invalide', 401);
+    decoded = await adminAuth.verifyIdToken(idToken);
+  } catch (err: any) {
+    console.warn('[Session] verifyIdToken refusé:', err?.code, err?.message);
+    throw new SessionError(`Jeton invalide (${err?.code || 'inconnu'})`, 401);
   }
 
   // Seules les identités dont l'e-mail est prouvé (Google, lien magique) ouvrent
@@ -119,9 +139,16 @@ export async function createSessionFromIdToken(idToken: string) {
   }
 
   const user = toSessionUser(decoded)!;
-  const sessionCookie = await adminAuth.createSessionCookie(idToken, {
-    expiresIn: SESSION_MAX_AGE_SECONDS * 1000,
-  });
+  let sessionCookie: string;
+  try {
+    sessionCookie = await adminAuth.createSessionCookie(idToken, {
+      expiresIn: SESSION_MAX_AGE_SECONDS * 1000,
+    });
+  } catch (err: any) {
+    // Typiquement : compte de service sans le rôle « Administrateur Firebase Authentication »
+    console.error('[Session] createSessionCookie a échoué:', err?.code, err?.message);
+    throw new SessionError(`Création de session refusée (${err?.code || 'inconnu'})`, 500);
+  }
 
   let isNewUser = false;
   if (adminDb) {

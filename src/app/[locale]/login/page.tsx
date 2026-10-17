@@ -41,7 +41,8 @@ export default function LoginPage() {
       } else if (code === 'auth/popup-blocked') {
         setError(t('googlePopupBlocked'));
       } else {
-        setError(err instanceof Error && !code ? err.message : t('googleError'));
+        // Code Firebase (popup) ou message du serveur : le détail aide au diagnostic
+        setError(code ? `${t('googleError')} (${code})` : err?.message || t('googleError'));
       }
       setIsGoogleLoading(false);
     }

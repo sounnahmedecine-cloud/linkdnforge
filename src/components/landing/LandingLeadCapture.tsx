@@ -169,7 +169,9 @@ export default function LandingLeadCapture() {
       if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
         setError(code === 'auth/popup-blocked'
           ? 'La fenêtre Google a été bloquée. Autorisez les popups puis réessayez.'
-          : 'La connexion Google a échoué. Réessayez.');
+          : code
+            ? `La connexion Google a échoué. Réessayez. (${code})`
+            : `La connexion Google a échoué : ${err?.message || 'erreur inconnue'}`);
       }
       setIsGoogleLoading(false);
     }
